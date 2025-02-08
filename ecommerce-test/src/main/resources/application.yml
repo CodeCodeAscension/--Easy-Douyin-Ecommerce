@@ -1,3 +1,5 @@
 spring:
   profiles:
     active: local
+  application:
+    name: test-service
