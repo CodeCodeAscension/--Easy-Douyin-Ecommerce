@@ -2,7 +2,7 @@ spring:
   profiles:
     active: local
   application:
-    name: test-service
+    name: user-service
   cloud:
     nacos:
       server-addr: ${ecommerce.nacos-addr}
@@ -12,4 +12,4 @@ spring:
     password: ${ecommerce.database.pwd}
     driver-class-name: com.mysql.cj.jdbc.Driver
 server:
-  port: 8888
+  port: 8001
