@@ -8,7 +8,7 @@
     </parent>
 
     <artifactId>ecommerce-user-service</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>${ecommerce.version}</version>
 
     <name>ecommerce-user-service</name>
     <url>http://maven.apache.org</url>
@@ -18,6 +18,12 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>ecommerce-feign-api</artifactId>
+            <version>${ecommerce.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -34,6 +40,17 @@
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+
+        <!--        fegin-api-->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>ecommerce-feign-api</artifactId>
+            <version>${ecommerce.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-okhttp</artifactId>
         </dependency>
     </dependencies>
 </project>

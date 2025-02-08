@@ -6,7 +6,7 @@
 
     <groupId>com.example</groupId>
     <artifactId>easy-douyin-ecommerce</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>${ecommerce.version}</version>
     <packaging>pom</packaging>
     <modules>
         <module>ecommerce-test</module>
@@ -29,6 +29,7 @@
     </parent>
 
     <properties>
+        <ecommerce.version>1.0-SNAPSHOT</ecommerce.version>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -90,46 +91,6 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-data-redis</artifactId>
             </dependency>
-<!--            &lt;!&ndash;nacos 服务&ndash;&gt;-->
-<!--            <dependency>-->
-<!--                <groupId>com.alibaba.cloud</groupId>-->
-<!--                <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>-->
-<!--            </dependency>-->
-<!--            &lt;!&ndash;nacos配置管理&ndash;&gt;-->
-<!--            <dependency>-->
-<!--                <groupId>com.alibaba.cloud</groupId>-->
-<!--                <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>-->
-<!--            </dependency>-->
-<!--            &lt;!&ndash;读取bootstrap文件&ndash;&gt;-->
-<!--            <dependency>-->
-<!--                <groupId>org.springframework.cloud</groupId>-->
-<!--                <artifactId>spring-cloud-starter-bootstrap</artifactId>-->
-<!--            </dependency>-->
-<!--            &lt;!&ndash;seata&ndash;&gt;-->
-<!--            <dependency>-->
-<!--                <groupId>com.alibaba.cloud</groupId>-->
-<!--                <artifactId>spring-cloud-starter-alibaba-seata</artifactId>-->
-<!--            </dependency>-->
-<!--            &lt;!&ndash;openFeign&ndash;&gt;-->
-<!--            <dependency>-->
-<!--                <groupId>org.springframework.cloud</groupId>-->
-<!--                <artifactId>spring-cloud-starter-openfeign</artifactId>-->
-<!--            </dependency>-->
-<!--            &lt;!&ndash;负载均衡器&ndash;&gt;-->
-<!--            <dependency>-->
-<!--                <groupId>org.springframework.cloud</groupId>-->
-<!--                <artifactId>spring-cloud-starter-loadbalancer</artifactId>-->
-<!--            </dependency>-->
-<!--            &lt;!&ndash;网关&ndash;&gt;-->
-<!--            <dependency>-->
-<!--                <groupId>org.springframework.cloud</groupId>-->
-<!--                <artifactId>spring-cloud-starter-gateway</artifactId>-->
-<!--            </dependency>-->
-<!--            &lt;!&ndash;AMQP依赖，包含RabbitMQ&ndash;&gt;-->
-<!--            <dependency>-->
-<!--                <groupId>org.springframework.boot</groupId>-->
-<!--                <artifactId>spring-boot-starter-amqp</artifactId>-->
-<!--            </dependency>-->
         </dependencies>
     </dependencyManagement>
 

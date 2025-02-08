@@ -8,7 +8,7 @@
     </parent>
 
     <artifactId>ecommerce-gateway</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>${ecommerce.version}</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -8,7 +8,7 @@
     </parent>
 
     <artifactId>ecommerce-checkout-service</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>${ecommerce.version}</version>
 
     <name>ecommerce-checkout-service</name>
     <url>http://maven.apache.org</url>
@@ -34,6 +34,17 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+
+        <!--        fegin-api-->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>ecommerce-feign-api</artifactId>
+            <version>${ecommerce.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-okhttp</artifactId>
         </dependency>
     </dependencies>
 </project>
