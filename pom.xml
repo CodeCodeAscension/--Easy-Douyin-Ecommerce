@@ -41,6 +41,25 @@
         <mysql.version>8.0.23</mysql.version>
     </properties>
 
+<!--    不同的开发者本地的测试属性可能不同，可以在此定义-->
+    <profiles>
+        <profile>
+            <id>dev1</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <env>dev1</env>
+                <database.host>vlsmb-nagamori.local</database.host>
+                <database.port>3306</database.port>
+                <database.user>root</database.user>
+                <database.pwd>root</database.pwd>
+                <sentinel.dashboard>vlsmb-nagamori.local:8090</sentinel.dashboard>
+                <nacos.dashboard>vlsmb-nagamori.local:8848</nacos.dashboard>
+            </properties>
+        </profile>
+    </profiles>
+
     <dependencies>
         <!-- lombok -->
         <dependency>

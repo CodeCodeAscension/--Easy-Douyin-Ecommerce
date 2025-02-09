@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: cart-service
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      server-addr: @nacos.dashboard@
+      config:
+        file-extension: yaml
+        shared-configs:
+          - dataId: jdbc-config.yaml
+          - dataId: log-config.yaml
+          - dataId: knife4j-config.yaml
+          - dataId: feign-config.yaml
+          - dataId: sentinel-config.yaml
+          - dataId: seata-config.yaml
+        group: DEFAULT_GROUP

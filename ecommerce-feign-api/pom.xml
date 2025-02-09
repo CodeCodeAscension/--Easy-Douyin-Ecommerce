@@ -33,10 +33,9 @@
         </dependency>
 
         <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-annotations</artifactId>
-            <version>1.6.6</version>
-            <scope>compile</scope>
+            <groupId>com.example</groupId>
+            <artifactId>ecommerce-common</artifactId>
+            <version>${ecommerce.version}</version>
         </dependency>
     </dependencies>
 </project>

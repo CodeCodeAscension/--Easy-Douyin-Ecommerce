@@ -1,18 +1,17 @@
-spring:
-  profiles:
-    active: local
-  application:
-    name: payment-service
-  cloud:
-    nacos:
-      server-addr: ${ecommerce.nacos-addr}
-  datasource:
-    url: jdbc:mysql://${ecommerce.database.host}:${ecommerce.database.port}/${ecommerce.database.table}?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
-    username: ${ecommerce.database.user}
-    password: ${ecommerce.database.pwd}
-    driver-class-name: com.mysql.cj.jdbc.Driver
 server:
-  port: 8006
-feign:
-  okhttp:
-    enabled: true
+  port: 8086
+
+ecommerce:
+  database:
+    host: @database.host@
+    port: @database.port@
+    user: @database.user@
+    pwd: @database.pwd@
+    table: test
+  knife4j:
+    title: 支付服务
+    description: 支付服务
+  sentinel:
+    dashboard: @sentinel.dashboard@
+  nacos:
+    dashboard: @nacos.dashboard@

@@ -1,8 +1,0 @@
-ecommerce:
-  nacos-addr: localhost:8848
-  database:
-    host: localhost
-    port: 3306
-    user: root
-    pwd: root
-    table: test
