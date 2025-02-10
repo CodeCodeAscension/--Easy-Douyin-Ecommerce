@@ -15,4 +15,5 @@ spring:
           - dataId: feign-config.yaml
           - dataId: sentinel-config.yaml
           - dataId: seata-config.yaml
+          - dataId: redis-config.yaml
         group: DEFAULT_GROUP

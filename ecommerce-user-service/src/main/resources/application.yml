@@ -15,3 +15,6 @@ ecommerce:
     dashboard: @sentinel.dashboard@
   nacos:
     dashboard: @nacos.dashboard@
+  redis:
+    cluster-addr: @redis.cluster-addr@
+    expire-hour: 4

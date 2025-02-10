@@ -36,6 +36,7 @@
             <groupId>com.example</groupId>
             <artifactId>ecommerce-common</artifactId>
             <version>${ecommerce.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
