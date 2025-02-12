@@ -58,6 +58,82 @@
                 <sentinel.dashboard>vlsmb-nagamori.local:8090</sentinel.dashboard>
                 <nacos.dashboard>vlsmb-nagamori.local:8848</nacos.dashboard>
                 <redis.cluster-addr>192.168.11.136:7001,192.168.11.136:7002,192.168.11.136:7003,192.168.11.136:7004,192.168.11.136:7005,192.168.11.136:7006</redis.cluster-addr>
+                <rabbitmq.host>192.168.11.136</rabbitmq.host>
+                <rabbitmq.port>5672</rabbitmq.port>
+                <rabbitmq.user>guest</rabbitmq.user>
+                <rabbitmq.pwd>guest</rabbitmq.pwd>
+            </properties>
+        </profile>
+<!--    环境二-->
+        <profile>
+            <id>dev2</id>
+            <properties>
+                <env>dev2</env>
+                <database.host>vlsmb-nagamori.local</database.host>
+                <database.port>3306</database.port>
+                <database.user>root</database.user>
+                <database.pwd>root</database.pwd>
+                <sentinel.dashboard>vlsmb-nagamori.local:8090</sentinel.dashboard>
+                <nacos.dashboard>vlsmb-nagamori.local:8848</nacos.dashboard>
+                <redis.cluster-addr>192.168.11.136:7001,192.168.11.136:7002,192.168.11.136:7003,192.168.11.136:7004,192.168.11.136:7005,192.168.11.136:7006</redis.cluster-addr>
+                <rabbitmq.host>192.168.11.136</rabbitmq.host>
+                <rabbitmq.port>5672</rabbitmq.port>
+                <rabbitmq.user>guest</rabbitmq.user>
+                <rabbitmq.pwd>guest</rabbitmq.pwd>
+            </properties>
+        </profile>
+<!--环境三-->
+        <profile>
+            <id>dev3</id>
+            <properties>
+                <env>dev3</env>
+                <database.host>vlsmb-nagamori.local</database.host>
+                <database.port>3306</database.port>
+                <database.user>root</database.user>
+                <database.pwd>root</database.pwd>
+                <sentinel.dashboard>vlsmb-nagamori.local:8090</sentinel.dashboard>
+                <nacos.dashboard>vlsmb-nagamori.local:8848</nacos.dashboard>
+                <redis.cluster-addr>192.168.11.136:7001,192.168.11.136:7002,192.168.11.136:7003,192.168.11.136:7004,192.168.11.136:7005,192.168.11.136:7006</redis.cluster-addr>
+                <rabbitmq.host>192.168.11.136</rabbitmq.host>
+                <rabbitmq.port>5672</rabbitmq.port>
+                <rabbitmq.user>guest</rabbitmq.user>
+                <rabbitmq.pwd>guest</rabbitmq.pwd>
+            </properties>
+        </profile>
+<!--环境四-->
+        <profile>
+            <id>dev4</id>
+            <properties>
+                <env>dev4</env>
+                <database.host>vlsmb-nagamori.local</database.host>
+                <database.port>3306</database.port>
+                <database.user>root</database.user>
+                <database.pwd>root</database.pwd>
+                <sentinel.dashboard>vlsmb-nagamori.local:8090</sentinel.dashboard>
+                <nacos.dashboard>vlsmb-nagamori.local:8848</nacos.dashboard>
+                <redis.cluster-addr>192.168.11.136:7001,192.168.11.136:7002,192.168.11.136:7003,192.168.11.136:7004,192.168.11.136:7005,192.168.11.136:7006</redis.cluster-addr>
+                <rabbitmq.host>192.168.11.136</rabbitmq.host>
+                <rabbitmq.port>5672</rabbitmq.port>
+                <rabbitmq.user>guest</rabbitmq.user>
+                <rabbitmq.pwd>guest</rabbitmq.pwd>
+            </properties>
+        </profile>
+<!--环境五-->
+        <profile>
+            <id>dev5</id>
+            <properties>
+                <env>dev5</env>
+                <database.host>vlsmb-nagamori.local</database.host>
+                <database.port>3306</database.port>
+                <database.user>root</database.user>
+                <database.pwd>root</database.pwd>
+                <sentinel.dashboard>vlsmb-nagamori.local:8090</sentinel.dashboard>
+                <nacos.dashboard>vlsmb-nagamori.local:8848</nacos.dashboard>
+                <redis.cluster-addr>192.168.11.136:7001,192.168.11.136:7002,192.168.11.136:7003,192.168.11.136:7004,192.168.11.136:7005,192.168.11.136:7006</redis.cluster-addr>
+                <rabbitmq.host>192.168.11.136</rabbitmq.host>
+                <rabbitmq.port>5672</rabbitmq.port>
+                <rabbitmq.user>guest</rabbitmq.user>
+                <rabbitmq.pwd>guest</rabbitmq.pwd>
             </properties>
         </profile>
     </profiles>

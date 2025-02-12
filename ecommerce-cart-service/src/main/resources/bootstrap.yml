@@ -16,4 +16,5 @@ spring:
           - dataId: sentinel-config.yaml
           - dataId: seata-config.yaml
           - dataId: redis-config.yaml
+          - dataId: rabbitmq-config.yaml
         group: DEFAULT_GROUP

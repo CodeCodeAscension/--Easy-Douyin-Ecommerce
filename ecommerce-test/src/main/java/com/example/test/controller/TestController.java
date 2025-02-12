@@ -32,6 +32,7 @@ public class TestController {
     private UserClient userClient;
 
     @GetMapping("/users")
+    @ApiOperation("users")
     public ResponseResult getUsers() {
         return userClient.getUserInfo();
     }

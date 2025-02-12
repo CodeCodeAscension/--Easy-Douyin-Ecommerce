@@ -18,3 +18,9 @@ ecommerce:
   redis:
     cluster-addr: @redis.cluster-addr@
     expire-hour: 4
+  rabbitmq:
+    host: @rabbitmq.host@
+    port: @rabbitmq.port@
+    virtual: /
+    user: @rabbitmq.user@
+    pwd: @rabbitmq.pwd@
