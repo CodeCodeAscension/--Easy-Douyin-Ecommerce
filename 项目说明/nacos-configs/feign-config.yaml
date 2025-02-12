@@ -1,0 +1,5 @@
+feign:
+  okhttp:
+    enabled: true
+  sentinel:
+    enabled: true

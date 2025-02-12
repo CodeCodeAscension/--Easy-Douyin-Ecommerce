@@ -1,0 +1,9 @@
+spring:
+  redis:
+    cluster:
+      nodes: ${ecommerce.redis.cluster-addr}
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0

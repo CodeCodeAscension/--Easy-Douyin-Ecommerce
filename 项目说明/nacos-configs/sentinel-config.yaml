@@ -1,0 +1,6 @@
+spring:
+  cloud:
+    sentinel:
+      transport:
+        dashboard: ${ecommerce.sentinel.dashboard}
+      http-method-specify: true

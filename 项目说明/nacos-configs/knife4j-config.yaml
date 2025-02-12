@@ -1,0 +1,6 @@
+knife4j:
+  enable: true
+  openapi:
+    title: ${ecommerce.knife4j.title:标题}
+    description: ${ecommerce.knife4j.description:描述}
+    base-package: com.example

@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: jdbc:mysql://${ecommerce.database.host}:${ecommerce.database.port}/${ecommerce.database.table}?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
+    username: ${ecommerce.database.user}
+    password: ${ecommerce.database.pwd}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+mybatis-plus:
+  configuration:
+    default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler
+    cache-enabled: true
+  global-config:
+    db-config:
+      update-strategy: not_null
+      id-type: assign_id

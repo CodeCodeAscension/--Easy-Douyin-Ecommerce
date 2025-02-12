@@ -1,0 +1,299 @@
+# 此处定义了第三方技术的搭建
+
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:8.0.36
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - "./mysql/conf:/etc/mysql/conf.d"
+      - "./mysql/data:/var/lib/mysql"
+      - "./mysql/init:/docker-entrypoint-initdb.d"
+    networks:
+      - new
+    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+  nacos:
+    image: nacos/nacos-server:v2.1.0-slim
+    container_name: nacos
+    env_file:
+      - ./nacos/custom.env
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+      - "9849:9849"
+    restart: always
+    volumes:
+      - "./nacos/data:/home/nacos/data"
+      - "./nacos/plugins:/home/nacos/plugins/mysql"
+    networks:
+      - new
+    depends_on:
+      mysql:
+        condition: service_healthy
+  setinel:
+    build:
+      context: ./sentinel
+      dockerfile: Dockerfile
+    container_name: sentinel
+    ports:
+      - "8090:8090"
+    restart: always
+    networks:
+      - new
+  seata:
+    image: seataio/seata-server:1.5.2
+    container_name: seata
+    ports:
+      - "8099:8099"
+      - "7099:7099"
+    environment:
+      SEATA_IP: ${HOST_IP}
+    volumes:
+      - "./seata/seata:/seata-server/resources"
+    privileged: true
+    restart: always
+    networks:
+      - new
+    depends_on:
+      mysql:
+        condition: service_healthy
+  elasticsearch:
+    image: elasticsearch:7.12.1
+    container_name: elasticsearch
+    environment:
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - discovery.type=single-node
+    volumes:
+      - "./elasticsearch/data:/usr/share/elasticsearch/data"
+      - "./elasticsearch/plugins:/usr/share/elasticsearch/plugins"
+    networks:
+      - new
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    privileged: true
+    restart: always
+  kibana:
+    image: kibana:7.12.1
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    networks:
+      - new
+    ports:
+      - "5601:5601"
+    restart: always
+
+  redis-node-1:
+    image: redis:7.0
+    container_name: redis-node-1
+    ports:
+      - "7001:6379"
+      - "17001:16379"
+    volumes:
+      - ./redis/data/redis-node-1:/data
+    environment:
+      - HOST_IP=${HOST_IP}
+    command:
+      - redis-server
+      - --cluster-enabled yes
+      - --cluster-config-file nodes-node-1.conf
+      - --cluster-node-timeout 5000
+      - --cluster-announce-ip ${HOST_IP}
+      - --cluster-announce-port 7001
+      - --cluster-announce-bus-port 17001
+      - --appendonly yes
+    networks:
+      - new
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+  redis-node-2:
+    image: redis:7.0
+    container_name: redis-node-2
+    ports:
+      - "7002:6379"
+      - "17002:16379"
+    volumes:
+      - ./redis/data/redis-node-2:/data
+    command:
+      - redis-server
+      - --cluster-enabled yes
+      - --cluster-config-file nodes-node-2.conf
+      - --cluster-node-timeout 5000
+      - --cluster-announce-ip ${HOST_IP}
+      - --cluster-announce-port 7002
+      - --cluster-announce-bus-port 17002
+      - --appendonly yes
+    networks:
+      - new
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+  redis-node-3:
+    image: redis:7.0
+    container_name: redis-node-3
+    ports:
+      - "7003:6379"
+      - "17003:16379"
+    volumes:
+      - ./redis/data/redis-node-3:/data
+    command:
+      - redis-server
+      - --cluster-enabled yes
+      - --cluster-config-file nodes-node-3.conf
+      - --cluster-node-timeout 5000
+      - --cluster-announce-ip ${HOST_IP}
+      - --cluster-announce-port 7003
+      - --cluster-announce-bus-port 17003
+      - --appendonly yes
+    networks:
+      - new
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+  redis-node-4:
+    image: redis:7.0
+    container_name: redis-node-4
+    ports:
+      - "7004:6379"
+      - "17004:16379"
+    volumes:
+      - ./redis/data/redis-node-4:/data
+    command:
+      - redis-server
+      - --cluster-enabled yes
+      - --cluster-config-file nodes-node-4.conf
+      - --cluster-node-timeout 5000
+      - --cluster-announce-ip ${HOST_IP}
+      - --cluster-announce-port 7004
+      - --cluster-announce-bus-port 17004
+      - --appendonly yes
+    networks:
+      - new
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+  redis-node-5:
+    image: redis:7.0
+    container_name: redis-node-5
+    ports:
+      - "7005:6379"
+      - "17005:16379"
+    volumes:
+      - ./redis/data/redis-node-5:/data
+    command:
+      - redis-server
+      - --cluster-enabled yes
+      - --cluster-config-file nodes-node-5.conf
+      - --cluster-node-timeout 5000
+      - --cluster-announce-ip ${HOST_IP}
+      - --cluster-announce-port 7005
+      - --cluster-announce-bus-port 17005
+      - --appendonly yes
+    networks:
+      - new
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+  redis-node-6:
+    image: redis:7.0
+    container_name: redis-node-6
+    ports:
+      - "7006:6379"
+      - "17006:16379"
+    volumes:
+      - ./redis/data/redis-node-6:/data
+    command:
+      - redis-server
+      - --cluster-enabled yes
+      - --cluster-config-file nodes-node-6.conf
+      - --cluster-node-timeout 5000
+      - --cluster-announce-ip ${HOST_IP}
+      - --cluster-announce-port 7006
+      - --cluster-announce-bus-port 17006
+      - --appendonly yes
+    networks:
+      - new
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+  redis-cluster-init:
+    image: redis:7.0
+    container_name: redis-cluster-init
+    depends_on:
+      redis-node-1:
+        condition: service_healthy
+      redis-node-2:
+        condition: service_healthy
+      redis-node-3:
+        condition: service_healthy
+      redis-node-4:
+        condition: service_healthy
+      redis-node-5:
+        condition: service_healthy
+      redis-node-6:
+        condition: service_healthy
+    entrypoint: [
+      "sh", "-c",
+      "echo 'Initializing Redis Cluster...' &&
+       redis-cli --cluster create ${HOST_IP}:7001 ${HOST_IP}:7002 ${HOST_IP}:7003 ${HOST_IP}:7004 ${HOST_IP}:7005 ${HOST_IP}:7006 --cluster-replicas 1 --cluster-yes --cluster-replica-validity-factor 0 &&
+       echo 'Redis Cluster initialized!'"
+    ]
+    networks:
+      - new
+    restart: always
+
+  rabbit-mq:
+    image: rabbitmq:3.8-management
+    container_name: rabbit-mq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    hostname: rabbit-mq
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    networks:
+      - new
+    restart: always
+    command: ["rabbitmq-server"]
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+networks:
+  new:
+    name: easy-douyin-ecommerce

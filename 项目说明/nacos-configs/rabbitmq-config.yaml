@@ -1,0 +1,10 @@
+spring:
+  rabbitmq:
+    host: ${ecommerce.rabbitmq.host}
+    port: ${ecommerce.rabbitmq.port}
+    virtual-host: ${ecommerce.rabbitmq.virtual}
+    username: ${ecommerce.rabbitmq.user}
+    password: ${ecommerce.rabbitmq.pwd}
+    listener:
+      simple:
+        prefetch: 1

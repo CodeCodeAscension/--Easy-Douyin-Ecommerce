@@ -1,0 +1,17 @@
+seata:
+  enabled: true
+  data-source-proxy-mode: AT
+  registry:
+    type: nacos
+    nacos:
+      server-addr: ${ecommerce.nacos.dashboard}
+      # namespace: ""
+      group: DEFAULT_GROUP
+      application: seata-server
+      username: nacos
+      password: nacos
+  tx-service-group: ecommerce
+  service:
+    vgroup-mapping:
+      ecommerce: default
+
