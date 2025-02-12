@@ -2,29 +2,22 @@ package com.example.common.cache;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.cache.Cache;
-import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.connection.RedisServerCommands;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReadWriteLock;
 
 @Slf4j
 public class MybatisRedisCache implements Cache {
 
     private final String id;
     private static RedisTemplate<String, Object> redisTemplate;
-    private static RedissonClient redissonClient;
     private static final int expireHour = 4;
 
     public static void setRedisTemplate(RedisTemplate<String, Object> redisTemplate) {
         MybatisRedisCache.redisTemplate = redisTemplate;
-    }
-
-    public static void setRedissonClient(RedissonClient redissonClient) {
-        MybatisRedisCache.redissonClient = redissonClient;
     }
 
     public MybatisRedisCache(String id) {
@@ -62,11 +55,6 @@ public class MybatisRedisCache implements Cache {
     @Override
     public int getSize() {
         return Objects.requireNonNull(redisTemplate.execute(RedisServerCommands::dbSize)).intValue();
-    }
-
-    @Override
-    public ReadWriteLock getReadWriteLock() {
-        return redissonClient.getReadWriteLock("mybatis:cache:lock:" + id);
     }
 
     private String generateKey(Object key) {

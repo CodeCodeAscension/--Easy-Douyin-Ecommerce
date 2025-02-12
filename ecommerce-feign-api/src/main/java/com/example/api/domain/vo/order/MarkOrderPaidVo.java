@@ -9,4 +9,6 @@ import lombok.Data;
 public class MarkOrderPaidVo {
     @ApiModelProperty("是否成功")
     private Boolean res;
+    @ApiModelProperty("返回信息")
+    private String msg;
 }

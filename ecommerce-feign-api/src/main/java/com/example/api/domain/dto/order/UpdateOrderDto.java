@@ -9,8 +9,12 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-@ApiModel(description = "下订单请求")
-public class PlaceOrderDto {
+@ApiModel(description = "更新订单数据")
+public class UpdateOrderDto {
+    @ApiModelProperty("订单ID")
+    private String orderId;
+    @ApiModelProperty("支付状态（0待支付，1已支付，2已取消）")
+    private Integer status;
     @ApiModelProperty("使用的货币")
     private String userCurrency;
     @ApiModelProperty("地址")

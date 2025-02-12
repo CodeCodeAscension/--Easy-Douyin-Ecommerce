@@ -1,16 +1,14 @@
 package com.example.api.client;
 
-import com.example.api.domain.dto.cart.AddItemDto;
-import com.example.api.domain.dto.cart.EmptyCartDto;
-import com.example.api.domain.dto.cart.GetCartDto;
-import com.example.api.domain.vo.cart.AddItemVo;
-import com.example.api.domain.vo.cart.EmptyCartVo;
-import com.example.api.domain.vo.cart.GetCartVo;
+import com.example.api.client.fallback.CartClientFallBack;
+import com.example.api.domain.vo.cart.CartInfoVo;
+import com.example.common.domain.ResponseResult;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
 
-@FeignClient("cart-service")
+@FeignClient(value = "cart-service", fallbackFactory = CartClientFallBack.class)
 public interface CartClient {
-    AddItemVo addItem(AddItemDto addItemDto);
-    GetCartVo getCart(GetCartDto getCartDto);
-    EmptyCartVo emptyCart(EmptyCartDto emptyCartDto);
+    // 获得当前用户的购物车信息
+    @GetMapping("/api/v1/carts")
+    ResponseResult<CartInfoVo> getCartInfo();
 }

@@ -1,16 +1,27 @@
 package com.example.api.client;
 
-import com.example.api.domain.dto.product.GetProductDto;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.example.api.client.fallback.ProductClientFallBack;
 import com.example.api.domain.dto.product.ListProductsDto;
 import com.example.api.domain.dto.product.SearchProductsDto;
-import com.example.api.domain.vo.product.GetProductVo;
-import com.example.api.domain.vo.product.ListProductsVo;
-import com.example.api.domain.vo.product.SearchProductsVo;
+import com.example.api.domain.vo.product.ProductInfoVo;
+import com.example.common.domain.ResponseResult;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient("product-service")
+@FeignClient(value = "product-service", fallbackFactory = ProductClientFallBack.class)
 public interface ProductClient {
-    ListProductsVo listProducts(ListProductsDto listProductsDto);
-    GetProductVo getProduct(GetProductDto getProductDto);
-    SearchProductsVo searchProducts(SearchProductsDto searchProductsDto);
+    // 通过ID获取商品信息
+    @GetMapping("/api/v1/products/{productId}")
+    ResponseResult<ProductInfoVo> getProductInfoById(@PathVariable("productId") Long productId);
+
+    // 通过类别获取商品信息
+    @GetMapping("/api/v1/products")
+    ResponseResult<IPage<ProductInfoVo>> getProductInfoByCategory(@RequestBody ListProductsDto listProductsDto);
+
+    // 查询商品信息
+    @GetMapping("/api/v1/products/search")
+    ResponseResult<IPage<ProductInfoVo>> seachProductInfo(@RequestBody SearchProductsDto searchProductsDto);
 }

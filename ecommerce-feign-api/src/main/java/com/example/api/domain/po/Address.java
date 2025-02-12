@@ -11,8 +11,8 @@ public class Address {
     private String streetAddress;
     @ApiModelProperty("城市")
     private String city;
-    @ApiModelProperty("状态")
-    private String state;
+    @ApiModelProperty("省份")
+    private String province;
     @ApiModelProperty("国家")
     private String country;
     @ApiModelProperty("邮政编码")

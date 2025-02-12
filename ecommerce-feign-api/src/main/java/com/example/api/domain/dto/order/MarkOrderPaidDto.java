@@ -5,10 +5,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
-@ApiModel(description = "标记订单已支付请求")
+@ApiModel(description = "让订单变成已支付")
 public class MarkOrderPaidDto {
-    @ApiModelProperty("用户ID")
-    private Long userId;
     @ApiModelProperty("订单ID")
     private String orderId;
 }

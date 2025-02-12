@@ -23,28 +23,28 @@ spring:
         - id: ai
           uri: lb://ai-service
           predicates:
-            - Path=/ai/**,/ais/**
+            - Path=/api/v1/ai/**,/api/v1/ais/**
         - id: cart
           uri: lb://cart-service
           predicates:
-            - Path=/carts/**
+            - Path=/api/v1/carts/**,/api/v1/cart/**
         - id: checkout
           uri: lb://checkout-service
           predicates:
-            - Path=/checkouts/**
+            - Path=/api/v1/checkouts/**,/api/v1/checkout/**
         - id: order
           uri: lb://order-service
           predicates:
-            - Path=/orders/**
+            - Path=/api/v1/orders/**,/api/v1/order/**
         - id: payment
           uri: lb://payment-service
           predicates:
-            - Path=/payments/**
+            - Path=/api/v1/payments/**,/api/v1/payment/**
         - id: product
           uri: lb://product-service
           predicates:
-            - Path=/products/**
+            - Path=/api/v1/products/**,/api/v1/product/**
         - id: user
           uri: lb://user-service
           predicates:
-            - Path=/users/**,/login,/register
+            - Path=/api/v1/users/**,/api/v1/user/**

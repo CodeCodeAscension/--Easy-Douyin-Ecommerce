@@ -27,7 +27,7 @@ public class ResponseResult<T> {
     /**
      * 操作成功
      */
-    public static ResponseResult<Object> success() {
+    public static <T> ResponseResult<T> success() {
         return new ResponseResult<>(ResultCode.SUCCESS, "操作成功", null);
     }
 
@@ -36,8 +36,24 @@ public class ResponseResult<T> {
      * @param code 状态码
      * @param msg 消息
      */
-    public static ResponseResult<Object> error(int code, String msg) {
+    public static <T> ResponseResult<T> error(int code, String msg) {
         return new ResponseResult<>(code, msg, null);
+    }
+
+    /**
+     * 操作失败，返回一个异常
+     * @param cause 异常
+     */
+    public static <T> ResponseResult<T> error(int code, Throwable cause) {
+        return new ResponseResult<>(code, cause.getMessage(), null);
+    }
+
+    /**
+     * 远程服务调用失败
+     * @param cause 异常
+     */
+    public static <T> ResponseResult<T> errorFeign(Throwable cause) {
+        return error(ResultCode.SERVICE_UNAVAILABLE, cause);
     }
 
     public int getCode() {
