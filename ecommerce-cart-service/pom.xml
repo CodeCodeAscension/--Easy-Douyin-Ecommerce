@@ -8,7 +8,7 @@
     </parent>
 
     <artifactId>ecommerce-cart-service</artifactId>
-    <version>${ecommerce.version}</version>
+    <version>1.0-SNAPSHOT</version>
 
     <name>ecommerce-cart-service</name>
     <url>http://maven.apache.org</url>
