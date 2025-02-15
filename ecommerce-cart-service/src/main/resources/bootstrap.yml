@@ -5,7 +5,7 @@ spring:
     active: dev
   cloud:
     nacos:
-      server-addr: @nacos.dashboard@
+      server-addr: 192.168.150.101:8848
       config:
         file-extension: yaml
         shared-configs:
