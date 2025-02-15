@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>ecommerce-test</artifactId>
-  <version>${ecommerce.version}</version>
+  <version>1.0-SNAPSHOT</version>
 
   <dependencies>
     <dependency>
