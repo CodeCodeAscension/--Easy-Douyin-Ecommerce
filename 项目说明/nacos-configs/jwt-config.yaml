@@ -1,0 +1,4 @@
+ecommerce:
+  jwt:
+    key: "aB3$kL9@qW2^zX8&amp;pR7*"
+    expire-hour: 1

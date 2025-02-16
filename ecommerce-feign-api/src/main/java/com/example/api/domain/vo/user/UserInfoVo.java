@@ -29,6 +29,8 @@ public class UserInfoVo {
     private String userCurrency;
     @ApiModelProperty("状态（0正常，1封禁，2注销）")
     private Integer status;
+    @ApiModelProperty("注销或封禁原因")
+    private String disableReason;
     @ApiModelProperty("创建时间")
     private LocalDateTime createTime;
     @ApiModelProperty("修改时间")
