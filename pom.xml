@@ -69,14 +69,14 @@
             <id>dev2</id>
             <properties>
                 <env>dev2</env>
-                <database.host>vlsmb-nagamori.local</database.host>
+                <database.host>192.168.150.101</database.host>
                 <database.port>3306</database.port>
                 <database.user>root</database.user>
                 <database.pwd>root</database.pwd>
-                <sentinel.dashboard>vlsmb-nagamori.local:8090</sentinel.dashboard>
-                <nacos.dashboard>vlsmb-nagamori.local:8848</nacos.dashboard>
-                <redis.cluster-addr>192.168.11.136:7001,192.168.11.136:7002,192.168.11.136:7003,192.168.11.136:7004,192.168.11.136:7005,192.168.11.136:7006</redis.cluster-addr>
-                <rabbitmq.host>192.168.11.136</rabbitmq.host>
+                <sentinel.dashboard>192.168.150.101:8090</sentinel.dashboard>
+                <nacos.dashboard>192.168.150.101:8848</nacos.dashboard>
+                <redis.cluster-addr>192.168.150.101:7001,192.168.150.101:7002,192.168.150.101:7003,192.168.150.101:7004,192.168.150.101:7005,192.168.150.101:7006</redis.cluster-addr>
+                <rabbitmq.host>192.168.150.101</rabbitmq.host>
                 <rabbitmq.port>5672</rabbitmq.port>
                 <rabbitmq.user>guest</rabbitmq.user>
                 <rabbitmq.pwd>guest</rabbitmq.pwd>
