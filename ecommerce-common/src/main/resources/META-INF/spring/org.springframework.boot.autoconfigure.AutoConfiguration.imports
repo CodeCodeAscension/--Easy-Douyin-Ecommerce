@@ -1,0 +1,4 @@
+com.example.common.config.MvcConfig
+com.example.common.config.MyBatisConfig
+com.example.common.config.RedisConfig
+com.example.common.config.UtilBeanConfig

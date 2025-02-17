@@ -5,8 +5,8 @@ import com.example.cart.domain.dto.AddItemDTO;
 import com.example.cart.domain.vo.CartInfoVo;
 import com.example.cart.service.ICartService;
 import com.example.common.domain.ResponseResult;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+//import io.swagger.annotations.Api;
+//import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
  * @author author
  * @since 2025-02-14
  */
-@Api("购物车相关接口")
+//@Api("购物车相关接口")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/carts")
@@ -26,7 +26,7 @@ public class CartController {
 
     private final ICartService iCartService;
 
-    @ApiOperation("添加购物车")
+//    @ApiOperation("添加购物车")
     @PostMapping
     public ResponseResult<AddItemDTO> addCart(@RequestBody AddItemDTO addItemDTO){
 
@@ -35,7 +35,7 @@ public class CartController {
     }
 
 
-    @ApiOperation("清空购物车")
+//    @ApiOperation("清空购物车")
     @DeleteMapping
     public ResponseResult<Void> deleteCartItem(){
 
@@ -44,7 +44,7 @@ public class CartController {
     }
 
 
-    @ApiOperation("获取购物车信息")
+//    @ApiOperation("获取购物车信息")
     @GetMapping
     public ResponseResult<CartInfoVo> getCartInfo(){
 

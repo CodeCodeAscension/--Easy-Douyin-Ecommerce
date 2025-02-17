@@ -1,6 +1,9 @@
 server:
   port: 8081
 
+springdoc:
+  show-login-endpoint: false
+
 ecommerce:
   user-service:
     pwd-length: 5 # 密码最小长度

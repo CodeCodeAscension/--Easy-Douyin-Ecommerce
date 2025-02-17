@@ -22,24 +22,25 @@
         <module>ecommerce-feign-api</module>
     </modules>
 
+<!--    SpringBoot 3.3.8-->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.12</version>
+        <version>3.3.8</version>
     </parent>
 
     <properties>
         <ecommerce.version>1.0-SNAPSHOT</ecommerce.version>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <lombok.version>1.18.20</lombok.version>
-        <spring-boot.version>2.7.12</spring-boot.version>
-        <spring-cloud.version>2021.0.3</spring-cloud.version>
-        <spring-cloud-alibaba.version>2021.0.4.0</spring-cloud-alibaba.version>
-        <mybatis-plus.version>3.4.3</mybatis-plus.version>
+        <spring-boot.version>3.3.8</spring-boot.version>
+        <spring-cloud.version>2023.0.1</spring-cloud.version>
+        <spring-cloud-alibaba.version>2023.0.1.0</spring-cloud-alibaba.version>
+        <mybatis-plus.version>3.5.5</mybatis-plus.version>
         <mysql.version>8.0.23</mysql.version>
-        <elasticsearch.version>7.12.1</elasticsearch.version>
+        <elasticsearch.version>8.5.0</elasticsearch.version>
     </properties>
 
 <!--    不同的开发者本地的测试属性可能不同，可以在此定义-->
@@ -57,7 +58,7 @@
                 <database.pwd>root</database.pwd>
                 <sentinel.dashboard>vlsmb-kotori.local:8090</sentinel.dashboard>
                 <nacos.dashboard>vlsmb-kotori.local:8848</nacos.dashboard>
-                <redis.cluster-addr>127.0.0.1:7001,127.0.0.1:7002,127.0.0.1:7003,127.0.0.1:7004,127.0.0.1:7005,127.0.0.1:7006</redis.cluster-addr>
+                <redis.cluster-addr>vlsmb-kotori.local:7001,vlsmb-kotori.local:7002,vlsmb-kotori.local:7003,vlsmb-kotori.local:7004,vlsmb-kotori.local:7005,vlsmb-kotori.local:7006</redis.cluster-addr>
                 <rabbitmq.host>vlsmb-kotori.local</rabbitmq.host>
                 <rabbitmq.port>5672</rabbitmq.port>
                 <rabbitmq.user>guest</rabbitmq.user>
@@ -180,7 +181,7 @@
             <!-- MyBatisPlus -->
             <dependency>
                 <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
                 <version>${mybatis-plus.version}</version>
             </dependency>
             <!-- jwt令牌-->
@@ -200,8 +201,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.8.1</version>
                     <configuration>
-                        <source>11</source>
-                        <target>11</target>
+                        <source>17</source>
+                        <target>17</target>
                     </configuration>
                 </plugin>
             </plugins>

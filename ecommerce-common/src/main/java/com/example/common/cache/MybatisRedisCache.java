@@ -46,10 +46,7 @@ public class MybatisRedisCache implements Cache {
 
     @Override
     public void clear() {
-        redisTemplate.execute((RedisCallback<Void>) connection -> {
-            connection.flushDb();
-            return null;
-        });
+        Objects.requireNonNull(redisTemplate.getConnectionFactory()).getConnection().flushDb();
     }
 
     @Override

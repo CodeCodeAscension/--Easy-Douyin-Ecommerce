@@ -11,8 +11,8 @@ import com.example.user.domain.vo.LoginVo;
 import com.example.user.domain.vo.RegisterVo;
 import com.example.user.service.UserService;
 import com.example.user.util.JwtUtil;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+//import io.swagger.annotations.Api;
+//import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/user")
-@Api(tags = "用户登陆注册控制器")
+//@Api(tags = "用户登陆注册控制器")
 public class LoginController {
 
     @Autowired
@@ -39,7 +39,7 @@ public class LoginController {
     private JwtUtil jwtUtil;
 
     @PostMapping("/register")
-    @ApiOperation("用户注册")
+//    @ApiOperation("用户注册")
     public ResponseResult<RegisterVo> register(@Validated @RequestBody RegisterDto registerDto) {
         // 字符串去掉左侧右侧空格
         String password = registerDto.getPassword().trim();
@@ -65,7 +65,7 @@ public class LoginController {
     }
 
     @PostMapping("/login")
-    @ApiOperation("用户登录")
+//    @ApiOperation("用户登录")
     public ResponseResult<LoginVo> login(@Validated @RequestBody LoginDto loginDto) {
         User user = userService.checkPassword(loginDto);
         if (user == null) {
