@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
+
+import com.example.cart.enums.OrderStatusEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -39,7 +41,7 @@ public class Cart implements Serializable {
 //    private String cartItems;
 
     @ApiModelProperty(value = "状态（0待支付，1已支付，2已删除）")
-    private Integer status;
+    private OrderStatusEnum status;
 
     @ApiModelProperty(value = "创建时间")
     private LocalDateTime createTime;

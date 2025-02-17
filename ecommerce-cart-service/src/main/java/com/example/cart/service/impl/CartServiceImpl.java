@@ -10,6 +10,7 @@ import com.example.cart.domain.po.Cart;
 import com.example.cart.domain.po.CartItem;
 import com.example.cart.domain.vo.CartInfoVo;
 import com.example.cart.domain.vo.CartItemInfo;
+import com.example.cart.enums.OrderStatusEnum;
 import com.example.cart.mapper.CartMapper;
 import com.example.cart.service.ICartItemService;
 import com.example.cart.service.ICartService;
@@ -59,12 +60,12 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
             return ResponseResult.error(ResultCode.UNAUTHORIZED,new RuntimeException("用户未登录"));
         }
         //判断是否是第一次添加购物车,条件是用户id和购物车未结算的购物车
-        Cart cart = this.lambdaQuery().eq(Cart::getUserId, userId).eq(Cart::getStatus, 0).one();
+        Cart cart = this.lambdaQuery().eq(Cart::getUserId, userId).eq(Cart::getStatus, OrderStatusEnum.UNPAID).one();
         //如果是第一次添加购物车，创建购物车
         if(cart==null){
             cart=new Cart();
             cart.setUserId(userId);
-            cart.setStatus(0);
+            cart.setStatus(OrderStatusEnum.UNPAID);
             cart.setCreateTime(LocalDateTime.now());
             cart.setUpdateTime(LocalDateTime.now());
             this.save(cart);
@@ -102,7 +103,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
             return ResponseResult.error(ResultCode.UNAUTHORIZED,new RuntimeException("用户未登录"));
         }
         //查询购物车表获取购物车id
-        Cart cart = this.lambdaQuery().eq(Cart::getUserId, userId).eq(Cart::getStatus, 0).one();
+        Cart cart = this.lambdaQuery().eq(Cart::getUserId, userId).eq(Cart::getStatus, OrderStatusEnum.UNPAID).one();
         if(cart==null){
             return ResponseResult.error(ResultCode.FAILED_DEPENDENCY,new RuntimeException("购物车不存在"));
         }
@@ -126,14 +127,14 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         //获取购物车信息
         Cart cart = this.lambdaQuery()
                 .eq(Cart::getUserId, userId)
-                .eq(Cart::getStatus, 0)
+                .eq(Cart::getStatus, OrderStatusEnum.UNPAID)
                 .one();
         CartInfoVo cartInfoVo = new CartInfoVo();
 
         if(cart!=null){
             cartInfoVo.setId(cart.getId());
             cartInfoVo.setUserId(cart.getUserId());
-            cartInfoVo.setStatus(cart.getStatus());
+            cartInfoVo.setStatus(cart.getStatus().getCode());
             cartInfoVo.setCreateTime(cart.getCreateTime());
             cartInfoVo.setUpdateTime(cart.getUpdateTime());
             List<CartItem> list = iCartItemService.lambdaQuery()
