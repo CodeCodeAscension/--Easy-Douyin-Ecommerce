@@ -3,18 +3,18 @@ server:
 
 ecommerce:
   database:
-    host: 192.168.150.101
-    port: 3306
-    user: root
-    pwd: root
-    table: db_cart
+    host: @database.host@
+    port: @database.port@
+    user: @database.user@
+    pwd: @database.pwd@
+    table: @database.table@
   knife4j:
     title: 购物车服务
     description: 购物车服务
   sentinel:
     dashboard: @sentinel.dashboard@
   nacos:
-    dashboard: 192.168.150.101:8848
+    dashboard: @nacos.dashboard@
   redis:
     cluster-addr: @redis.cluster-addr@
     expire-hour: 4
