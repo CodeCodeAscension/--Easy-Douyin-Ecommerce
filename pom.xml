@@ -41,6 +41,7 @@
         <mybatis-plus.version>3.5.5</mybatis-plus.version>
         <mysql.version>8.0.23</mysql.version>
         <elasticsearch.version>7.12.1</elasticsearch.version>
+        <knife4j.version>4.5.0</knife4j.version>
     </properties>
 
 <!--    不同的开发者本地的测试属性可能不同，可以在此定义-->
@@ -190,7 +191,13 @@
                 <artifactId>java-jwt</artifactId>
                 <version>4.4.0</version>
             </dependency>
-<!--            elasticsearch-->
+        <!--    knife4j-->
+            <dependency>
+                <groupId>com.github.xiaoymin</groupId>
+                <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+                <version>${knife4j.version}</version>
+            </dependency>
+        <!--  elasticsearch-->
             <dependency>
                 <groupId>org.elasticsearch</groupId>
                 <artifactId>elasticsearch</artifactId>
