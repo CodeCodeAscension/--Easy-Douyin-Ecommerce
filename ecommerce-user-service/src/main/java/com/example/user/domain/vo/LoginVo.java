@@ -1,14 +1,13 @@
 package com.example.user.domain.vo;
 
-//import io.swagger.annotations.ApiModel;
-//import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
-//@ApiModel(description = "用户注册返回信息")
+@Schema(description = "返回用户登陆的信息")
 public class LoginVo {
-//    @ApiModelProperty("用户ID")
+    @Schema(description = "用户ID")
     private Long userId;
-//    @ApiModelProperty("token")
+    @Schema(description = "用户Token")
     private String token;
 }

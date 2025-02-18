@@ -1,24 +1,24 @@
 package com.example.user.domain.dto;
 
-//import io.swagger.annotations.ApiModel;
-//import io.swagger.annotations.ApiModelProperty;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-//@ApiModel(description = "注册表单")
+@Schema(description = "注册DTO")
 public class RegisterDto {
-//    @ApiModelProperty(value = "用户邮箱", required = true)
+    @Schema(description = "注册邮箱")
     @NotBlank
     @Email
     private String email;
 
-//    @ApiModelProperty(value = "密码",required = true)
+    @Schema(description = "密码")
     @NotBlank
     private String password;
 
-//    @ApiModelProperty(value = "用户再次确认的密码",required = true)
+    @Schema(description = "再次输入密码")
     @NotBlank
     private String confirmPassword;
 }

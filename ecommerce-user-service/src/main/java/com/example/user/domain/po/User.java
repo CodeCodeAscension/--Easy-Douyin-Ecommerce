@@ -4,8 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.example.user.enums.UserPower;
 import com.example.user.enums.UserStatus;
-//import io.swagger.annotations.ApiModel;
-//import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.io.Serial;
@@ -13,40 +12,40 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Data
-//@ApiModel(description = "用户信息实体类")
+@Schema(description = "用户信息实体类")
 public class User implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
-//    @ApiModelProperty("用户ID")
+    @Schema(description = "用户ID")
     @TableId(type = IdType.ASSIGN_ID)
     private Long userId;
 
-//    @ApiModelProperty("邮箱")
+    @Schema(description = "用户邮箱")
     private String email;
-//    @ApiModelProperty("密码（BCrypt密文）")
+    @Schema(description = "密码（BCrypt密文）")
     private String password;
-//    @ApiModelProperty("用户权限")
+    @Schema(description = "用户权限")
     private UserPower power;
-//    @ApiModelProperty("用户名称")
+    @Schema(description = "用户名称")
     private String userName;
-//    @ApiModelProperty("手机号")
+    @Schema(description = "手机号")
     private String phone;
-//    @ApiModelProperty("城市")
+    @Schema(description = "城市")
     private String city;
-//    @ApiModelProperty("省份")
+    @Schema(description = "省份")
     private String province;
-//    @ApiModelProperty("国家")
+    @Schema(description = "国家")
     private String country;
-//    @ApiModelProperty("邮编")
+    @Schema(description = "邮编")
     private String zipCode;
-//    @ApiModelProperty("偏好货币")
+    @Schema(description = "偏好货币")
     private String userCurrency;
-//    @ApiModelProperty("账号状态")
+    @Schema(description = "账号状态")
     private UserStatus status;
-//    @ApiModelProperty("注销或封禁原因")
+    @Schema(description = "注销或封禁原因")
     private String disableReason;
-//    @ApiModelProperty("创建时间")
+    @Schema(description = "创建时间")
     private LocalDateTime createTime;
-//    @ApiModelProperty("更新时间")
+    @Schema(description = "更新时间")
     private LocalDateTime updateTime;
 }

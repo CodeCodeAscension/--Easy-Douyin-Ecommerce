@@ -2,6 +2,7 @@ package com.example.user.enums;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
 import com.example.common.exception.BadRequestException;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
