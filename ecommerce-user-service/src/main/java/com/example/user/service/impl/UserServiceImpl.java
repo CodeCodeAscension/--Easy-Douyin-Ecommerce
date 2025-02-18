@@ -1,0 +1,96 @@
+package com.example.user.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.api.domain.vo.user.UserInfoVo;
+import com.example.common.exception.DatabaseException;
+import com.example.user.domain.dto.LoginDto;
+import com.example.user.domain.dto.RegisterDto;
+import com.example.user.domain.po.User;
+import com.example.user.enums.UserStatus;
+import com.example.user.mapper.UserMapper;
+import com.example.user.service.UserService;
+import com.example.user.util.BCryptUtil;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+
+/**
+ * <p>
+ *     用户数据库服务类
+ * </p>
+ * @author vlsmb
+ */
+@Service
+public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
+
+    @Autowired
+    private UserMapper userMapper;
+    @Autowired
+    private BCryptUtil bCryptUtil;
+
+    /**
+     * 寻找是否存在可用的用户对象
+     * @param email 用户邮箱
+     * @return 用户对象
+     */
+    private User findEnabledUser(String email) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getEmail, email);
+        queryWrapper.eq(User::getStatus, UserStatus.NORMAL);
+        return userMapper.selectOne(queryWrapper);
+    }
+
+    @Override
+    public Long findEnabledUserId(String email) {
+        User user = findEnabledUser(email);
+        if (user == null) {
+            return null;
+        }
+        return user.getUserId();
+    }
+
+    @Override
+    public Long register(RegisterDto registerDto) throws DatabaseException {
+        String email = registerDto.getEmail();
+        String password = bCryptUtil.hashPassword(registerDto.getPassword().trim());
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword(password);
+        user.setStatus(UserStatus.NORMAL);
+        user.setCreateTime(LocalDateTime.now());
+        user.setUpdateTime(LocalDateTime.now());
+        if(!this.save(user)) {
+            throw new DatabaseException("用户信息保存失败");
+        }
+        return user.getUserId();
+    }
+
+    @Override
+    public User checkPassword(LoginDto loginDto) {
+        User user = findEnabledUser(loginDto.getEmail());
+        if(user == null) {
+            // 用户不存在
+            return null;
+        }
+        if(bCryptUtil.matches(loginDto.getPassword().trim(), user.getPassword())) {
+            return user;
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public UserInfoVo getUserInfo(Long userId) {
+        User user = userMapper.selectById(userId);
+        if(user == null) {
+            return null;
+        }
+        UserInfoVo userInfoVo = new UserInfoVo();
+        BeanUtils.copyProperties(user, userInfoVo);
+        userInfoVo.setStatus(user.getStatus().getCode());
+        return userInfoVo;
+    }
+}

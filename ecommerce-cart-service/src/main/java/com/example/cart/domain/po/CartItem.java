@@ -8,8 +8,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
 
 import com.example.cart.enums.OrderStatusEnum;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+//import io.swagger.annotations.ApiModel;
+//import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -26,36 +26,36 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("cart_item")
-@ApiModel(value="CartItem对象", description="购物车物品数据库")
+//@ApiModel(value="CartItem对象", description="购物车物品数据库")
 public class CartItem implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty(value = "购物车物品ID")
+//    @ApiModelProperty(value = "购物车物品ID")
     @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;
 
-    @ApiModelProperty(value = "商品ID")
+//    @ApiModelProperty(value = "商品ID")
     @TableField("product_id")
     private Long productId;
 
-    @ApiModelProperty(value = "商品数量")
+//    @ApiModelProperty(value = "商品数量")
     @TableField("quantity")
     private Integer quantity;
 
-    @ApiModelProperty(value = "状态（0待支付，1已支付，2已删除）")
+//    @ApiModelProperty(value = "状态（0待支付，1已支付，2已删除）")
     @TableField("status")
     private OrderStatusEnum status;
 
-    @ApiModelProperty(value = "创建时间")
+//    @ApiModelProperty(value = "创建时间")
     @TableField("create_time")
     private LocalDateTime createTime;
 
-    @ApiModelProperty(value = "更新时间")
+//    @ApiModelProperty(value = "更新时间")
     @TableField("update_time")
     private LocalDateTime updateTime;
 
-    @ApiModelProperty(value = "购物车ID")
+//    @ApiModelProperty(value = "购物车ID")
     @TableField("cart_id")
     private Long cartId;
 
