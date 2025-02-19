@@ -3,7 +3,9 @@ package com.example.gateway.filter;
 import com.example.auth.domain.UserClaims;
 import com.example.auth.util.JwtUtil;
 import com.example.auth.util.TokenRedisUtil;
+import com.example.common.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -25,6 +27,7 @@ import java.nio.charset.StandardCharsets;
  */
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class TokenAnalysisGlobalFilter implements GlobalFilter, Ordered {
 
     private final JwtUtil jwtUtil;
@@ -49,7 +52,7 @@ public class TokenAnalysisGlobalFilter implements GlobalFilter, Ordered {
             UserClaims userClaims = jwtUtil.verifyToken(token);
             // 检查当前Redis里的token与现在传递进来的是否一致
             if(!token.equals(tokenRedisUtil.getToken(userClaims.getUserId()))) {
-                throw new Exception("Token在Redis中失效");
+                throw new UnauthorizedException("Token在Redis中失效");
             }
 
             // 设置请求头
@@ -58,13 +61,21 @@ public class TokenAnalysisGlobalFilter implements GlobalFilter, Ordered {
                     .header("X-User-Power", userClaims.getUserPower().toString())
                     .build();
             return chain.filter(exchange.mutate().request(mutateRequest).build());
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (UnauthorizedException e) {
             ServerHttpResponse response = exchange.getResponse();
             response.setStatusCode(HttpStatus.UNAUTHORIZED);
             response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
             // 自定义响应体
             String responseBody = "{\"code\":401,\"msg\":\"用户的Token已失效\",\"data\":null}";
+            DataBuffer buffer = response.bufferFactory().wrap(responseBody.getBytes(StandardCharsets.UTF_8));
+            return response.writeWith(Mono.just(buffer));
+        } catch (Exception e) {
+            // 出现了未知的异常，记录日志
+            log.error(e.getMessage());
+            ServerHttpResponse response = exchange.getResponse();
+            response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+            response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+            String responseBody = "{\"code\":500,\"msg\":\""+e.getMessage()+"\",\"data\":null}";
             DataBuffer buffer = response.bufferFactory().wrap(responseBody.getBytes(StandardCharsets.UTF_8));
             return response.writeWith(Mono.just(buffer));
         }

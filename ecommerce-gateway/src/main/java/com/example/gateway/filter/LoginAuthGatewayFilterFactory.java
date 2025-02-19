@@ -1,5 +1,6 @@
 package com.example.gateway.filter;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.core.Ordered;
@@ -22,6 +23,7 @@ import java.util.Objects;
  * @author vlsmb
  */
 @Component
+@Slf4j
 public class LoginAuthGatewayFilterFactory extends AbstractGatewayFilterFactory<Object> implements Ordered {
     @Override
     public GatewayFilter apply(Object config) {
@@ -36,6 +38,15 @@ public class LoginAuthGatewayFilterFactory extends AbstractGatewayFilterFactory<
                 response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
                 // 自定义响应体
                 String responseBody = "{\"code\":401,\"msg\":\"用户未登录\",\"data\":null}";
+                DataBuffer buffer = response.bufferFactory().wrap(responseBody.getBytes(StandardCharsets.UTF_8));
+                return response.writeWith(Mono.just(buffer));
+            } catch (Exception e) {
+                // 出现了未知的异常，记录日志
+                log.error(e.getMessage());
+                ServerHttpResponse response = exchange.getResponse();
+                response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+                response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+                String responseBody = "{\"code\":500,\"msg\":\""+e.getMessage()+"\",\"data\":null}";
                 DataBuffer buffer = response.bufferFactory().wrap(responseBody.getBytes(StandardCharsets.UTF_8));
                 return response.writeWith(Mono.just(buffer));
             }

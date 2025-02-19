@@ -6,6 +6,7 @@ import com.example.common.exception.SystemException;
 import com.example.common.exception.UserException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -28,8 +29,17 @@ public class ExceptionAdvice {
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseResult<Object> validException(MethodArgumentNotValidException e) {
-        log.info("UserException: 用户输入了无效的参数");
         return ResponseResult.error(ResultCode.BAD_REQUEST, "参数无效");
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseResult<Object> httpMessageNotReadableException(HttpMessageNotReadableException e) {
+        return ResponseResult.error(ResultCode.BAD_REQUEST, "请求体无效");
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseResult<Object> httpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
+        return ResponseResult.error(ResultCode.BAD_REQUEST, "HTTP请求方法无效");
     }
 
     @ExceptionHandler(SystemException.class)
