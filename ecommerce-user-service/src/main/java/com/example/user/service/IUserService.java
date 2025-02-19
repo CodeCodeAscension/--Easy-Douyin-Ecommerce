@@ -7,7 +7,7 @@ import com.example.user.domain.dto.LoginDto;
 import com.example.user.domain.dto.RegisterDto;
 import com.example.user.domain.po.User;
 
-public interface UserService extends IService<User> {
+public interface IUserService extends IService<User> {
 
     /**
      * 根据用户邮箱去找是否存在可用的账号，并返回用户ID

@@ -2,7 +2,7 @@ package com.example.user.domain.po;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import com.example.user.enums.UserPower;
+import com.example.auth.enums.UserPower;
 import com.example.user.enums.UserStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

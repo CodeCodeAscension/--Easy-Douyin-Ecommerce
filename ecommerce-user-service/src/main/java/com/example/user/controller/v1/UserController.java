@@ -5,9 +5,10 @@ import com.example.common.domain.ResponseResult;
 import com.example.common.domain.ResultCode;
 import com.example.common.exception.UnauthorizedException;
 import com.example.common.util.UserContextUtil;
-import com.example.user.service.UserService;
+import com.example.user.service.IUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,12 +21,12 @@ import org.springframework.web.bind.annotation.RestController;
  * @author vlsmb
  */
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
 @Tag(name="用户信息接口",description = "用户信息接口")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final IUserService iUserService;
 
     @GetMapping
     @Operation(summary = "获取用户信息")
@@ -34,7 +35,7 @@ public class UserController {
         if (userId == null) {
             throw new UnauthorizedException("用户未登录");
         }
-        UserInfoVo userInfoVo = userService.getUserInfo(userId);
+        UserInfoVo userInfoVo = iUserService.getUserInfo(userId);
         if(userInfoVo == null) {
             return ResponseResult.error(ResultCode.BAD_REQUEST, "用户信息不存在");
         }

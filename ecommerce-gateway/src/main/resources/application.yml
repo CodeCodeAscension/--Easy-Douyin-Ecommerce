@@ -15,8 +15,14 @@ ecommerce:
     dashboard: @sentinel.dashboard@
   nacos:
     dashboard: @nacos.dashboard@
+  redis:
+    cluster-addr: @redis.cluster-addr@
+    expire-hour: 4l
 
+#网关设置X-User-Id和X-User-Power两个请求头供下游微服务使用
 spring:
+  main:
+    allow-bean-definition-overriding: true
   cloud:
     gateway:
       routes:
@@ -48,3 +54,6 @@ spring:
           uri: lb://user-service
           predicates:
             - Path=/api/v1/users/**,/api/v1/user/**
+          filters:
+            - LoginAuth
+            - AdminAuth

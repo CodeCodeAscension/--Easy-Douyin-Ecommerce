@@ -1,7 +1,7 @@
-package com.example.user.util;
+package com.example.auth.util;
 
 import com.example.common.exception.SystemException;
-import com.example.user.config.JwtConfig;
+import com.example.auth.config.JwtConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
  * @author vlsmb
  */
 @Component
-public class RedisUtil {
+public class TokenRedisUtil {
 
     @Autowired
     private StringRedisTemplate redisTemplate;

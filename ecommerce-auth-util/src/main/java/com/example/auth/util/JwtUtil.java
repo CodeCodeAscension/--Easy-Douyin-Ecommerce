@@ -1,11 +1,11 @@
-package com.example.user.util;
+package com.example.auth.util;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.example.auth.domain.UserClaims;
 import com.example.common.exception.UnauthorizedException;
-import com.example.user.config.JwtConfig;
-import com.example.user.domain.po.User;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.auth.config.JwtConfig;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -19,10 +19,10 @@ import java.util.Map;
  * @author vlsmb
  */
 @Component
+@AllArgsConstructor
 public class JwtUtil {
 
-    @Autowired
-    private JwtConfig jwtConfig;
+    private final JwtConfig jwtConfig;
 
     /**
      * 计算令牌过期时间
@@ -34,34 +34,29 @@ public class JwtUtil {
 
     /**
      * 生成JWT令牌
-     * @param user 用户对象
+     * @param userClaims 用户信息
      * @return JWT令牌字符串
      */
-    public String generateToken(User user) {
-        Map<String, Object> claims = new HashMap<>();
-        if(user == null || user.getUserId() == null || user.getPower() == null) {
-            throw new RuntimeException("给JWT传递的User对象缺少必要信息");
-        }
-        claims.put("userId", user.getUserId());
-        claims.put("userPower", user.getPower().getCode());
+    public String generateToken(UserClaims userClaims) {
         return JWT.create()
-                .withClaim("claims", claims)
+                .withClaim("claims", userClaims.toClaims())
                 .withExpiresAt(expireTime())
                 .sign(Algorithm.HMAC256(jwtConfig.getKey()));
     }
 
     /**
      * 获得JWT令牌信息
-     * @param token
-     * @return
+     * @param token JWT令牌
+     * @return UserClaims对象
      */
-    public Map<String, Object> verifyToken(String token) throws UnauthorizedException {
+    public UserClaims verifyToken(String token) throws UnauthorizedException {
         try {
-            return JWT.require(Algorithm.HMAC256(jwtConfig.getKey()))
+            Map<String, Object> claims= JWT.require(Algorithm.HMAC256(jwtConfig.getKey()))
                     .build()
                     .verify(token)
                     .getClaim("claims")
                     .asMap();
+            return new UserClaims(claims);
         } catch (Exception e) {
             throw new UnauthorizedException("jwt令牌无效或者已经过期");
         }

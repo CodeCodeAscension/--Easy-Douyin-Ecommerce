@@ -9,8 +9,9 @@ import com.example.user.domain.dto.RegisterDto;
 import com.example.user.domain.po.User;
 import com.example.user.enums.UserStatus;
 import com.example.user.mapper.UserMapper;
-import com.example.user.service.UserService;
-import com.example.user.util.BCryptUtil;
+import com.example.user.service.IUserService;
+import com.example.auth.util.BCryptUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,12 +25,11 @@ import java.time.LocalDateTime;
  * @author vlsmb
  */
 @Service
-public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
+@RequiredArgsConstructor
+public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
 
-    @Autowired
-    private UserMapper userMapper;
-    @Autowired
-    private BCryptUtil bCryptUtil;
+    private final UserMapper userMapper;
+    private final BCryptUtil bCryptUtil;
 
     /**
      * 寻找是否存在可用的用户对象
