@@ -4,6 +4,8 @@ import com.example.auth.domain.UserClaims;
 import com.example.common.domain.ResponseResult;
 import com.example.common.domain.ResultCode;
 import com.example.common.exception.BadRequestException;
+import com.example.common.exception.UnauthorizedException;
+import com.example.common.util.UserContextUtil;
 import com.example.user.config.UserServiceConfig;
 import com.example.user.domain.dto.LoginDto;
 import com.example.user.domain.dto.RegisterDto;
@@ -86,5 +88,16 @@ public class LoginController {
         // 保存到Redis里
         redisUtil.addToken(user.getUserId(), token);
         return ResponseResult.success(loginVo);
+    }
+
+    @PostMapping("/logout")
+    @Operation(summary = "用户登出")
+    public ResponseResult<Object> logout() {
+        Long userId = UserContextUtil.getUserId();
+        if (userId == null) {
+            throw new UnauthorizedException("用户未登录");
+        }
+        redisUtil.removeToken(userId);
+        return ResponseResult.success();
     }
 }

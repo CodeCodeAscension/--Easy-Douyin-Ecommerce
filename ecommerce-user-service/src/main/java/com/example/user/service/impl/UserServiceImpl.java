@@ -4,7 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.api.domain.vo.user.UserInfoVo;
 import com.example.common.exception.DatabaseException;
+import com.example.common.exception.NotFoundException;
+import com.example.common.exception.SystemException;
+import com.example.common.exception.UserException;
 import com.example.user.domain.dto.LoginDto;
+import com.example.user.domain.dto.LogoffDto;
 import com.example.user.domain.dto.RegisterDto;
 import com.example.user.domain.po.User;
 import com.example.user.enums.UserStatus;
@@ -92,5 +96,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         BeanUtils.copyProperties(user, userInfoVo);
         userInfoVo.setStatus(user.getStatus().getCode());
         return userInfoVo;
+    }
+
+    @Override
+    public void disableUser(Long userId, LogoffDto logoffDto) throws UserException, SystemException {
+        // 先判断是否存在
+        if(!userMapper.exists(new LambdaQueryWrapper<User>().eq(User::getUserId, userId))) {
+            throw new NotFoundException("要封禁或注销的用户ID不存在");
+        }
+        User user = new User();
+        user.setUserId(userId);
+        user.setStatus(logoffDto.getStatus());
+        user.setDisableReason(logoffDto.getReason());
+        user.setUpdateTime(LocalDateTime.now());
+        if(!this.updateById(user)) {
+            throw new DatabaseException("MybatisPlus更新数据库失败");
+        }
     }
 }
