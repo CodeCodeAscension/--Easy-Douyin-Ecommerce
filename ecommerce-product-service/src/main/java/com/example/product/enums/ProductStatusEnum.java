@@ -15,7 +15,7 @@ public enum ProductStatusEnum implements BaseExceptionInterface {
     PRODUCT_NOT_EXIST(ResultCode.NOT_FOUND, "该商品不存在"),
     PRODUCT_CATEGORY_NOT_EXIST(ResultCode.NOT_FOUND, "该商品的分类不存在"),
     PARAM_NOT_NULL(ResultCode.BAD_REQUEST, "参数不能为空"),
-    CATEGORY_PRODUCT_NOT_EXIST(ResultCode.NOT_FOUND, "该分类下的商品不存在")，
+    CATEGORY_PRODUCT_NOT_EXIST(ResultCode.NOT_FOUND, "该分类下的商品不存在"),
     ;
 
     // 异常码
