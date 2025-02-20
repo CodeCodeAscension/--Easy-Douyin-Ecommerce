@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("product")
-public class product implements Serializable {
+public class Product implements Serializable {
 
         private static final long serialVersionUID = 1L;
 
@@ -28,15 +28,20 @@ public class product implements Serializable {
 
         private Float price;
 
+        // 销量
         private Integer sold;
 
+        // 库存
         private Integer stoke;
 
+        // 乐观锁
         private Integer version;
 
+        // 商户名称
         private String merchantName;
 
-        private String status;
+        // 状态（0上架，1下架）
+        private Integer status;
 
         private LocalDateTime createTime;
 

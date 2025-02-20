@@ -15,26 +15,34 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("credit")
-public class transaction implements Serializable{
+public class Credit implements Serializable{
 
     private static final long serialVersionUID = 1L;
 
-    @TableId(value = "transaction_id", type = IdType.ASSIGN_UUID)
-    private String transId;
+    @TableId(value = "card_number", type = IdType.ASSIGN_UUID)
+    private String cardNumber;
+
+    // 卡验证值
+    private Integer cvv;
 
     private Long userId;
-    
-    private String orderId;
 
-    private String creditId;
+    // 余额
+    private Integer balance;
 
-    private Float amount;
+    // 乐观锁
+    private Integer version;
 
+    // 过期日期
+    private LocalDate expireDate;
+
+    // 状态（0正常，1禁用，2过期）
     private Integer status;
-
-    private String reason;
 
     private LocalDateTime createTime;
 
+    private LocalDateTime updateTime;
+
+    // 逻辑删除
     private Integer deleted;
 }

@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("product_category_relation")
-public class proCateRel implements Serializable {
+public class ProCateRel implements Serializable {
 
         private static final long serialVersionUID = 1L;
 

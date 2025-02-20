@@ -13,13 +13,14 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("category")
-public class category implements Serializable {
+public class Category implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;
 
+    // 分类名称
     private String categoryName;
 
     private LocalDateTime createTime;
