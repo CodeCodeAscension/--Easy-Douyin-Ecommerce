@@ -8,6 +8,7 @@ import com.example.common.exception.UserException;
 import com.example.user.domain.dto.LoginDto;
 import com.example.user.domain.dto.LogoffDto;
 import com.example.user.domain.dto.RegisterDto;
+import com.example.user.domain.dto.UserUpdateDto;
 import com.example.user.domain.po.User;
 
 public interface IUserService extends IService<User> {
@@ -51,4 +52,13 @@ public interface IUserService extends IService<User> {
      * @throws SystemException 系统异常
      */
     void disableUser(Long userId, LogoffDto logoffDto) throws UserException, SystemException;
+
+    /**
+     * 更新用户信息
+     * @param userId 用户ID
+     * @param userUpdateDto 更新信息
+     * @throws UserException 用户异常
+     * @throws SystemException 系统异常
+     */
+    void updateUserInfo(Long userId, UserUpdateDto userUpdateDto) throws UserException, SystemException;
 }

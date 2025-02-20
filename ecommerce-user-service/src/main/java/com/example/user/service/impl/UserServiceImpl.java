@@ -10,6 +10,7 @@ import com.example.common.exception.UserException;
 import com.example.user.domain.dto.LoginDto;
 import com.example.user.domain.dto.LogoffDto;
 import com.example.user.domain.dto.RegisterDto;
+import com.example.user.domain.dto.UserUpdateDto;
 import com.example.user.domain.po.User;
 import com.example.user.enums.UserStatus;
 import com.example.user.mapper.UserMapper;
@@ -109,6 +110,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         user.setStatus(logoffDto.getStatus());
         user.setDisableReason(logoffDto.getReason());
         user.setUpdateTime(LocalDateTime.now());
+        if(!this.updateById(user)) {
+            throw new DatabaseException("MybatisPlus更新数据库失败");
+        }
+    }
+
+    @Override
+    public void updateUserInfo(Long userId, UserUpdateDto userUpdateDto) throws UserException, SystemException {
+        // 先判断是否存在
+        if(!userMapper.exists(new LambdaQueryWrapper<User>().eq(User::getUserId, userId))) {
+            throw new NotFoundException("要封禁或注销的用户ID不存在");
+        }
+        User user = new User();
+        user.setUserId(userId);
+        user.setUpdateTime(LocalDateTime.now());
+        BeanUtils.copyProperties(userUpdateDto, user);
         if(!this.updateById(user)) {
             throw new DatabaseException("MybatisPlus更新数据库失败");
         }

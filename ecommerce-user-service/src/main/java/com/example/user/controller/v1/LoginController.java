@@ -94,9 +94,6 @@ public class LoginController {
     @Operation(summary = "用户登出")
     public ResponseResult<Object> logout() {
         Long userId = UserContextUtil.getUserId();
-        if (userId == null) {
-            throw new UnauthorizedException("用户未登录");
-        }
         redisUtil.removeToken(userId);
         return ResponseResult.success();
     }
