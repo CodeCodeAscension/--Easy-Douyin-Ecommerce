@@ -3,21 +3,17 @@ package com.example.gateway.filter;
 import com.example.auth.domain.UserClaims;
 import com.example.auth.util.JwtUtil;
 import com.example.auth.util.TokenRedisUtil;
+import com.example.common.exception.SystemException;
 import com.example.common.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
-import java.nio.charset.StandardCharsets;
 
 /**
  * <p>
@@ -62,22 +58,11 @@ public class TokenAnalysisGlobalFilter implements GlobalFilter, Ordered {
                     .build();
             return chain.filter(exchange.mutate().request(mutateRequest).build());
         } catch (UnauthorizedException e) {
-            ServerHttpResponse response = exchange.getResponse();
-            response.setStatusCode(HttpStatus.UNAUTHORIZED);
-            response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-            // 自定义响应体
-            String responseBody = "{\"code\":401,\"msg\":\"用户的Token已失效\",\"data\":null}";
-            DataBuffer buffer = response.bufferFactory().wrap(responseBody.getBytes(StandardCharsets.UTF_8));
-            return response.writeWith(Mono.just(buffer));
+            throw new UnauthorizedException(e.getMessage());
         } catch (Exception e) {
             // 出现了未知的异常，记录日志
             log.error(e.getMessage());
-            ServerHttpResponse response = exchange.getResponse();
-            response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-            response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-            String responseBody = "{\"code\":500,\"msg\":\""+e.getMessage()+"\",\"data\":null}";
-            DataBuffer buffer = response.bufferFactory().wrap(responseBody.getBytes(StandardCharsets.UTF_8));
-            return response.writeWith(Mono.just(buffer));
+            throw new SystemException(e);
         }
     }
 

@@ -16,6 +16,10 @@ public class ResponseResult<T> {
         this.data = data;
     }
 
+    public ResponseResult() {
+        
+    }
+
     /**
      * 操作成功,并返回数据
      * @param data 要返回的数据

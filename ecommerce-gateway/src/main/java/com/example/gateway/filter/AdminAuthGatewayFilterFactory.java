@@ -1,19 +1,16 @@
 package com.example.gateway.filter;
 
 import com.example.auth.enums.UserPower;
+import com.example.common.domain.ResultCode;
+import com.example.common.exception.SystemException;
+import com.example.common.exception.UserException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.core.Ordered;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Mono;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /**
@@ -37,22 +34,11 @@ public class AdminAuthGatewayFilterFactory extends AbstractGatewayFilterFactory<
                 }
             } catch (NumberFormatException e) {
                 // 不存在用户ID，说明没有登陆
-                ServerHttpResponse response = exchange.getResponse();
-                response.setStatusCode(HttpStatus.FORBIDDEN);
-                response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-                // 自定义响应体
-                String responseBody = "{\"code\":403,\"msg\":\"当前接口仅允许管理员访问\",\"data\":null}";
-                DataBuffer buffer = response.bufferFactory().wrap(responseBody.getBytes(StandardCharsets.UTF_8));
-                return response.writeWith(Mono.just(buffer));
+                throw new UserException(ResultCode.FORBIDDEN, "当前接口仅允许管理员访问");
             } catch (Exception e) {
                 // 出现了未知的异常，记录日志
                 log.error(e.getMessage());
-                ServerHttpResponse response = exchange.getResponse();
-                response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-                response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-                String responseBody = "{\"code\":500,\"msg\":\""+e.getMessage()+"\",\"data\":null}";
-                DataBuffer buffer = response.bufferFactory().wrap(responseBody.getBytes(StandardCharsets.UTF_8));
-                return response.writeWith(Mono.just(buffer));
+                throw new SystemException(e);
             }
             return chain.filter(exchange);
         };

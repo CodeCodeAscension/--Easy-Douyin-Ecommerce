@@ -51,6 +51,6 @@ public class ExceptionAdvice {
     @ExceptionHandler(Exception.class)
     public ResponseResult<Object> exception(Exception e) {
         log.error("UnknownException: "+e.getMessage(), e);
-        return ResponseResult.error(ResultCode.SERVER_ERROR, "未知的异常");
+        return ResponseResult.error(ResultCode.SERVER_ERROR, e.getMessage());
     }
 }
