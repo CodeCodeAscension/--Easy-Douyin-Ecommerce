@@ -20,6 +20,7 @@
         <module>ecommerce-payment-service</module>
         <module>ecommerce-ai-service</module>
         <module>ecommerce-feign-api</module>
+        <module>ecommerce-auth-util</module>
     </modules>
 
 <!--    SpringBoot 3.3.8-->

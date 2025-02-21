@@ -13,4 +13,6 @@ spring:
           - dataId: log-config.yaml
           - dataId: knife4j-config.yaml
           - dataId: feign-config.yaml
+          - dataId: jwt-config.yaml
+          - dataId: redis-config.yaml
         group: DEFAULT_GROUP

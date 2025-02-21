@@ -15,8 +15,14 @@ ecommerce:
     dashboard: @sentinel.dashboard@
   nacos:
     dashboard: @nacos.dashboard@
+  redis:
+    cluster-addr: @redis.cluster-addr@
+    expire-hour: 4l
 
+#网关设置X-User-Id和X-User-Power两个请求头供下游微服务使用
 spring:
+  main:
+    allow-bean-definition-overriding: true
   cloud:
     gateway:
       routes:
@@ -24,27 +30,58 @@ spring:
           uri: lb://ai-service
           predicates:
             - Path=/api/v1/ai/**,/api/v1/ais/**
+          filters:
+            - LoginAuth
+
         - id: cart
           uri: lb://cart-service
           predicates:
             - Path=/api/v1/carts/**,/api/v1/cart/**
+          filters:
+            - LoginAuth
+
         - id: checkout
           uri: lb://checkout-service
           predicates:
             - Path=/api/v1/checkouts/**,/api/v1/checkout/**
+          filters:
+            - LoginAuth
+
         - id: order
           uri: lb://order-service
           predicates:
             - Path=/api/v1/orders/**,/api/v1/order/**
+          filters:
+            - LoginAuth
+
         - id: payment
           uri: lb://payment-service
           predicates:
             - Path=/api/v1/payments/**,/api/v1/payment/**
-        - id: product
+          filters:
+            - LoginAuth
+
+        - id: product-auth
           uri: lb://product-service
           predicates:
-            - Path=/api/v1/products/**,/api/v1/product/**
-        - id: user
+            - Path=/api/v1/products/**
+            - Method=POST,PUT,DELETE
+          filters:
+            - LoginAuth
+            - AdminAuth
+        - id: product-common
+          uri: lb://product-service
+          predicates:
+            - Path=/api/v1/products/**
+            - Method=GET
+
+        - id: user-auth
           uri: lb://user-service
           predicates:
-            - Path=/api/v1/users/**,/api/v1/user/**
+            - Path=/api/v1/users/**,/api/v1/user/logout
+          filters:
+            - LoginAuth
+        - id: user-common
+          uri: lb://user-service
+          predicates:
+            - Path=/api/v1/user/**

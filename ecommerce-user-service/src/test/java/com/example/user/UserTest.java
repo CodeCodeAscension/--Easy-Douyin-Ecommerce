@@ -1,13 +1,15 @@
 package com.example.user;
 
-import com.example.user.config.JwtConfig;
+import com.example.auth.domain.UserClaims;
 import com.example.user.config.UserServiceConfig;
 import com.example.user.domain.po.User;
-import com.example.user.enums.UserPower;
+import com.example.auth.enums.UserPower;
 import com.example.user.enums.UserStatus;
 import com.example.user.mapper.UserMapper;
-import com.example.user.util.BCryptUtil;
-import com.example.user.util.JwtUtil;
+import com.example.auth.util.BCryptUtil;
+import com.example.auth.util.JwtUtil;
+import com.example.auth.util.TokenRedisUtil;
+import com.example.auth.config.JwtConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -67,10 +69,10 @@ public class UserTest {
 
     @Test
     public void testJwt() {
-        User user = new User();
-        user.setUserId(123456L);
-        user.setPower(UserPower.ADMIN);
-        String token = jwtUtil.generateToken(user);
+        UserClaims userClaims = new UserClaims();
+        userClaims.setUserId(123456L);
+        userClaims.setUserPower(1);
+        String token = jwtUtil.generateAccessToken(userClaims);
         System.out.println(token);
     }
 
@@ -79,5 +81,15 @@ public class UserTest {
 //        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGFpbXMiOnsidXNlcklkIjoxMjM0NTYsInVzZXJQb3dlciI6MX0sImV4cCI6MTczOTczMjQ5NX0.rOm0d8_2m-DOmcP52Q-fDVemNy_4pcSf0TwoeYFTUFc";
         String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGFpbXMiOnsidXNlcklkIjoxODkxMTc2NTM5MjcyNTIzNzc4LCJ1c2VyUG93ZXIiOjB9LCJleHAiOjE3Mzk3MzQ3ODl9.ouRPN4JQIE2AQ5UyXb16GxljWh7yinJK-xKAcLi_UPM";
         System.out.println(jwtUtil.verifyToken(token));
+    }
+
+    @Autowired
+    private TokenRedisUtil redisUtil;
+
+    @Test
+    public void testRedis() {
+//        redisUtil.addToken(123L,"vlsmb");
+        System.out.println(redisUtil.getAccessToken(123L));
+//        System.out.println(redisUtil.getValidMinutes(123L));
     }
 }

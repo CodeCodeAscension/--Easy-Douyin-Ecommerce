@@ -1,4 +1,4 @@
-package com.example.user.util;
+package com.example.auth.util;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
