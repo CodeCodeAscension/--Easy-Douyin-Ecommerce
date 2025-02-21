@@ -24,50 +24,61 @@ public class TokenRedisUtil {
     private JwtConfig jwtConfig;
 
     /**
-     * 用户ID转为redisKey名
+     * 用户ID转为redis access-token键名
      * @param userId 用户ID
      * @return redisKey名
      */
-    private String userIdToKey(Long userId) {
-        return "token:" + userId;
+    private String userIdToAccessKey(Long userId) {
+        return "access-token:" + userId;
     }
 
     /**
-     * 向redis中保存用户当前登陆Token
+     * 用户ID转为redis refresh-token键名
      * @param userId 用户ID
-     * @param token token
+     * @return redisKey名
      */
-    public void addToken(Long userId, String token) {
-        ValueOperations<String, String> operations = redisTemplate.opsForValue();
-        operations.set(userIdToKey(userId), token, jwtConfig.getExpireHour(), TimeUnit.HOURS);
+    private String userIdToRefreshKey(Long userId) {
+        return "refresh-token:" + userId;
     }
 
     /**
-     * 删除某用户的Token
+     * 向redis中保存用户当前登陆AccessToken
+     * @param userId 用户ID
+     * @param accessToken 权限Token
+     * @param refreshToken 刷新token
+     */
+    public void addToken(Long userId, String accessToken, String refreshToken) {
+        ValueOperations<String, String> operations = redisTemplate.opsForValue();
+        operations.set(userIdToAccessKey(userId), accessToken, jwtConfig.getExpireHour(), TimeUnit.HOURS);
+        operations.set(userIdToRefreshKey(userId), refreshToken, jwtConfig.getRefreshExpireDay(), TimeUnit.DAYS);
+    }
+
+    /**
+     * 删除某用户的AccessToken和RefreshToken
      * @param userId 用户ID
      */
     public void removeToken(Long userId) {
-        if(Boolean.FALSE.equals(redisTemplate.delete(userIdToKey(userId)))) {
-            throw new SystemException("Redis删除异常");
-        }
+        redisTemplate.delete(userIdToAccessKey(userId));
+        redisTemplate.delete(userIdToRefreshKey(userId));
     }
 
     /**
-     * 获得某用户Token
+     * 获得某用户AccessToken
      * @param userId 用户ID
-     * @return token
+     * @return accessToken
      */
-    public String getToken(Long userId) {
+    public String getAccessToken(Long userId) {
         ValueOperations<String, String> operations = redisTemplate.opsForValue();
-        return operations.get(userIdToKey(userId));
+        return operations.get(userIdToAccessKey(userId));
     }
 
     /**
-     * 获得当前用户Token剩余有效期
+     * 获得某用户RefreshToken
      * @param userId 用户ID
-     * @return 剩余有效期（分钟）
+     * @return refreshToken
      */
-    public Long getValidMinutes(Long userId) {
-        return redisTemplate.getExpire(userIdToKey(userId), TimeUnit.MINUTES);
+    public String getRefreshToken(Long userId) {
+        ValueOperations<String, String> operations = redisTemplate.opsForValue();
+        return operations.get(userIdToRefreshKey(userId));
     }
 }

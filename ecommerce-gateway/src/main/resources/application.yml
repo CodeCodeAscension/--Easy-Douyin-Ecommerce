@@ -84,4 +84,4 @@ spring:
         - id: user-common
           uri: lb://user-service
           predicates:
-            - Path=/api/v1/user/login,/api/v1/user/register
+            - Path=/api/v1/user/**

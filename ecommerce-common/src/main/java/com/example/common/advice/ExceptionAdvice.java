@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -30,6 +31,11 @@ public class ExceptionAdvice {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseResult<Object> validException(MethodArgumentNotValidException e) {
         return ResponseResult.error(ResultCode.BAD_REQUEST, "参数无效");
+    }
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseResult<Object> missingRequestHeaderException(MissingRequestHeaderException e) {
+        return ResponseResult.error(ResultCode.BAD_REQUEST, "缺少必要的请求头");
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)

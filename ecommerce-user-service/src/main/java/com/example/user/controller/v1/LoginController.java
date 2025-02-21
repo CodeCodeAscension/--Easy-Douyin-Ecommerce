@@ -18,12 +18,8 @@ import com.example.auth.util.TokenRedisUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -68,6 +64,28 @@ public class LoginController {
         return ResponseResult.success(registerVo);
     }
 
+    /**
+     * 生成并记录AccessToken和RefreshToken，供登陆和刷新接口使用
+     * @param userClaims 用户claims对象
+     * @return ResponseResult对象
+     */
+    private ResponseResult<LoginVo> generateTokens(UserClaims userClaims) {
+        // 记录返回结果
+        LoginVo loginVo = new LoginVo();
+        loginVo.setUserId(userClaims.getUserId());
+        // 生成AccessToken和RefreshToken
+        userClaims.setIsRefreshToken(false);
+        String accessToken = jwtUtil.generateAccessToken(userClaims);
+        loginVo.setAccessToken(accessToken);
+        userClaims.setIsRefreshToken(true);
+        String refreshToken = jwtUtil.generateRefreshToken(userClaims);
+        loginVo.setRefreshToken(refreshToken);
+
+        // 保存到Redis里
+        redisUtil.addToken(userClaims.getUserId(), accessToken, refreshToken);
+        return ResponseResult.success(loginVo);
+    }
+
     @PostMapping("/login")
     @Operation(summary = "用户登陆")
     public ResponseResult<LoginVo> login(@Validated @RequestBody LoginDto loginDto) {
@@ -75,19 +93,10 @@ public class LoginController {
         if (user == null) {
             return ResponseResult.error(ResultCode.UNAUTHORIZED, "用户不存在或者密码错误");
         }
-
-        // 记录返回结果
-        LoginVo loginVo = new LoginVo();
-        loginVo.setUserId(user.getUserId());
-        // 生成JWT令牌
         UserClaims userClaims = new UserClaims();
         userClaims.setUserId(user.getUserId());
         userClaims.setUserPower(user.getPower().getCode());
-        String token = jwtUtil.generateToken(userClaims);
-        loginVo.setToken(token);
-        // 保存到Redis里
-        redisUtil.addToken(user.getUserId(), token);
-        return ResponseResult.success(loginVo);
+        return generateTokens(userClaims);
     }
 
     @PostMapping("/logout")
@@ -96,5 +105,15 @@ public class LoginController {
         Long userId = UserContextUtil.getUserId();
         redisUtil.removeToken(userId);
         return ResponseResult.success();
+    }
+
+    @PutMapping("/refresh")
+    @Operation(summary = "使用RefreshToken刷新AccessToken")
+    public ResponseResult<LoginVo> refresh(@RequestHeader("Refresh-Token") String refreshToken) {
+        UserClaims userClaims = jwtUtil.verifyToken(refreshToken);
+        if(!Boolean.TRUE.equals(userClaims.getIsRefreshToken())) {
+            throw new UnauthorizedException("请使用RefreshToken访问本接口");
+        }
+        return generateTokens(userClaims);
     }
 }

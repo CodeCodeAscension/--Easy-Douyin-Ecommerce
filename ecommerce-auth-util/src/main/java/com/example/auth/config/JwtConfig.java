@@ -16,4 +16,5 @@ import org.springframework.stereotype.Component;
 public class JwtConfig {
     private String key;
     private Integer expireHour;
+    private Integer refreshExpireDay;
 }

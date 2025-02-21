@@ -72,7 +72,7 @@ public class UserTest {
         UserClaims userClaims = new UserClaims();
         userClaims.setUserId(123456L);
         userClaims.setUserPower(1);
-        String token = jwtUtil.generateToken(userClaims);
+        String token = jwtUtil.generateAccessToken(userClaims);
         System.out.println(token);
     }
 
@@ -89,7 +89,7 @@ public class UserTest {
     @Test
     public void testRedis() {
 //        redisUtil.addToken(123L,"vlsmb");
-        System.out.println(redisUtil.getToken(123L));
-        System.out.println(redisUtil.getValidMinutes(123L));
+        System.out.println(redisUtil.getAccessToken(123L));
+//        System.out.println(redisUtil.getValidMinutes(123L));
     }
 }

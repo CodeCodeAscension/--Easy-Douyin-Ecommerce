@@ -47,8 +47,12 @@ public class TokenAnalysisGlobalFilter implements GlobalFilter, Ordered {
         try {
             UserClaims userClaims = jwtUtil.verifyToken(token);
             // 检查当前Redis里的token与现在传递进来的是否一致
-            if(!token.equals(tokenRedisUtil.getToken(userClaims.getUserId()))) {
+            if(!token.equals(tokenRedisUtil.getAccessToken(userClaims.getUserId()))) {
                 throw new UnauthorizedException("Token已失效");
+            }
+            // 不是RefreshToken
+            if(userClaims.getIsRefreshToken()) {
+                throw new UnauthorizedException("请使用AccessToken访问本页面");
             }
 
             // 设置请求头

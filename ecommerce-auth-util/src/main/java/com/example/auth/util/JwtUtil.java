@@ -9,7 +9,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -28,26 +27,46 @@ public class JwtUtil {
      * 计算令牌过期时间
      * @return Date对象
      */
-    private Date expireTime() {
-        return new Date(System.currentTimeMillis() + 1000L * 60 * 60 * jwtConfig.getExpireHour());
+    private Date expireTime(int hours) {
+        return new Date(System.currentTimeMillis() + 1000L * 60 * 60 * hours);
     }
 
     /**
      * 生成JWT令牌
      * @param userClaims 用户信息
+     * @param hours 过期时间
      * @return JWT令牌字符串
      */
-    public String generateToken(UserClaims userClaims) {
+    private String generateToken(UserClaims userClaims, int hours) {
         return JWT.create()
                 .withClaim("claims", userClaims.toClaims())
-                .withExpiresAt(expireTime())
+                .withExpiresAt(expireTime(hours))
                 .sign(Algorithm.HMAC256(jwtConfig.getKey()));
+    }
+
+    /**
+     * 生成用户AccessToken
+     * @param userClaims 用户信息
+     * @return AccessToken
+     */
+    public String generateAccessToken(UserClaims userClaims) {
+        return generateToken(userClaims, jwtConfig.getExpireHour());
+    }
+
+    /**
+     * 生成用户RefreshToken
+     * @param userClaims 用户信息
+     * @return RefreshToken
+     */
+    public String generateRefreshToken(UserClaims userClaims) {
+        return generateToken(userClaims, jwtConfig.getRefreshExpireDay() * 24);
     }
 
     /**
      * 获得JWT令牌信息
      * @param token JWT令牌
      * @return UserClaims对象
+     * @throws UnauthorizedException JWT令牌失效异常
      */
     public UserClaims verifyToken(String token) throws UnauthorizedException {
         try {
@@ -58,7 +77,7 @@ public class JwtUtil {
                     .asMap();
             return new UserClaims(claims);
         } catch (Exception e) {
-            throw new UnauthorizedException("jwt令牌无效或者已经过期");
+            throw new UnauthorizedException("token无效或者已经过期");
         }
     }
 }

@@ -11,6 +11,7 @@ import java.util.Map;
 public class UserClaims {
     private Long userId;
     private Integer userPower;
+    private Boolean isRefreshToken;
 
     /**
      * 将数据从HashMap转为UserClaims对象
@@ -19,6 +20,7 @@ public class UserClaims {
     public UserClaims(Map<String, Object> claims) {
         this.userId = (Long) claims.get("userId");
         this.userPower = (Integer) claims.get("userPower");
+        this.isRefreshToken = (Boolean) claims.get("isRefreshToken");
     }
 
     /**
@@ -29,6 +31,7 @@ public class UserClaims {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
         claims.put("userPower", userPower);
+        claims.put("isRefreshToken", isRefreshToken);
         return claims;
     }
 }
