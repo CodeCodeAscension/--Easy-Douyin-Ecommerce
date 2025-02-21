@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.common.domain.ResponseResult;
 import com.example.product.domain.dto.ListProductsDto;
+import com.example.product.domain.dto.SearchProductsDto;
 import com.example.product.domain.po.Product;
 import com.example.product.domain.vo.ProductInfoVo;
 
@@ -23,4 +24,9 @@ public interface IProductService extends IService<Product> {
      * 指定某种类别查询商品信息
      */
     ResponseResult<IPage<ProductInfoVo>> listProducts(ListProductsDto listProductsDto);
+
+    /**
+     * 指定条件查询商品信息
+     */
+    ResponseResult<IPage<ProductInfoVo>> searchProducts(SearchProductsDto searchProductsDto);
 }

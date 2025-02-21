@@ -1,15 +1,15 @@
 package com.example.product.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.example.common.domain.ResponseResult;
+import com.example.product.domain.dto.ListProductsDto;
+import com.example.product.domain.dto.SearchProductsDto;
 import com.example.product.domain.vo.ProductInfoVo;
 import com.example.product.service.IProductService;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -30,5 +30,25 @@ public class ProductController {
     public ResponseResult<ProductInfoVo> getProductById(@PathVariable Long productId) {
         log.info("根据商品id获取商品信息，productId: {}", productId);
         return iProductService.getProductById(productId);
+    }
+
+    /**
+     * 指定某种类别查询商品信息
+     *
+     * @param listProductsDto
+     */
+    @GetMapping
+    public ResponseResult<IPage<ProductInfoVo>> listProducts(@RequestBody ListProductsDto listProductsDto) {
+        return iProductService.listProducts(listProductsDto);
+    }
+
+    /**
+     * 指定条件查询商品信息
+     *
+     * @param searchProductsDto
+     */
+    @GetMapping("/search")
+    public ResponseResult<IPage<ProductInfoVo>> searchProducts(@RequestBody SearchProductsDto searchProductsDto) {
+        return iProductService.searchProducts(searchProductsDto);
     }
 }
