@@ -2,6 +2,8 @@ package com.example.api.client.fallback;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.example.api.client.ProductClient;
+import com.example.api.domain.dto.product.AddProductDto;
+import com.example.api.domain.dto.product.DecProductDto;
 import com.example.api.domain.dto.product.ListProductsDto;
 import com.example.api.domain.dto.product.SearchProductsDto;
 import com.example.api.domain.vo.product.ProductInfoVo;
@@ -31,6 +33,18 @@ public class ProductClientFallBack implements FallbackFactory<ProductClient> {
             @Override
             public ResponseResult<IPage<ProductInfoVo>> seachProductInfo(SearchProductsDto searchProductsDto) {
                 log.error("product-service-exception:seachProductInfo, "+cause.getMessage());
+                return ResponseResult.errorFeign(cause);
+            }
+
+            @Override
+            public ResponseResult<Object> addProductStock(AddProductDto addProductDto) {
+                log.error("product-service-exception:addProductStock, "+cause.getMessage());
+                return ResponseResult.errorFeign(cause);
+            }
+
+            @Override
+            public ResponseResult<Object> decProductStock(DecProductDto decProductDto) {
+                log.error("product-service-exception:decProductStock, "+cause.getMessage());
                 return ResponseResult.errorFeign(cause);
             }
         };
