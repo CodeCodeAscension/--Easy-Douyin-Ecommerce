@@ -20,6 +20,7 @@
         <module>ecommerce-payment-service</module>
         <module>ecommerce-ai-service</module>
         <module>ecommerce-feign-api</module>
+        <module>ecommerce-auth-util</module>
     </modules>
 
 <!--    SpringBoot 3.3.8-->
@@ -53,14 +54,14 @@
             </activation>
             <properties>
                 <env>dev1</env>
-                <database.host>localhost</database.host>
+                <database.host>vlsmb-kotori.local</database.host>
                 <database.port>3306</database.port>
                 <database.user>root</database.user>
-                <database.pwd>2781307050.wl</database.pwd>
-                <sentinel.dashboard>localhost:8090</sentinel.dashboard>
-                <nacos.dashboard>localhost:8848</nacos.dashboard>
-                <redis.cluster-addr>localhost:7001,localhost:7002,localhost:7003,localhost:7004,localhost:7005,localhost:7006</redis.cluster-addr>
-                <rabbitmq.host>localhost</rabbitmq.host>
+                <database.pwd>root</database.pwd>
+                <sentinel.dashboard>vlsmb-kotori.local:8090</sentinel.dashboard>
+                <nacos.dashboard>vlsmb-kotori.local:8848</nacos.dashboard>
+                <redis.cluster-addr>vlsmb-kotori.local:7001,vlsmb-kotori.local:7002,vlsmb-kotori.local:7003,vlsmb-kotori.local:7004,vlsmb-kotori.local:7005,vlsmb-kotori.local:7006</redis.cluster-addr>
+                <rabbitmq.host>vlsmb-kotori.local</rabbitmq.host>
                 <rabbitmq.port>5672</rabbitmq.port>
                 <rabbitmq.user>guest</rabbitmq.user>
                 <rabbitmq.pwd>guest</rabbitmq.pwd>

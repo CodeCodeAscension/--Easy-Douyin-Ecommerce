@@ -3,10 +3,10 @@ package com.example.common.cache;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.cache.Cache;
 import org.springframework.data.redis.connection.RedisServerCommands;
-import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -46,7 +46,13 @@ public class MybatisRedisCache implements Cache {
 
     @Override
     public void clear() {
-        Objects.requireNonNull(redisTemplate.getConnectionFactory()).getConnection().flushDb();
+        // 只删除当前Mapper的缓存数据
+        String prefix = generateKey("");
+        System.out.println(prefix);
+        Set<String> keys = redisTemplate.keys(prefix + "*");
+        if (!keys.isEmpty()) {
+            redisTemplate.delete(keys);
+        }
     }
 
     @Override
@@ -55,6 +61,6 @@ public class MybatisRedisCache implements Cache {
     }
 
     private String generateKey(Object key) {
-        return String.format("mybatis:cache:%s:%s", id, key);
+        return String.format("ecommerce:mybatis:cache:%s:%s", id, key);
     }
 }

@@ -1,12 +1,9 @@
-package com.example.user.enums;
+package com.example.auth.enums;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
 import com.example.common.exception.BadRequestException;
-import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
-import java.io.IOException;
 
 @AllArgsConstructor
 @Getter

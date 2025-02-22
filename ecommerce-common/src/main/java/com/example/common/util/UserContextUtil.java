@@ -1,5 +1,7 @@
 package com.example.common.util;
 
+import com.example.common.exception.UnauthorizedException;
+
 public class UserContextUtil {
     private static final ThreadLocal<Long> threadLocal = new ThreadLocal<>();
 
@@ -13,10 +15,15 @@ public class UserContextUtil {
 
     /**
      * 获取当前用户UserId
+     * @throws UnauthorizedException 未登录异常
      * @return 用户ID
      */
-    public static Long getUserId() {
-        return threadLocal.get();
+    public static Long getUserId() throws UnauthorizedException {
+        Long userId = threadLocal.get();
+        if (userId == null) {
+            throw new UnauthorizedException("用户未登录");
+        }
+        return userId;
     }
 
     /**

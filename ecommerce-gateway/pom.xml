@@ -45,11 +45,11 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-bootstrap</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.example</groupId>-->
-<!--            <artifactId>ecommerce-common</artifactId>-->
-<!--            <version>${ecommerce.version}</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>ecommerce-auth-util</artifactId>
+            <version>${ecommerce.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
