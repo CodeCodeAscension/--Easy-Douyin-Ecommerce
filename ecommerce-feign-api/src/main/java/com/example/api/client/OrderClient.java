@@ -1,12 +1,10 @@
 package com.example.api.client;
 
 import com.example.api.client.fallback.OrderClientFallBack;
-import com.example.api.domain.dto.order.CancelOrderDto;
-import com.example.api.domain.dto.order.MarkOrderPaidDto;
-import com.example.api.domain.dto.order.PlaceOrderDto;
-import com.example.api.domain.dto.order.UpdateOrderDto;
+import com.example.api.domain.dto.order.*;
 import com.example.api.domain.vo.order.OrderInfoVo;
 import com.example.api.domain.vo.order.PlaceOrderVo;
+import com.example.api.enums.OrderStatus;
 import com.example.common.domain.ResponseResult;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
@@ -38,4 +36,7 @@ public interface OrderClient {
     // 订单标记为已支付
     @PostMapping("/api/v1/orders/paid")
     ResponseResult<Object> markOrderPaid(@RequestBody MarkOrderPaidDto markOrderPaidDto);
+
+    @GetMapping("/api/v1/orders/search")
+    ResponseResult<List<OrderInfoVo>> searchOrders(@RequestBody SearchOrderDto searchOrderDto);
 }
