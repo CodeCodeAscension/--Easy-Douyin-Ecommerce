@@ -75,5 +75,9 @@
             <version>10.1.34</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.amqp</groupId>
+            <artifactId>spring-rabbit</artifactId>
+        </dependency>
     </dependencies>
 </project>
