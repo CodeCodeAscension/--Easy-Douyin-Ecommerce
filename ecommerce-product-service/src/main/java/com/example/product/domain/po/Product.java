@@ -3,6 +3,7 @@ package com.example.product.domain.po;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.Version;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -35,6 +36,7 @@ public class Product implements Serializable {
         private Integer stoke;
 
         // 乐观锁
+        @Version
         private Integer version;
 
         // 商户名称

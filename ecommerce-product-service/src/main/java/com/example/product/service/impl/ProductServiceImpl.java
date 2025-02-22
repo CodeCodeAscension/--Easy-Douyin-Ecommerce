@@ -6,7 +6,10 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.common.domain.ResponseResult;
+import com.example.common.util.UserContextUtil;
 import com.example.product.convert.ProductInfoVoConvert;
+import com.example.product.domain.dto.AddProductDto;
+import com.example.product.domain.dto.DecProductDto;
 import com.example.product.domain.dto.ListProductsDto;
 import com.example.product.domain.dto.SearchProductsDto;
 import com.example.product.domain.po.Category;
@@ -248,6 +251,79 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
         IPage<ProductInfoVo> productInfoVoPage = productPage.convert(productInfoVoConvert::convertToProductInfoVo);
 
         return ResponseResult.success(productInfoVoPage);
+    }
+
+    /**
+     * 增加库存
+     *
+     * @param addProductDto
+     */
+    @Override
+    public ResponseResult<Object> addProductStock(AddProductDto addProductDto) {
+        Long userId = UserContextUtil.getUserId();
+        if (userId == null) {
+            log.error("用户未登录");
+            return ResponseResult.error(ProductStatusEnum.USER_NOT_LOGIN.getErrorCode(), ProductStatusEnum.USER_NOT_LOGIN.getErrorMessage());
+        }
+
+        // 根据商品ID查询商品信息
+        Long productId = addProductDto.getProductId();
+        Product product = productMapper.selectById(productId);
+
+        if (product == null) {
+            log.error("商品不存在，productId: {}", productId);
+            return ResponseResult.error(ProductStatusEnum.PRODUCT_NOT_EXIST.getErrorCode(), ProductStatusEnum.PRODUCT_NOT_EXIST.getErrorMessage());
+        }
+
+        // 增加库存
+        Integer addStock = addProductDto.getAddStock();
+        product.setStoke(product.getStoke() + addStock);
+        int update = productMapper.updateById(product);
+        if (update == 0) {
+            log.error("增加库存失败，productId: {}", productId);
+            return ResponseResult.error(ProductStatusEnum.PRODUCT_STOCK_UPDATE_FAIL.getErrorCode(), ProductStatusEnum.PRODUCT_STOCK_UPDATE_FAIL.getErrorMessage());
+        }
+
+        return ResponseResult.success();
+    }
+
+    /**
+     * 减少库存
+     *
+     * @param decProductDto
+     */
+    @Override
+    public ResponseResult<Object> decProductStock(DecProductDto decProductDto) {
+        Long userId = UserContextUtil.getUserId();
+        if (userId == null) {
+            log.error("用户未登录");
+            return ResponseResult.error(ProductStatusEnum.USER_NOT_LOGIN.getErrorCode(), ProductStatusEnum.USER_NOT_LOGIN.getErrorMessage());
+        }
+
+        // 根据商品ID查询商品信息
+        Long productId = decProductDto.getProductId();
+        Product product = productMapper.selectById(productId);
+
+        if (product == null) {
+            log.error("商品不存在，productId: {}", productId);
+            return ResponseResult.error(ProductStatusEnum.PRODUCT_NOT_EXIST.getErrorCode(), ProductStatusEnum.PRODUCT_NOT_EXIST.getErrorMessage());
+        }
+
+        // 减少库存
+        Integer decStock = decProductDto.getDecStock();
+        if (product.getStoke() < decStock) {
+            log.error("库存不足，productId: {}", productId);
+            return ResponseResult.error(ProductStatusEnum.PRODUCT_STOCK_NOT_ENOUGH.getErrorCode(), ProductStatusEnum.PRODUCT_STOCK_NOT_ENOUGH.getErrorMessage());
+        }
+
+        product.setStoke(product.getStoke() - decStock);
+        int update = productMapper.updateById(product);
+        if (update == 0) {
+            log.error("减少库存失败，productId: {}", productId);
+            return ResponseResult.error(ProductStatusEnum.PRODUCT_STOCK_UPDATE_FAIL.getErrorCode(), ProductStatusEnum.PRODUCT_STOCK_UPDATE_FAIL.getErrorMessage());
+        }
+
+        return ResponseResult.success();
     }
 
 

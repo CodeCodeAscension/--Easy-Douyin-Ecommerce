@@ -2,6 +2,8 @@ package com.example.product.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.example.common.domain.ResponseResult;
+import com.example.product.domain.dto.AddProductDto;
+import com.example.product.domain.dto.DecProductDto;
 import com.example.product.domain.dto.ListProductsDto;
 import com.example.product.domain.dto.SearchProductsDto;
 import com.example.product.domain.vo.ProductInfoVo;
@@ -14,8 +16,8 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/products")
-//@RequestMapping("/products")
+//@RequestMapping("/api/v1/products")
+@RequestMapping("/products")
 public class ProductController {
 
     @Resource
@@ -50,5 +52,25 @@ public class ProductController {
     @GetMapping("/search")
     public ResponseResult<IPage<ProductInfoVo>> searchProducts(@RequestBody SearchProductsDto searchProductsDto) {
         return iProductService.seachProductInfo(searchProductsDto);
+    }
+
+    /**
+     * 增加库存
+     *
+     * @param addProductDto
+     */
+    @PutMapping("/add")
+    public ResponseResult<Object> addProductStock(@RequestBody AddProductDto addProductDto) {
+        return iProductService.addProductStock(addProductDto);
+    }
+
+    /**
+     * 减少库存
+     *
+     * @param decProductDto
+     */
+    @PutMapping("/dec")
+    public ResponseResult<Object> decProductStock(@RequestBody DecProductDto decProductDto) {
+        return iProductService.decProductStock(decProductDto);
     }
 }

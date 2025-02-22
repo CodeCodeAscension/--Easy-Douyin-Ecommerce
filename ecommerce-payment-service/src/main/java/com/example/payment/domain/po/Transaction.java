@@ -25,6 +25,8 @@ public class Transaction implements Serializable{
     @TableId(value = "transaction_id", type = IdType.ASSIGN_UUID)
     private String transId;
 
+    private String preTransId;
+
     private Long userId;
 
     private String orderId;
@@ -42,6 +44,8 @@ public class Transaction implements Serializable{
     private String reason;
 
     private LocalDateTime createTime;
+
+    private LocalDateTime updateTime;
 
     // 逻辑删除
     private Integer deleted;
