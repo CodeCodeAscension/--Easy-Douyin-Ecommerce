@@ -4,8 +4,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.common.domain.ResponseResult;
 import com.example.payment.domain.dto.ChargeCancelDto;
 import com.example.payment.domain.dto.ChargeDto;
+import com.example.payment.domain.dto.CreditDto;
+import com.example.payment.domain.dto.CreditUpdateDto;
 import com.example.payment.domain.po.Credit;
 import com.example.payment.domain.vo.ChargeVo;
+import com.example.payment.domain.vo.CreditVo;
 import io.seata.spring.annotation.GlobalTransactional;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,5 +37,25 @@ public interface CreditService extends IService<Credit> {
      * @return
      */
     ResponseResult<Object> autoCancelCharge(ChargeCancelDto chargeCancelDto);
+
+    /**
+     * 输入信用卡信息
+     */
+    ResponseResult<CreditVo> createCredit(CreditDto creditDto);
+
+    /**
+     * 删除信用卡信息
+     */
+    ResponseResult<Object> deleteCredit(String cardNumber);
+
+    /**
+     * 更新信用卡信息
+     */
+    ResponseResult<CreditVo> updateCredit(CreditUpdateDto creditUpdateDto);
+
+    /**
+     * 查询信用卡信息
+     */
+    ResponseResult<CreditVo> getCredit(String cardNumber);
 
 }

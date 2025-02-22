@@ -24,6 +24,12 @@ public enum PaymentStatusEnum implements BaseExceptionInterface {
     PAYMENT_NOT_FOUND(ResultCode.NOT_FOUND, "交易记录不存在"),
     PAYMENT_ACCESS_DENIED(ResultCode.UNAUTHORIZED, "无权访问该交易记录"),
     PAYMENT_CANNOT_CANCEL(ResultCode.FORBIDDEN, "该交易记录无法取消"),
+    CREDIT_EXPIRED(ResultCode.FORBIDDEN, "该银行卡已过期"),
+    CREDIT_SAVE_FAILED(ResultCode.SERVER_ERROR, "银行卡信息保存失败"),
+    CREDIT_UPDATE_FAILED(ResultCode.SERVER_ERROR, "银行卡信息更新失败"),
+    CREDIT_DELETE_FAILED(ResultCode.SERVER_ERROR, "银行卡信息删除失败"),
+    CREDIT_NOT_FOUND(ResultCode.NOT_FOUND, "银行卡信息不存在"),
+    CREDIT_BALANCE_NOT_ENOUGH(ResultCode.CREATED, "该银行卡信息已录入"),
     ;
 
 

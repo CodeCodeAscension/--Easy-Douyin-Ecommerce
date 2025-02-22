@@ -9,9 +9,12 @@ import com.example.common.exception.SystemException;
 import com.example.common.util.UserContextUtil;
 import com.example.payment.domain.dto.ChargeCancelDto;
 import com.example.payment.domain.dto.ChargeDto;
+import com.example.payment.domain.dto.CreditDto;
+import com.example.payment.domain.dto.CreditUpdateDto;
 import com.example.payment.domain.po.Credit;
 import com.example.payment.domain.po.Transaction;
 import com.example.payment.domain.vo.ChargeVo;
+import com.example.payment.domain.vo.CreditVo;
 import com.example.payment.enums.PaymentStatusEnum;
 import com.example.payment.mapper.CreditMapper;
 import com.example.payment.service.CreditService;
@@ -24,6 +27,8 @@ import org.apache.ibatis.javassist.tools.rmi.RemoteException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ConcurrentModificationException;
 import java.util.UUID;
 
@@ -227,6 +232,194 @@ public class CreditServiceImpl extends ServiceImpl<CreditMapper, Credit> impleme
     @Override
     public ResponseResult<Object> autoCancelCharge(ChargeCancelDto chargeCancelDto) {
         return null;
+    }
+
+    /**
+     * 输入信用卡信息
+     *
+     * @param creditDto
+     */
+    @Override
+    public ResponseResult<CreditVo> createCredit(CreditDto creditDto) {
+        // 判断用户是否登录
+        Long userId = UserContextUtil.getUserId();
+        if (userId == null) {
+            log.error("用户未登录");
+            return ResponseResult.error(PaymentStatusEnum.USER_NOT_LOGIN.getErrorCode(), PaymentStatusEnum.USER_NOT_LOGIN.getErrorMessage());
+        }
+
+        // 判断信用卡信息是否已存在
+        Credit creditExist = creditMapper.selectById(creditDto.getCardNumber());
+        if (creditExist != null) {
+            log.error("信用卡信息已录入");
+            return ResponseResult.error(PaymentStatusEnum.CREDIT_BALANCE_NOT_ENOUGH.getErrorCode(), PaymentStatusEnum.CREDIT_BALANCE_NOT_ENOUGH.getErrorMessage());
+        }
+
+        LocalDate expireDate = creditDto.getExpireDate();
+        if (expireDate.isBefore(LocalDate.now())) {
+            log.error("信用卡已过期");
+            return ResponseResult.error(PaymentStatusEnum.CREDIT_EXPIRED.getErrorCode(), PaymentStatusEnum.CREDIT_EXPIRED.getErrorMessage());
+        }
+
+        Credit credit = Credit.builder()
+                .cardNumber(creditDto.getCardNumber())
+                .cvv(creditDto.getCvv())
+                .userId(userId)
+                .balance(creditDto.getBalance())
+                .expireDate(creditDto.getExpireDate())
+                .status(0)
+                .version(0)
+                .deleted(0)
+                .createTime(LocalDateTime.now())
+                .updateTime(LocalDateTime.now())
+                .build();
+        int insert = creditMapper.insert(credit);
+        if (insert == 0){
+            log.error("信用卡信息保存失败");
+            return ResponseResult.error(PaymentStatusEnum.CREDIT_SAVE_FAILED.getErrorCode(), PaymentStatusEnum.CREDIT_SAVE_FAILED.getErrorMessage());
+        }
+
+        CreditVo creditVo = CreditVo.builder()
+                .cardNumber(credit.getCardNumber())
+                .cvv(credit.getCvv())
+                .userId(credit.getUserId())
+                .balance(credit.getBalance())
+                .expireDate(credit.getExpireDate())
+                .status(credit.getStatus())
+                .createTime(credit.getCreateTime())
+                .updateTime(credit.getUpdateTime())
+                .build();
+
+        return ResponseResult.success(creditVo);
+    }
+
+    /**
+     * 删除信用卡信息
+     *
+     * @param cardNumber
+     */
+    @Override
+    public ResponseResult<Object> deleteCredit(String cardNumber) {
+        Long userId = UserContextUtil.getUserId();
+        if (userId == null) {
+            log.error("用户未登录");
+            return ResponseResult.error(PaymentStatusEnum.USER_NOT_LOGIN.getErrorCode(), PaymentStatusEnum.USER_NOT_LOGIN.getErrorMessage());
+        }
+
+        Credit credit = creditMapper.selectById(cardNumber);
+        if (credit == null || credit.getDeleted() != 0) {
+            log.error("信用卡信息不存在");
+            return ResponseResult.error(PaymentStatusEnum.CREDIT_NOT_FOUND.getErrorCode(), PaymentStatusEnum.CREDIT_NOT_FOUND.getErrorMessage());
+        }
+
+        if (!userId.equals(credit.getUserId())) {
+            log.error("无权删除该信用卡信息");
+            return ResponseResult.error(PaymentStatusEnum.PAYMENT_ACCESS_DENIED.getErrorCode(), PaymentStatusEnum.PAYMENT_ACCESS_DENIED.getErrorMessage());
+        }
+
+        int delete = creditMapper.deleteById(cardNumber);
+        if (delete == 0) {
+            log.error("信用卡信息删除失败");
+            return ResponseResult.error(PaymentStatusEnum.CREDIT_DELETE_FAILED.getErrorCode(), PaymentStatusEnum.CREDIT_DELETE_FAILED.getErrorMessage());
+        }
+
+        return ResponseResult.success("删除成功!");
+    }
+
+    /**
+     * 更新信用卡信息
+     *
+     * @param credit
+     */
+    @Override
+    public ResponseResult<CreditVo> updateCredit(CreditUpdateDto creditUpdateDto) {
+        Long userId = UserContextUtil.getUserId();
+        if (userId == null) {
+            log.error("用户未登录");
+            return ResponseResult.error(PaymentStatusEnum.USER_NOT_LOGIN.getErrorCode(), PaymentStatusEnum.USER_NOT_LOGIN.getErrorMessage());
+        }
+        CreditVo creditVo = new CreditVo();
+        Credit credit = creditMapper.selectById(creditUpdateDto.getCardNumber());
+        if (credit == null || credit.getDeleted() != 0) {
+            log.error("信用卡信息不存在");
+            return ResponseResult.error(PaymentStatusEnum.CREDIT_NOT_FOUND.getErrorCode(), PaymentStatusEnum.CREDIT_NOT_FOUND.getErrorMessage());
+        }
+
+        if (!userId.equals(credit.getUserId())) {
+            log.error("无权更新该信用卡信息");
+            return ResponseResult.error(PaymentStatusEnum.PAYMENT_ACCESS_DENIED.getErrorCode(), PaymentStatusEnum.PAYMENT_ACCESS_DENIED.getErrorMessage());
+        }
+
+        Float balance = creditUpdateDto.getBalance();
+        if (balance != null && balance < 0) {
+            log.error("余额不能小于0");
+            return ResponseResult.error(PaymentStatusEnum.CREDIT_UPDATE_FAILED.getErrorCode(), PaymentStatusEnum.CREDIT_UPDATE_FAILED.getErrorMessage());
+        } else if (balance != null) {
+            credit.setBalance(balance);
+            creditVo.setBalance(balance);
+        }
+
+        Integer status = creditUpdateDto.getStatus();
+        if (status != null) {
+            credit.setStatus(status);
+            creditVo.setStatus(status);
+        }
+
+        LocalDate expireDate = creditUpdateDto.getExpireDate();
+        if (expireDate != null) {
+            credit.setExpireDate(expireDate);
+            creditVo.setExpireDate(expireDate);
+        }
+
+        credit.setUpdateTime(LocalDateTime.now());
+        int update = creditMapper.updateById(credit);
+        if (update == 0) {
+            log.error("信用卡信息更新失败");
+            return ResponseResult.error(PaymentStatusEnum.CREDIT_UPDATE_FAILED.getErrorCode(), PaymentStatusEnum.CREDIT_UPDATE_FAILED.getErrorMessage());
+        }
+        creditVo.setCardNumber(credit.getCardNumber());
+        creditVo.setCvv(credit.getCvv());
+        creditVo.setUserId(credit.getUserId());
+        creditVo.setCreateTime(credit.getCreateTime());
+        creditVo.setUpdateTime(credit.getUpdateTime());
+        return ResponseResult.success(creditVo);
+    }
+
+    /**
+     * 查询信用卡信息
+     *
+     * @param cardNumber
+     */
+    @Override
+    public ResponseResult<CreditVo> getCredit(String cardNumber) {
+        Long userId = UserContextUtil.getUserId();
+        if (userId == null) {
+            log.error("用户未登录");
+            return ResponseResult.error(PaymentStatusEnum.USER_NOT_LOGIN.getErrorCode(), PaymentStatusEnum.USER_NOT_LOGIN.getErrorMessage());
+        }
+
+        Credit credit = creditMapper.selectById(cardNumber);
+        if (credit == null || credit.getDeleted() != 0) {
+            log.error("信用卡信息不存在");
+            return ResponseResult.error(PaymentStatusEnum.CREDIT_NOT_FOUND.getErrorCode(), PaymentStatusEnum.CREDIT_NOT_FOUND.getErrorMessage());
+        }
+
+        if (!userId.equals(credit.getUserId())) {
+            log.error("无权访问该信用卡信息");
+            return ResponseResult.error(PaymentStatusEnum.PAYMENT_ACCESS_DENIED.getErrorCode(), PaymentStatusEnum.PAYMENT_ACCESS_DENIED.getErrorMessage());
+        }
+
+        CreditVo creditVo = CreditVo.builder()
+                .cardNumber(credit.getCardNumber())
+                .cvv(credit.getCvv())
+                .userId(credit.getUserId())
+                .balance(credit.getBalance())
+                .expireDate(credit.getExpireDate())
+                .status(credit.getStatus())
+                .createTime(credit.getCreateTime())
+                .updateTime(credit.getUpdateTime())
+                .build();
+        return ResponseResult.success(creditVo);
     }
 
     public void saveFailedTransaction(String transId, Long userId, String orderId, String creditId, Float amount, String reason) {

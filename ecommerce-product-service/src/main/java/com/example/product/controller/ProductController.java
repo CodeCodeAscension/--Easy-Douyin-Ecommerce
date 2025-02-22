@@ -11,6 +11,7 @@ import com.example.product.service.IProductService;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -60,7 +61,7 @@ public class ProductController {
      * @param addProductDto
      */
     @PutMapping("/add")
-    public ResponseResult<Object> addProductStock(@RequestBody AddProductDto addProductDto) {
+    public ResponseResult<Object> addProductStock(@RequestBody @Validated AddProductDto addProductDto) {
         return iProductService.addProductStock(addProductDto);
     }
 
@@ -70,7 +71,7 @@ public class ProductController {
      * @param decProductDto
      */
     @PutMapping("/dec")
-    public ResponseResult<Object> decProductStock(@RequestBody DecProductDto decProductDto) {
+    public ResponseResult<Object> decProductStock(@RequestBody @Validated DecProductDto decProductDto) {
         return iProductService.decProductStock(decProductDto);
     }
 }
