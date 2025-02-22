@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-//@RequestMapping("/api/v1/products")
-@RequestMapping("/products")
+@RequestMapping("/api/v1/products")
+//@RequestMapping("/products")
 public class ProductController {
 
     @Resource
@@ -29,7 +29,7 @@ public class ProductController {
     @GetMapping("/{productId}")
     public ResponseResult<ProductInfoVo> getProductById(@PathVariable Long productId) {
         log.info("根据商品id获取商品信息，productId: {}", productId);
-        return iProductService.getProductById(productId);
+        return iProductService.getProductInfoById(productId);
     }
 
     /**
@@ -39,7 +39,7 @@ public class ProductController {
      */
     @GetMapping
     public ResponseResult<IPage<ProductInfoVo>> listProducts(@RequestBody ListProductsDto listProductsDto) {
-        return iProductService.listProducts(listProductsDto);
+        return iProductService.getProductInfoByCategory(listProductsDto);
     }
 
     /**
@@ -49,6 +49,6 @@ public class ProductController {
      */
     @GetMapping("/search")
     public ResponseResult<IPage<ProductInfoVo>> searchProducts(@RequestBody SearchProductsDto searchProductsDto) {
-        return iProductService.searchProducts(searchProductsDto);
+        return iProductService.seachProductInfo(searchProductsDto);
     }
 }

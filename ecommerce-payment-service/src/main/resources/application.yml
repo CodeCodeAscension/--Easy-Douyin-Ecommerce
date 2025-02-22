@@ -24,3 +24,17 @@ ecommerce:
     virtual: /
     user: @rabbitmq.user@
     pwd: @rabbitmq.pwd@
+
+
+
+debug: true
+logging:
+  level:
+    org:
+      springframework:
+        cloud:
+          openfeign: debug
+    com:
+        alibaba:
+            cloud:
+              sentinel: debug

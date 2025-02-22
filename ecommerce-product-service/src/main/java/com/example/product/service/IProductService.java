@@ -18,15 +18,15 @@ public interface IProductService extends IService<Product> {
     /**
      * 根据商品ID查询商品信息
      */
-    ResponseResult<ProductInfoVo> getProductById(Long productId);
+    ResponseResult<ProductInfoVo> getProductInfoById(Long productId);
 
     /**
      * 指定某种类别查询商品信息
      */
-    ResponseResult<IPage<ProductInfoVo>> listProducts(ListProductsDto listProductsDto);
+    ResponseResult<IPage<ProductInfoVo>> getProductInfoByCategory(ListProductsDto listProductsDto);
 
     /**
      * 指定条件查询商品信息
      */
-    ResponseResult<IPage<ProductInfoVo>> searchProducts(SearchProductsDto searchProductsDto);
+    ResponseResult<IPage<ProductInfoVo>> seachProductInfo(SearchProductsDto searchProductsDto);
 }

@@ -1,5 +1,6 @@
 package com.example.payment.domain.dto;
 
+import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 
 @Data
@@ -9,11 +10,11 @@ import lombok.*;
 public class ChargeDto {
 
     // 订单id
-    @NonNull
+    @NotEmpty
     private String orderId;
 
     // 银行卡id
-    @NonNull
+    @NotEmpty
     private String creditId;
 
     // 交易金额

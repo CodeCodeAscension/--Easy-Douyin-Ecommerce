@@ -3,6 +3,7 @@ package com.example.payment.domain.po;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.Version;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -28,9 +29,10 @@ public class Credit implements Serializable{
     private Long userId;
 
     // 余额
-    private Integer balance;
+    private Float balance;
 
     // 乐观锁
+    @Version
     private Integer version;
 
     // 过期日期
@@ -45,4 +47,11 @@ public class Credit implements Serializable{
 
     // 逻辑删除
     private Integer deleted;
+
+    public Credit(String creditId, Long userId, float v, int i) {
+        this.cardNumber = creditId;
+        this.userId = userId;
+        this.balance = v;
+        this.status = i;
+    }
 }

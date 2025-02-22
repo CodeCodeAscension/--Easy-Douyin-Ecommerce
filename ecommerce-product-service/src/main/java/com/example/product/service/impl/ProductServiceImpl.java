@@ -49,7 +49,7 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
      * @param productId
      */
     @Override
-    public ResponseResult<ProductInfoVo> getProductById(Long productId) {
+    public ResponseResult<ProductInfoVo> getProductInfoById(Long productId) {
         // 根据商品id查询商品信息
         Product product = productMapper.selectById(productId);
         if (product == null) {
@@ -94,7 +94,7 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
      * @param listProductsDto
      */
     @Override
-    public ResponseResult<IPage<ProductInfoVo>> listProducts(ListProductsDto listProductsDto) {
+    public ResponseResult<IPage<ProductInfoVo>> getProductInfoByCategory(ListProductsDto listProductsDto) {
 
 
         // 当前页面
@@ -160,7 +160,7 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
      * @param searchProductsDto
      */
     @Override
-    public ResponseResult<IPage<ProductInfoVo>> searchProducts(SearchProductsDto searchProductsDto) {
+    public ResponseResult<IPage<ProductInfoVo>> seachProductInfo(SearchProductsDto searchProductsDto) {
 //        if (searchProductsDto == null) {
 //            log.error("参数不能为空");
 //            return ResponseResult.error(ProductStatusEnum.PARAM_NOT_NULL.getErrorCode(), ProductStatusEnum.PARAM_NOT_NULL.getErrorMessage());

@@ -106,7 +106,7 @@
         <profile>
             <id>dev4</id>
             <properties>
-                <env>dev1</env>
+                <env>dev4</env>
                 <database.host>localhost</database.host>
                 <database.port>3306</database.port>
                 <database.user>root</database.user>
