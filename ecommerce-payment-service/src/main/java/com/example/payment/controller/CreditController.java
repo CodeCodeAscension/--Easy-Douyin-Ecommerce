@@ -1,6 +1,7 @@
 package com.example.payment.controller;
 
 import com.example.common.domain.ResponseResult;
+import com.example.payment.domain.dto.ChargeCancelDto;
 import com.example.payment.domain.dto.ChargeDto;
 import com.example.payment.domain.dto.CreditDto;
 import com.example.payment.domain.dto.CreditUpdateDto;
@@ -24,13 +25,23 @@ public class CreditController {
     private CreditService creditService;
 
     @PostMapping
-    public ResponseResult<ChargeVo> charge(@RequestBody ChargeDto chargeDto) {
+    public ResponseResult<ChargeVo> charge(@RequestBody @Validated ChargeDto chargeDto) {
         return creditService.charge(chargeDto);
     }
 
     @DeleteMapping
     public ResponseResult<Object> cancelCharge(@RequestParam String transactionId) {
         return creditService.cancelCharge(transactionId);
+    }
+
+    @PutMapping
+    public ResponseResult<Object> autoCancelCharge(@RequestBody @Validated ChargeCancelDto chargeCancelDto) {
+        return creditService.autoCancelCharge(chargeCancelDto);
+    }
+
+    @PostMapping("/confirm")
+    public ResponseResult<Object> confirmCharge(@RequestParam String transactionId) {
+        return creditService.confirmCharge(transactionId);
     }
 
     @PostMapping("/credits")

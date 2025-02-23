@@ -1,5 +1,6 @@
 package com.example.payment.domain.dto;
 
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 
@@ -19,5 +20,6 @@ public class ChargeDto {
 
     // 交易金额
     @NonNull
+    @DecimalMin(value = "0.0", message = "交易金额不能小于0")
     private Float amount;
 }

@@ -58,4 +58,9 @@ public interface CreditService extends IService<Credit> {
      */
     ResponseResult<CreditVo> getCredit(String cardNumber);
 
+    /**
+     * 确认支付
+     */
+    ResponseResult<Object> confirmCharge(String transactionId);
+
 }

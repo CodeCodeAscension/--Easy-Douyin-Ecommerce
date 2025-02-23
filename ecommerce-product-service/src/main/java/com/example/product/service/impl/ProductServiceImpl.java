@@ -275,6 +275,14 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
             return ResponseResult.error(ProductStatusEnum.PRODUCT_NOT_EXIST.getErrorCode(), ProductStatusEnum.PRODUCT_NOT_EXIST.getErrorMessage());
         }
 
+        // 减少销量
+        Integer decSold = addProductDto.getAddStock();
+        if (product.getSold() < decSold) {
+            log.error("销量不足，productId: {}", productId);
+            return ResponseResult.error(ProductStatusEnum.PRODUCT_SOLD_NOT_ENOUGH.getErrorCode(), ProductStatusEnum.PRODUCT_SOLD_NOT_ENOUGH.getErrorMessage());
+        }
+        product.setSold(product.getSold() - decSold);
+
         // 增加库存
         Integer addStock = addProductDto.getAddStock();
         product.setStoke(product.getStoke() + addStock);
@@ -317,11 +325,13 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
         }
 
         product.setStoke(product.getStoke() - decStock);
+        product.setSold(product.getSold() + decStock);
         int update = productMapper.updateById(product);
         if (update == 0) {
             log.error("减少库存失败，productId: {}", productId);
             return ResponseResult.error(ProductStatusEnum.PRODUCT_STOCK_UPDATE_FAIL.getErrorCode(), ProductStatusEnum.PRODUCT_STOCK_UPDATE_FAIL.getErrorMessage());
         }
+
 
         return ResponseResult.success();
     }

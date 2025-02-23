@@ -1,14 +1,10 @@
 package com.example.payment.domain.po;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.annotation.Version;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import com.baomidou.mybatisplus.annotation.*;
+import lombok.*;
 import lombok.experimental.Accessors;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,8 +14,11 @@ import java.time.LocalDateTime;
 @Accessors(chain = true)
 @TableName("credit")
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Credit implements Serializable{
 
+//    @Serial
     private static final long serialVersionUID = 1L;
 
     @TableId(value = "card_number", type = IdType.ASSIGN_UUID)
@@ -35,25 +34,22 @@ public class Credit implements Serializable{
 
     // 乐观锁
     @Version
-    private Integer version;
+    private Integer version = 0;
 
     // 过期日期
     private LocalDate expireDate;
 
     // 状态（0正常，1禁用，2过期）
-    private Integer status;
+    @TableField(fill = FieldFill.INSERT)
+    private Integer status = 0;
 
     private LocalDateTime createTime;
 
     private LocalDateTime updateTime;
 
     // 逻辑删除
-    private Integer deleted;
+    @TableLogic
+    private Integer deleted = 0;
 
-    public Credit(String creditId, Long userId, float v, int i) {
-        this.cardNumber = creditId;
-        this.userId = userId;
-        this.balance = v;
-        this.status = i;
-    }
+
 }

@@ -1,5 +1,6 @@
 package com.example.payment.domain.dto;
 
+import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 
 /**
@@ -12,7 +13,7 @@ import lombok.*;
 public class ChargeCancelDto {
 
     // 交易id
-    @NonNull
+    @NotEmpty
     private String transactionId;
 
     // 是否设置定时取消（可以取消上次的定时）

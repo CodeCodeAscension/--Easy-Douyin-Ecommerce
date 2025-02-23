@@ -19,7 +19,7 @@ public enum ProductStatusEnum implements BaseExceptionInterface {
     USER_NOT_LOGIN(ResultCode.UNAUTHORIZED, "用户未登录"),
     PRODUCT_STOCK_NOT_ENOUGH(ResultCode.BAD_REQUEST, "商品库存不足"),
     PRODUCT_STOCK_UPDATE_FAIL(ResultCode.CONFLICT, "可能由于并发冲突导致商品库存更新失败"),
-    ;
+    PRODUCT_SOLD_NOT_ENOUGH(ResultCode.BAD_REQUEST, "商品销量不足, 无法扣减");
 
     // 异常码
     private Integer errorCode;
