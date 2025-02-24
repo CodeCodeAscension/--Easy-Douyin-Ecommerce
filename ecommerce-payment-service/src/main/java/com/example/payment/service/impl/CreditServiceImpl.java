@@ -321,6 +321,10 @@ public class CreditServiceImpl extends ServiceImpl<CreditMapper, Credit> impleme
 
     // -------------------------------------------- 工具方法 --------------------------------------------
 
+    /**
+     * 校验用户登录
+     * @return
+     */
     private Long checkUserLogin() {
         Long userId = UserContextUtil.getUserId();
         if (userId == null) {
@@ -330,6 +334,11 @@ public class CreditServiceImpl extends ServiceImpl<CreditMapper, Credit> impleme
         return userId;
     }
 
+    /**
+     * 校验用户权限与信用卡信息
+     * @param cardNumber
+     * @return
+     */
     public Credit checkCreditPermission(String cardNumber) {
         Long userId = checkUserLogin();
 
@@ -362,6 +371,10 @@ public class CreditServiceImpl extends ServiceImpl<CreditMapper, Credit> impleme
         );
     }
 
+    /**
+     * 发送支付取消消息
+     * @param transaction
+     */
     private void sendPaymentCancelMessage(Transaction transaction) {
         PayCancelMessage message = new PayCancelMessage();
         message.setOrderId(transaction.getOrderId());
@@ -374,6 +387,11 @@ public class CreditServiceImpl extends ServiceImpl<CreditMapper, Credit> impleme
         );
     }
 
+    /**
+     * 发送支付失败消息
+     * @param transaction
+     * @param products
+     */
     private void sendPaymentFailedMessage(Transaction transaction, List<ProductQuantity> products) {
         PayFailMessage message = new PayFailMessage();
         message.setOrderId(transaction.getOrderId());
@@ -385,6 +403,11 @@ public class CreditServiceImpl extends ServiceImpl<CreditMapper, Credit> impleme
         );
     }
 
+    /**
+     * 发送支付成功消息
+     * @param transaction
+     * @param products
+     */
     private void sendPaymentSuccessMessage(Transaction transaction, List<ProductQuantity> products) {
         PaySuccessMessage message = new PaySuccessMessage();
         message.setOrderId(transaction.getOrderId());
@@ -396,6 +419,11 @@ public class CreditServiceImpl extends ServiceImpl<CreditMapper, Credit> impleme
         );
     }
 
+    /**
+     * 获取订单商品信息
+     * @param orderId
+     * @return
+     */
     private List<ProductQuantity> getProducts(String orderId) {
         ResponseResult<OrderInfoVo> orderResult = orderClient.getOrderById(orderId);
         if (orderResult.getCode() != 200) {
@@ -408,6 +436,13 @@ public class CreditServiceImpl extends ServiceImpl<CreditMapper, Credit> impleme
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 构建预支付交易记录
+     * @param credit
+     * @param chargeDto
+     * @param transId
+     * @return
+     */
     private Transaction buildPreTransaction(Credit credit, ChargeDto chargeDto, String transId) {
         return Transaction.builder()
                 .transId(transId)
@@ -423,6 +458,11 @@ public class CreditServiceImpl extends ServiceImpl<CreditMapper, Credit> impleme
                 .build();
     }
 
+    /**
+     * 处理支付失败
+     * @param transactionId
+     * @param reason
+     */
     private void handlePaymentFailure(String transactionId, String reason) {
         Transaction transaction = transactionService.getById(transactionId);
         if (transaction != null) {
@@ -433,6 +473,9 @@ public class CreditServiceImpl extends ServiceImpl<CreditMapper, Credit> impleme
         }
     }
 
+    /**
+     * 更新交易状态
+     */
     private void updateTransactionStatus(Transaction transaction, Integer status, String reason) {
         transaction.setStatus(status);
         transaction.setReason(reason);
@@ -440,7 +483,12 @@ public class CreditServiceImpl extends ServiceImpl<CreditMapper, Credit> impleme
         transactionService.updateById(transaction);
     }
 
-    private void scheduleAutoCancel(String transactionId, int minutes) {
+    /**
+     * 设置定时任务
+     * @param transactionId
+     * @param minutes
+     */
+    void scheduleAutoCancel(String transactionId, int minutes) {
         long cancelTime = System.currentTimeMillis() + minutes * 60 * 1000L;
         scheduledCancellations.put(transactionId, cancelTime);
         log.info("已设置交易{}在{}分钟后自动取消", transactionId, minutes);
@@ -494,6 +542,12 @@ public class CreditServiceImpl extends ServiceImpl<CreditMapper, Credit> impleme
         }
     }
 
+    /**
+     * 验证交易记录
+     * @param transactionId
+     * @param expectedStatus
+     * @return
+     */
     private Transaction validateTransaction(String transactionId, int expectedStatus) {
         Transaction transaction = transactionService.getById(transactionId);
         if (transaction == null) {

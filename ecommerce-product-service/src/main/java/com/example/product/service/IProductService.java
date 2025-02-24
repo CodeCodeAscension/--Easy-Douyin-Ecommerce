@@ -19,6 +19,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface IProductService extends IService<Product> {
 
     /**
+     * 创建商品
+     */
+
+    /**
      * 根据商品ID查询商品信息
      */
     ResponseResult<ProductInfoVo> getProductInfoById(Long productId);
