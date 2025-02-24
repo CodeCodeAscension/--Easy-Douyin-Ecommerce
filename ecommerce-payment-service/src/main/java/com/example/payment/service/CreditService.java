@@ -22,26 +22,26 @@ public interface CreditService extends IService<Credit> {
      * @param chargeDto 订单支付信息
      * @rerurn chargeVo 支付结果
      */
-    ResponseResult<ChargeVo> charge(ChargeDto chargeDto);
+//    ResponseResult<ChargeVo> charge(ChargeDto chargeDto);
 
     /**
      * 取消支付
      * @param transactionId
      * @return
      */
-    ResponseResult<Object> cancelCharge(String transactionId);
+//    ResponseResult<Object> cancelCharge(String transactionId);
 
     /**
      * 定期取消支付
      * @param chargeCancelDto
      * @return
      */
-    ResponseResult<Object> autoCancelCharge(ChargeCancelDto chargeCancelDto);
+//    ResponseResult<Object> autoCancelCharge(ChargeCancelDto chargeCancelDto);
 
     /**
      * 输入信用卡信息
      */
-    ResponseResult<CreditVo> createCredit(CreditDto creditDto);
+    ResponseResult<CreditVo> createCredit(Long userId, CreditDto creditDto);
 
     /**
      * 删除信用卡信息
@@ -61,6 +61,6 @@ public interface CreditService extends IService<Credit> {
     /**
      * 确认支付
      */
-    ResponseResult<Object> confirmCharge(String transactionId);
+//    ResponseResult<Object> confirmCharge(String transactionId);
 
 }

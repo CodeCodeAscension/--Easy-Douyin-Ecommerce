@@ -60,6 +60,21 @@ spring:
             - Path=/api/v1/payments/**,/api/v1/payment/**
           filters:
             - LoginAuth
+        - id: credits-common
+          uri: lb://payment-service
+          predicates:
+            - Path=/api/v1/credits/**
+            - Method=GET,POST,DELETE
+          filters:
+            - LoginAuth
+        - id: credits-auth
+          uri: lb://payment-service
+          predicates:
+            - Path=/api/v1/credits/**
+            - Method=PUT
+          filters:
+            - LoginAuth
+            - AdminAuth
 
         - id: product-auth
           uri: lb://product-service

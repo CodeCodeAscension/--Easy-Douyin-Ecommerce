@@ -1,5 +1,6 @@
 package com.example.payment.domain.dto;
 
+import com.example.payment.enums.CreditStatusEnum;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
@@ -21,7 +22,7 @@ public class CreditUpdateDto {
 
     private Integer cvv;
 
-    @NotNull(message = "用户ID不能为空")
+    @NotNull(message = "请指定用户ID")
     private Long userId;
 
 
@@ -31,7 +32,5 @@ public class CreditUpdateDto {
     @Future(message = "过期日期必须是未来的日期")
     private LocalDate expireDate;
 
-    private Integer status;
-
-    private Integer deleted;
+    private CreditStatusEnum status;
 }

@@ -1,6 +1,7 @@
 package com.example.payment.domain.po;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.example.payment.enums.CreditStatusEnum;
 import lombok.*;
 import lombok.experimental.Accessors;
 
@@ -16,16 +17,16 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Credit implements Serializable{
+public class Credit implements Serializable {
 
-//    @Serial
+    @Serial
     private static final long serialVersionUID = 1L;
 
-    @TableId(value = "card_number", type = IdType.ASSIGN_UUID)
+    @TableId(value = "card_number", type = IdType.INPUT)
     private String cardNumber;
 
     // 卡验证值
-    private Integer cvv;
+    private Integer cardCvv;
 
     private Long userId;
 
@@ -41,7 +42,7 @@ public class Credit implements Serializable{
 
     // 状态（0正常，1禁用，2过期）
     @TableField(fill = FieldFill.INSERT)
-    private Integer status = 0;
+    private CreditStatusEnum status = CreditStatusEnum.NORMAL;
 
     private LocalDateTime createTime;
 

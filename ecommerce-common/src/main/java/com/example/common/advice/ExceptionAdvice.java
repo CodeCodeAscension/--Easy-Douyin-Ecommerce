@@ -30,22 +30,22 @@ public class ExceptionAdvice {
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseResult<Object> validException(MethodArgumentNotValidException e) {
-        return ResponseResult.error(ResultCode.BAD_REQUEST, "参数无效");
+        return ResponseResult.error(ResultCode.BAD_REQUEST, e.getMessage());
     }
 
     @ExceptionHandler(MissingRequestHeaderException.class)
     public ResponseResult<Object> missingRequestHeaderException(MissingRequestHeaderException e) {
-        return ResponseResult.error(ResultCode.BAD_REQUEST, "缺少必要的请求头");
+        return ResponseResult.error(ResultCode.BAD_REQUEST, e.getMessage());
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseResult<Object> httpMessageNotReadableException(HttpMessageNotReadableException e) {
-        return ResponseResult.error(ResultCode.BAD_REQUEST, "请求体无效");
+        return ResponseResult.error(ResultCode.BAD_REQUEST, e.getMessage());
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseResult<Object> httpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
-        return ResponseResult.error(ResultCode.BAD_REQUEST, "HTTP请求方法无效");
+        return ResponseResult.error(ResultCode.BAD_REQUEST, e.getMessage());
     }
 
     @ExceptionHandler(SystemException.class)
