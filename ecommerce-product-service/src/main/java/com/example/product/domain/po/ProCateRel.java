@@ -37,4 +37,9 @@ public class ProCateRel implements Serializable {
 
         @Schema(description = "更新时间")
         private LocalDateTime updateTime;
+
+        public ProCateRel(Long productId, Long cid) {
+                this.productId = productId;
+                this.categoryId = cid;
+        }
 }

@@ -24,3 +24,8 @@ ecommerce:
     virtual: /
     user: @rabbitmq.user@
     pwd: @rabbitmq.pwd@
+  elasticsearch:
+    host: @elasticsearch.host@
+    port: @elasticsearch.port@
+
+
