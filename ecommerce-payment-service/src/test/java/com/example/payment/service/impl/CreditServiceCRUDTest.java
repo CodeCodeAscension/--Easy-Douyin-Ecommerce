@@ -1,6 +1,7 @@
 package com.example.payment.service.impl;
 
 import com.example.common.domain.ResponseResult;
+import com.example.common.exception.BadRequestException;
 import com.example.common.exception.DatabaseException;
 import com.example.common.exception.NotFoundException;
 import com.example.common.util.UserContextUtil;
@@ -87,11 +88,11 @@ class CreditServiceCRUDTest {
         when(creditMapper.selectById(validCardNumber)).thenReturn(null);
         when(creditMapper.insert(any(Credit.class))).thenReturn(1);
 
-        ResponseResult<CreditVo> result = creditService.createCredit(dto);
+        CreditVo result = creditService.createCredit(UserContextUtil.getUserId(), dto);
 
         // 验证结果
-        assertThat(result.getCode()).isEqualTo(200);
-        assertThat(result.getData().getCardNumber()).isEqualTo(validCardNumber);
+//        assertThat(result.getCode()).isEqualTo(200);
+        assertThat(result.getCardNumber()).isEqualTo(validCardNumber);
     }
 
     @Test
@@ -101,8 +102,8 @@ class CreditServiceCRUDTest {
         CreditDto dto = new CreditDto();
         dto.setCardNumber(validCardNumber);
 
-        assertThatThrownBy(() -> creditService.createCredit(dto))
-                .isInstanceOf(DatabaseException.class)
+        assertThatThrownBy(() -> creditService.createCredit(UserContextUtil.getUserId(), dto))
+                .isInstanceOf(BadRequestException.class)
                 .hasMessage("信用卡信息已录入");
     }
 
@@ -112,9 +113,9 @@ class CreditServiceCRUDTest {
         when(creditMapper.selectById(validCardNumber)).thenReturn(validCredit);
         when(creditMapper.deleteById(validCardNumber)).thenReturn(1);
 
-        ResponseResult<Object> result = creditService.deleteCredit(validCardNumber);
+        creditService.deleteCredit(validCardNumber);
 
-        assertThat(result.getCode()).isEqualTo(200);
+//        assertThat(result.getCode()).isEqualTo(200);
 //        verify(creditMapper).updateById(argThat(credit -> credit.getDeleted() == 1));
     }
 

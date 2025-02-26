@@ -10,5 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CreditGetDto {
     @NotBlank(message = "银行卡号不为空")
+    @Schema(description = "银行卡号")
     private String cardNumber;
 }

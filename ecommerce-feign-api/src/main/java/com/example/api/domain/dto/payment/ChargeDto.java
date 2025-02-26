@@ -1,16 +1,24 @@
 package com.example.api.domain.dto.payment;
 
-//import io.swagger.annotations.ApiModel;
-//import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-//@ApiModel(description = "收费请求")
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Schema(description = "收费请求DTO")
 public class ChargeDto {
-//    @ApiModelProperty("订单ID")
+    @NotBlank(message = "订单不能为空")
+    @Schema(description = "订单ID")
     private String orderId;
-//    @ApiModelProperty("银行卡ID")
+
+    @NotBlank(message = "银行卡号不能为空")
+    @Schema(description = "银行卡ID")
     private String creditId;
-//    @ApiModelProperty("支付金额")
-    private Float amount;
+
 }
