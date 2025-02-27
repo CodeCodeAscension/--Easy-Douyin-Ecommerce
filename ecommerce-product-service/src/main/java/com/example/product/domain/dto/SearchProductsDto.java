@@ -1,5 +1,6 @@
 package com.example.product.domain.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,9 +24,11 @@ public class SearchProductsDto {
         private String productName;
 
         @Schema(description = "最低价格")
+        @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT)
         private Float priceLow;
 
         @Schema(description = "最高价格")
+        @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT)
         private Float priceHigh;
 
         @Schema(description = "销量")

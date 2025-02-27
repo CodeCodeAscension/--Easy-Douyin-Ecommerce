@@ -2,17 +2,19 @@ package com.example.product.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
-import lombok.*;
+import lombok.Data;
+import lombok.NonNull;
 
 import java.util.List;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Schema(description = "创建商品DTO")
-public class CreateProductDto {
+@Schema(description = "更新商品信息")
+public class UpdateProductDto {
+
+    @NonNull
+    @Schema(description = "商品ID")
+    private Long id;
 
     @NotEmpty
     @Schema(description = "商品名称")
@@ -27,8 +29,10 @@ public class CreateProductDto {
     private Float price;
 
     @Schema(description = "商品库存")
-    @Min(0)
     private Integer stock;
+
+    @Schema(description = "商品销量")
+    private Integer sold;
 
     @NotEmpty
     @Schema(description = "商家名称")
@@ -39,5 +43,5 @@ public class CreateProductDto {
     private List<String> categories;
 
     @Schema(description = "状态（0上架，1下架）")
-    private Integer status = 0;
+    private Integer status;
 }

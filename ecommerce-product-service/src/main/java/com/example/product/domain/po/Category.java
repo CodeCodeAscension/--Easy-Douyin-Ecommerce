@@ -1,8 +1,6 @@
 package com.example.product.domain.po;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -24,13 +22,14 @@ public class Category implements Serializable {
     @Schema(description = "分类ID")
     private Long id;
 
-    // 分类名称
     @Schema(description = "分类名称")
     private String categoryName;
 
+    @TableField(fill = FieldFill.INSERT)
     @Schema(description = "创建时间")
     private LocalDateTime createTime;
 
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     @Schema(description = "更新时间")
     private LocalDateTime updateTime;
 }

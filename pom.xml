@@ -119,6 +119,8 @@
                 <rabbitmq.port>5672</rabbitmq.port>
                 <rabbitmq.user>guest</rabbitmq.user>
                 <rabbitmq.pwd>guest</rabbitmq.pwd>
+                <elasticsearch.host>localhost</elasticsearch.host>
+                <elasticsearch.port>9200</elasticsearch.port>
             </properties>
         </profile>
 <!--环境五-->
