@@ -1,10 +1,7 @@
 package com.example.api.client.fallback;
 
 import com.example.api.client.OrderClient;
-import com.example.api.domain.dto.order.CancelOrderDto;
-import com.example.api.domain.dto.order.MarkOrderPaidDto;
-import com.example.api.domain.dto.order.PlaceOrderDto;
-import com.example.api.domain.dto.order.UpdateOrderDto;
+import com.example.api.domain.dto.order.*;
 import com.example.api.domain.vo.order.OrderInfoVo;
 import com.example.api.domain.vo.order.PlaceOrderVo;
 import com.example.common.domain.ResponseResult;
@@ -53,6 +50,12 @@ public class OrderClientFallBack implements FallbackFactory<OrderClient> {
             @Override
             public ResponseResult<Object> markOrderPaid(MarkOrderPaidDto markOrderPaidDto) {
                 log.error("order-service-exception:markOrderPaid, "+cause.getMessage());
+                return ResponseResult.errorFeign(cause);
+            }
+
+            @Override
+            public ResponseResult<List<OrderInfoVo>> searchOrders(SearchOrderDto searchOrderDto) {
+                log.error("order-service-exception:searchOrders, "+cause.getMessage());
                 return ResponseResult.errorFeign(cause);
             }
         };
