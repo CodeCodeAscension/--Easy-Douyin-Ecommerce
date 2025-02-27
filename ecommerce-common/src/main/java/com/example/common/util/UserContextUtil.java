@@ -1,7 +1,6 @@
 package com.example.common.util;
 
 import com.example.common.exception.UnauthorizedException;
-import org.springframework.stereotype.Component;
 
 public class UserContextUtil {
     private static final ThreadLocal<Long> threadLocal = new ThreadLocal<>();
