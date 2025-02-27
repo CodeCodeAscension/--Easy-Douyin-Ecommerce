@@ -1,27 +1,28 @@
 package com.example.cart.enums;
 
+
+import com.baomidou.mybatisplus.annotation.EnumValue;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+
+@RequiredArgsConstructor
+@Getter
 public enum OrderStatusEnum {
     UNPAID(0, "待支付"),
     PAID(1, "已支付"),
     DELETED(2, "已删除");
 
+    @EnumValue
+    @JsonValue
     private final Integer code;
     private final String description;
 
-    OrderStatusEnum(Integer code, String description) {
-        this.code = code;
-        this.description = description;
-    }
-
-    public Integer getCode() {
-        return code;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
     // 根据 code 获取枚举值
+    @JsonCreator
     public static OrderStatusEnum getByCode(Integer code) {
         for (OrderStatusEnum status : OrderStatusEnum.values()) {
             if (status.getCode().equals(code)) {

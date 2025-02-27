@@ -17,11 +17,11 @@ import com.example.common.domain.ResponseResult;
 public interface ICartService extends IService<Cart> {
 
     //添加购物车
-    ResponseResult<AddItemDTO> addCart(AddItemDTO addItemDTO);
+    AddItemDTO addCart(AddItemDTO addItemDTO);
 
     //清空购物车商品
-    ResponseResult<Void> deleteCartItem();
+    Boolean deleteCartItem();
 
     //获取购物车信息
-    ResponseResult<CartInfoVo> getCartInfo();
+    CartInfoVo getCartInfo();
 }

@@ -18,3 +18,4 @@ spring:
           - dataId: redis-config.yaml
           - dataId: rabbitmq-config.yaml
         group: DEFAULT_GROUP
+

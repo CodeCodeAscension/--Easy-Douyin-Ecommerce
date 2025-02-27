@@ -2,7 +2,9 @@ package com.example.cart.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.example.api.client.ProductClient;
 import com.example.api.client.UserClient;
+import com.example.api.domain.vo.product.ProductInfoVo;
 import com.example.api.domain.vo.user.UserInfoVo;
 import com.example.cart.controller.CartController;
 import com.example.cart.domain.dto.AddItemDTO;
@@ -46,19 +48,21 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
 
 
     private final ICartItemService iCartItemService;
+    private final ProductClient productClient;
 
 
     //添加购物车
     @Transactional
     @Override
-    public ResponseResult<AddItemDTO> addCart(AddItemDTO addItemDTO) {
-        //判断用户是否登录
+    public AddItemDTO addCart(AddItemDTO addItemDTO) {
 
+        //判断用户是否登录
         Long userId= UserContextUtil.getUserId();
     // userId= 1L;
         if(userId==null){
-            return ResponseResult.error(ResultCode.UNAUTHORIZED,new RuntimeException("用户未登录"));
+            return null;
         }
+
         //判断是否是第一次添加购物车,条件是用户id和购物车未结算的购物车
         Cart cart = this.lambdaQuery().eq(Cart::getUserId, userId).eq(Cart::getStatus, OrderStatusEnum.UNPAID).one();
         //如果是第一次添加购物车，创建购物车
@@ -70,6 +74,14 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
             cart.setUpdateTime(LocalDateTime.now());
             this.save(cart);
         }
+
+        //判断商品是否有货,以及商品是否下架
+        ResponseResult<ProductInfoVo> productInfoById = productClient.getProductInfoById(addItemDTO.getProductId());
+        ProductInfoVo data = productInfoById.getData();
+        if ( data == null || data.getStock() < addItemDTO.getQuantity()||data.getStatus().equals(1)){
+            return null;
+        }
+
         //判断购物车中是否已经有该商品,如果有，则更新数量，如果没有，则添加商品
         CartItem cartItem = iCartItemService.lambdaQuery()
                 .eq(CartItem::getProductId, addItemDTO.getProductId())
@@ -88,41 +100,39 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
             cartItem1.setUpdateTime(LocalDateTime.now());
             iCartItemService.save(cartItem1);
         }
-        return ResponseResult.success();
+        return addItemDTO;
     }
 
 
     //清空购物车商品
     @Transactional
     @Override
-    public ResponseResult<Void> deleteCartItem() {
+    public Boolean deleteCartItem() {
        //获取用户id
         Long userId= UserContextUtil.getUserId();
        // userId= 1L;
         if(userId==null){
-            return ResponseResult.error(ResultCode.UNAUTHORIZED,new RuntimeException("用户未登录"));
+            return false;
         }
         //查询购物车表获取购物车id
         Cart cart = this.lambdaQuery().eq(Cart::getUserId, userId).eq(Cart::getStatus, OrderStatusEnum.UNPAID).one();
         if(cart==null){
-            return ResponseResult.error(ResultCode.FAILED_DEPENDENCY,new RuntimeException("购物车不存在"));
+            return false;
         }
         boolean remove = iCartItemService.lambdaUpdate()
                 .eq(CartItem::getCartId, cart.getId())
                 .remove();
-        if(!remove){
-            return ResponseResult.error(ResultCode.FAILED_DEPENDENCY,new RuntimeException("清空购物车失败"));
-        }
-        return ResponseResult.success();
+        return remove;
+
     }
 
     //获取购物车信息
     @Override
-    public ResponseResult<CartInfoVo> getCartInfo() {
+    public CartInfoVo getCartInfo() {
         Long userId= UserContextUtil.getUserId();
        // userId= 1L;
         if(userId==null){
-            return ResponseResult.error(ResultCode.UNAUTHORIZED,new RuntimeException("用户未登录"));
+            return null;
         }
         //获取购物车信息
         Cart cart = this.lambdaQuery()
@@ -130,6 +140,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
                 .eq(Cart::getStatus, OrderStatusEnum.UNPAID)
                 .one();
         CartInfoVo cartInfoVo = new CartInfoVo();
+
 
         if(cart!=null){
             cartInfoVo.setId(cart.getId());
@@ -151,7 +162,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
             cartInfoVo.setCartItems(cartItemInfoList);
 
         }
-        return ResponseResult.success(cartInfoVo);
+        return  cartInfoVo;
 
     }
 
