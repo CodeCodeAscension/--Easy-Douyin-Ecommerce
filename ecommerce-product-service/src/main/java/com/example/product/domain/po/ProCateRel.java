@@ -1,8 +1,6 @@
 package com.example.product.domain.po;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -32,9 +30,11 @@ public class ProCateRel implements Serializable {
         @Schema(description = "分类ID")
         private Long categoryId;
 
+        @TableField(fill = FieldFill.INSERT)
         @Schema(description = "创建时间")
         private LocalDateTime createTime;
 
+        @TableField(fill = FieldFill.INSERT_UPDATE)
         @Schema(description = "更新时间")
         private LocalDateTime updateTime;
 

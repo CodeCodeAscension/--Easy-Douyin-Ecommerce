@@ -1,10 +1,9 @@
 package com.example.product.domain.po;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.annotation.Version;
+import com.baomidou.mybatisplus.annotation.*;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -37,33 +36,32 @@ public class Product implements Serializable {
         private String description;
 
         @Schema(description = "商品价格")
+        @DecimalMin(value = "0.00", message = "价格必须大于0")
         private Float price;
 
-        // 销量
+        @Min(value = 0, message = "销量必须大于或等于0")
         @Schema(description = "销量")
         private Integer sold;
 
-        // 库存
+        @Min(value = 0, message = "库存必须大于或等于0")
         @Schema(description = "库存")
         private Integer stoke;
 
-        // 乐观锁
         @Version
         @Schema(description = "乐观锁")
         private Integer version;
 
-        // 商户名称
         @Schema(description = "商户名称")
         private String merchantName;
 
-        // 状态（0上架，1下架）
         @Schema(description = "状态（0上架，1下架）")
         private Integer status;
 
-        // 创建时间
+        @TableField(fill = FieldFill.INSERT)
         @Schema(description = "创建时间")
         private LocalDateTime createTime;
 
+        @TableField(fill = FieldFill.INSERT_UPDATE)
         @Schema(description = "更新时间")
         private LocalDateTime updateTime;
 }

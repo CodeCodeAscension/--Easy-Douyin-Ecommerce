@@ -2,6 +2,7 @@ package com.example.product.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 
@@ -26,6 +27,7 @@ public class CreateProductDto {
     private Float price;
 
     @Schema(description = "商品库存")
+    @Min(0)
     private Integer stock;
 
     @NotEmpty
@@ -37,5 +39,5 @@ public class CreateProductDto {
     private List<String> categories;
 
     @Schema(description = "状态（0上架，1下架）")
-    private Integer status;
+    private Integer status = 0;
 }

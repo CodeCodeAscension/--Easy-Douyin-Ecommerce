@@ -142,6 +142,8 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
             saveProductCategories(product.getId(), categoryIds);
         }
 
+        product.setUpdateTime(LocalDateTime.now());
+
         // 4. 更新商品
         if (!updateById(product)) {
             log.error("商品更新失败: {}", updateProductDto);
@@ -173,7 +175,7 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
             ProductInfoVo vo = convertToVo(source);
             return ResponseResult.success(vo);
         } catch (IOException e) {
-            throw new RuntimeException("ES查询失败", e);
+            throw new SystemException("ES查询失败", e);
         }
     }
 
@@ -192,7 +194,6 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
         if (StringUtils.hasText(listProductsDto.getCategoryName())) {
             // 使用 wildcard 查询实现模糊匹配
             boolQuery.must(QueryBuilders.wildcardQuery(ProductsIndex.categoryName, "*" + listProductsDto.getCategoryName() + "*"));
-//            boolQuery.must(QueryBuilders.fuzzyQuery(ProductsIndex.categoryName, listProductsDto.getCategoryName()).fuzziness(Fuzziness.AUTO));
         }
 
         // 分页设置
@@ -215,7 +216,7 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
             pageResult.setRecords(products);
             return ResponseResult.success(pageResult);
         } catch (IOException e) {
-            throw new RuntimeException("ES查询失败", e);
+            throw new SystemException("ES查询失败", e);
         }
     }
 
@@ -288,7 +289,7 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
             pageResult.setRecords(products);
             return ResponseResult.success(pageResult);
         } catch (IOException e) {
-            throw new RuntimeException("ES查询失败", e);
+            throw new SystemException("ES查询失败", e);
         }
     }
 
@@ -308,7 +309,7 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
 
         if (product == null) {
             log.error("商品不存在，productId: {}", productId);
-            return ResponseResult.error(ProductStatusEnum.PRODUCT_NOT_EXIST.getErrorCode(), ProductStatusEnum.PRODUCT_NOT_EXIST.getErrorMessage());
+            throw new NotFoundException("商品不存在");
         }
 
         // 减少销量
@@ -340,14 +341,14 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
 
         if (product == null) {
             log.error("商品不存在，productId: {}", productId);
-            return ResponseResult.error(ProductStatusEnum.PRODUCT_NOT_EXIST.getErrorCode(), ProductStatusEnum.PRODUCT_NOT_EXIST.getErrorMessage());
+            throw new NotFoundException("商品不存在");
         }
 
         // 减少库存
         Integer decStock = decProductDto.getDecStock();
         if (product.getStoke() < decStock) {
             log.error("库存不足，productId: {}", productId);
-            return ResponseResult.error(ProductStatusEnum.PRODUCT_STOCK_NOT_ENOUGH.getErrorCode(), ProductStatusEnum.PRODUCT_STOCK_NOT_ENOUGH.getErrorMessage());
+            throw new DatabaseException("库存不足");
         }
 
         product.setStoke(product.getStoke() - decStock);
@@ -469,7 +470,7 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
                     .map(name -> new Category().setCategoryName(name))
                     .collect(Collectors.toList());
 
-            // 构建创建时间和更新时间
+            // 增加创建时间和更新时间
             LocalDateTime now = LocalDateTime.now();
             newCategories.forEach(c -> {
                 c.setCreateTime(now);
@@ -530,14 +531,12 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
         doc.put(ProductsIndex.merchantName, product.getMerchantName());
         doc.put(ProductsIndex.status, product.getStatus());
         doc.put(ProductsIndex.categoryName, categoryNames);
-//        doc.put("createTime", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(product.getCreateTime()));
-//        doc.put("updateTime", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(product.getUpdateTime()));
         doc.put(ProductsIndex.createTime, product.getCreateTime());
         doc.put(ProductsIndex.updateTime, product.getUpdateTime());
         log.info(product.getCreateTime().toString());
 
         // 更新ES
-        UpdateRequest request = new UpdateRequest("products", productId.toString())
+        UpdateRequest request = new UpdateRequest(ProductsIndex.name, productId.toString())
                 .doc(doc, XContentType.JSON)
                 .docAsUpsert(true);
 
