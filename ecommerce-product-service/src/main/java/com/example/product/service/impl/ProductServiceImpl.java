@@ -95,6 +95,8 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
                 .stoke(createProductDto.getStock() != null ? createProductDto.getStock() : 0) // 需要根据业务需求调整
                 .merchantName(createProductDto.getMerchantName())
                 .status(createProductDto.getStatus())
+                .createTime(LocalDateTime.now())
+                .updateTime(LocalDateTime.now())
                 .build();
 
         // 3. 保存商品
@@ -466,6 +468,14 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
             List<Category> newCategories = notExist.stream()
                     .map(name -> new Category().setCategoryName(name))
                     .collect(Collectors.toList());
+
+            // 构建创建时间和更新时间
+            LocalDateTime now = LocalDateTime.now();
+            newCategories.forEach(c -> {
+                c.setCreateTime(now);
+                c.setUpdateTime(now);
+            });
+
             if (!iCategoryService.saveBatch(newCategories)) {
                 throw new DatabaseException("保存分类失败");
             }
@@ -485,7 +495,12 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
         List<ProCateRel> relations = categoryIds.stream()
                 .map(cid -> new ProCateRel(productId, cid))
                 .collect(Collectors.toList());
-
+        // 保存创建时间和更新时间
+        LocalDateTime now = LocalDateTime.now();
+        relations.forEach(r -> {
+            r.setCreateTime(now);
+            r.setUpdateTime(now);
+        });
         if (!iProCateRelService.saveBatch(relations)) {
             throw new RuntimeException("保存分类关系失败");
         }
@@ -506,17 +521,20 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
 
         // 构建ES文档
         Map<String, Object> doc = new HashMap<>();
-        doc.put("id", product.getId());
-        doc.put("name", product.getName());
-        doc.put("description", product.getDescription());
-        doc.put("price", product.getPrice());
-        doc.put("sold", product.getSold());
-        doc.put("stoke", product.getStoke());
-        doc.put("merchantName", product.getMerchantName());
-        doc.put("status", product.getStatus());
-        doc.put("categories", categoryNames);
-        doc.put("createTime", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(product.getCreateTime()));
-        doc.put("updateTime", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(product.getUpdateTime()));
+        doc.put(ProductsIndex.productId, product.getId());
+        doc.put(ProductsIndex.productName, product.getName());
+        doc.put(ProductsIndex.description, product.getDescription());
+        doc.put(ProductsIndex.price, product.getPrice());
+        doc.put(ProductsIndex.sold, product.getSold());
+        doc.put(ProductsIndex.stock, product.getStoke());
+        doc.put(ProductsIndex.merchantName, product.getMerchantName());
+        doc.put(ProductsIndex.status, product.getStatus());
+        doc.put(ProductsIndex.categoryName, categoryNames);
+//        doc.put("createTime", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(product.getCreateTime()));
+//        doc.put("updateTime", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(product.getUpdateTime()));
+        doc.put(ProductsIndex.createTime, product.getCreateTime());
+        doc.put(ProductsIndex.updateTime, product.getUpdateTime());
+        log.info(product.getCreateTime().toString());
 
         // 更新ES
         UpdateRequest request = new UpdateRequest("products", productId.toString())
