@@ -18,6 +18,7 @@ import com.example.product.domain.po.ProCateRel;
 import com.example.product.domain.po.Product;
 import com.example.product.domain.vo.ProductInfoVo;
 import com.example.product.enums.ProductStatusEnum;
+import com.example.product.index.ProductsIndex;
 import com.example.product.mapper.productMapper;
 import com.example.product.service.ICategoryService;
 import com.example.product.service.IProCateRelService;
@@ -32,6 +33,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -68,6 +70,7 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
 
     @Resource
     private RestHighLevelClient elasticsearchClient;
+
 
     // ================================ 商品操作 ================================
     /**
@@ -158,7 +161,7 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
      */
     @Override
     public ResponseResult<ProductInfoVo> getProductInfoById(Long productId) {
-        GetRequest request = new GetRequest("products", productId.toString());
+        GetRequest request = new GetRequest(ProductsIndex.name, productId.toString());
         try {
             GetResponse response = elasticsearchClient.get(request, RequestOptions.DEFAULT);
             if (!response.isExists()) {
@@ -179,13 +182,15 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
      */
     @Override
     public ResponseResult<IPage<ProductInfoVo>> getProductInfoByCategory(ListProductsDto listProductsDto) {
-        SearchRequest searchRequest = new SearchRequest("products");
+        SearchRequest searchRequest = new SearchRequest(ProductsIndex.name);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
         // 构建查询条件
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         if (StringUtils.hasText(listProductsDto.getCategoryName())) {
-            boolQuery.filter(QueryBuilders.termQuery("categories", listProductsDto.getCategoryName()));
+            // 使用 wildcard 查询实现模糊匹配
+            boolQuery.must(QueryBuilders.wildcardQuery(ProductsIndex.categoryName, "*" + listProductsDto.getCategoryName() + "*"));
+//            boolQuery.must(QueryBuilders.fuzzyQuery(ProductsIndex.categoryName, listProductsDto.getCategoryName()).fuzziness(Fuzziness.AUTO));
         }
 
         // 分页设置
@@ -219,26 +224,42 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
      */
     @Override
     public ResponseResult<IPage<ProductInfoVo>> seachProductInfo(SearchProductsDto searchProductsDto) {
-        SearchRequest searchRequest = new SearchRequest("products");
+        SearchRequest searchRequest = new SearchRequest(ProductsIndex.name);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
 
         // 商品名称模糊查询
         if (StringUtils.hasText(searchProductsDto.getProductName())) {
-            boolQuery.must(QueryBuilders.matchQuery("name", searchProductsDto.getProductName()));
+//            boolQuery.must(QueryBuilders.wildcardQuery("name", "*" + searchProductsDto.getProductName() + "*"));
+            boolQuery.must(QueryBuilders.fuzzyQuery(ProductsIndex.productName, searchProductsDto.getProductName()).fuzziness(Fuzziness.AUTO));
         }
 
         // 价格范围查询
         if (searchProductsDto.getPriceLow() != null || searchProductsDto.getPriceHigh() != null) {
-            RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery("price");
+            RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery(ProductsIndex.price);
             if (searchProductsDto.getPriceLow() != null) rangeQuery.gte(searchProductsDto.getPriceLow());
             if (searchProductsDto.getPriceHigh() != null) rangeQuery.lte(searchProductsDto.getPriceHigh());
             boolQuery.filter(rangeQuery);
         }
 
-        // 分类查询
+        // 分类查询（模糊匹配）
         if (StringUtils.hasText(searchProductsDto.getCategoryName())) {
-            boolQuery.filter(QueryBuilders.termQuery("categories", searchProductsDto.getCategoryName()));
+            boolQuery.must(QueryBuilders.wildcardQuery(ProductsIndex.categoryName, "*" + searchProductsDto.getCategoryName() + "*"));
+        }
+
+        // 商家名称查询
+        if (StringUtils.hasText(searchProductsDto.getMerchantName())) {
+            boolQuery.must(QueryBuilders.wildcardQuery(ProductsIndex.merchantName, "*" + searchProductsDto.getMerchantName() + "*"));
+        }
+
+        // 销量查询
+        if (searchProductsDto.getSold() != null) {
+            boolQuery.filter(QueryBuilders.rangeQuery(ProductsIndex.sold).gte(searchProductsDto.getSold()));
+        }
+
+        // 库存查询
+        if (searchProductsDto.getStoke() != null) {
+            boolQuery.filter(QueryBuilders.rangeQuery(ProductsIndex.stock).gte(searchProductsDto.getStoke()));
         }
 
         // 分页设置
@@ -255,6 +276,11 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
             List<ProductInfoVo> products = Arrays.stream(response.getHits().getHits())
                     .map(hit -> convertToVo(hit.getSourceAsMap()))
                     .collect(Collectors.toList());
+
+//            // 按创建时间倒序
+//            if (products.size() > 1) {
+//                products.sort(Comparator.comparing(ProductInfoVo::getCreateTime).reversed());
+//            }
 
             Page<ProductInfoVo> pageResult = new Page<>(page, size, response.getHits().getTotalHits().value);
             pageResult.setRecords(products);
@@ -346,7 +372,7 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
 
         // 2. 同步到Elasticsearch
         try {
-            UpdateRequest request = new UpdateRequest("products", product.getId().toString())
+            UpdateRequest request = new UpdateRequest(ProductsIndex.name, product.getId().toString())
                     .doc(convertToMap(product), XContentType.JSON)
                     .docAsUpsert(true); // 不存在时创建文档
 
@@ -360,16 +386,16 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
 
     private Map<String, Object> convertToMap(Product product) {
         Map<String, Object> map = new HashMap<>();
-        map.put("id", product.getId());
-        map.put("name", product.getName());
-        map.put("description", product.getDescription());
-        map.put("price", product.getPrice());
-        map.put("sold", product.getSold());
-        map.put("stock", product.getStoke());
-        map.put("merchantName", product.getMerchantName());
-        map.put("status", product.getStatus());
-        map.put("createTime", product.getCreateTime());
-        map.put("updateTime", product.getUpdateTime());
+        map.put(ProductsIndex.productId, product.getId());
+        map.put(ProductsIndex.productName, product.getName());
+        map.put(ProductsIndex.description, product.getDescription());
+        map.put(ProductsIndex.price, product.getPrice());
+        map.put(ProductsIndex.sold, product.getSold());
+        map.put(ProductsIndex.stock, product.getStoke());
+        map.put(ProductsIndex.merchantName, product.getMerchantName());
+        map.put(ProductsIndex.status, product.getStatus());
+        map.put(ProductsIndex.createTime, product.getCreateTime());
+        map.put(ProductsIndex.updateTime, product.getUpdateTime());
 
         // 获取关联表信息
         List<ProCateRel> proCateRels = iProCateRelService.list(Wrappers.<ProCateRel>lambdaQuery().eq(ProCateRel::getProductId, product.getId()));
@@ -378,20 +404,36 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
         // 获取分类名称列表
         List<Category> categories = iCategoryService.listByIds(categoryIds);
         List<String> categoryNames = categories.stream().map(Category::getCategoryName).collect(Collectors.toList());
-        map.put("categories", categoryNames);
+        map.put(ProductsIndex.categoryName, categoryNames);
         return map;
     }
 
     private ProductInfoVo convertToVo(Map<String, Object> source) {
+        // 处理 categories 字段
+        Object categoriesValue = source.get(ProductsIndex.categoryName);
+        List<String> categories = new ArrayList<>();
+
+        if (categoriesValue instanceof List) {
+            // 已经是列表类型
+            for (Object item : (List<?>) categoriesValue) {
+                categories.add(item.toString());
+            }
+        } else if (categoriesValue instanceof String) {
+            // 如果是字符串，按业务规则解析（如逗号分隔）
+            String[] parts = ((String) categoriesValue).split(",");
+            categories = Arrays.stream(parts)
+                    .map(String::trim)
+                    .collect(Collectors.toList());
+        }
         return ProductInfoVo.builder()
                 .id(Long.parseLong(source.get("id").toString()))
                 .name((String) source.get("name"))
                 .description((String) source.get("description"))
-                .price((Float) source.get("price"))
+                .price(((Number) source.get("price")).floatValue())
                 .sold((Integer) source.get("sold"))
                 .stoke((Integer) source.get("stock"))
                 .merchantName((String) source.get("merchantName"))
-                .categories((List<String>) source.get("categories"))
+                .categories(categories)
                 .status((Integer) source.get("status"))
                 .createTime((LocalDateTime) source.get("createTime"))
                 .updateTime((LocalDateTime) source.get("updateTime"))

@@ -1,5 +1,6 @@
 package com.example.product.domain.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
@@ -24,6 +25,7 @@ public class UpdateProductDto {
 
     @NonNull
     @Schema(description = "商品价格")
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT)
     private Float price;
 
     @Schema(description = "商品库存")

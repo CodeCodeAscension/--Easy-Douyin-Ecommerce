@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/products")
-//@RequestMapping("/products")
+//@RequestMapping("/api/v1/products")
+@RequestMapping("/products")
 @Tag(name = "商品服务接口", description = "商品服务接口")
 public class ProductController {
 
