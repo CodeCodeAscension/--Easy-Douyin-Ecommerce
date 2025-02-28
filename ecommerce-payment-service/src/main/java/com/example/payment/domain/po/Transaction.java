@@ -1,22 +1,19 @@
 package com.example.payment.domain.po;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+import com.example.payment.enums.TransactionStatusEnum;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("credit")
+@TableName("transaction")
 @Builder
 public class Transaction implements Serializable{
 
@@ -24,9 +21,10 @@ public class Transaction implements Serializable{
 
     // 交易ID
     @TableId(value = "transaction_id", type = IdType.ASSIGN_UUID)
-    private String transId;
+    private String transactionId;
 
-    private String preTransId;
+    @TableField("pre_transaction_id")
+    private String preTransactionId;
 
     private Long userId;
 
@@ -39,7 +37,7 @@ public class Transaction implements Serializable{
     private Float amount;
 
     // 交易状态（0成功，1失败）
-    private Integer status;
+    private TransactionStatusEnum status;
 
     // 失败原因
     private String reason;

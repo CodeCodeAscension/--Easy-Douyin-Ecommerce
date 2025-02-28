@@ -1,5 +1,6 @@
 package com.example.payment.controller.v1;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.example.common.domain.ResponseResult;
 import com.example.common.util.UserContextUtil;
 import com.example.payment.domain.dto.*;
@@ -63,12 +64,25 @@ public class CreditController {
 
     /**
      * 获取银行卡信息
-     * @param creditGetDto 获取银行卡信息DTO
+     * @param cardNumber 银行卡号
      * @return ResponseResult对象
      */
-    @GetMapping
+    @GetMapping("/{cardNumber}")
     @Operation(summary = "获取银行卡信息")
-    public ResponseResult<CreditVo> getCredit(@RequestBody @Validated CreditGetDto creditGetDto) {
-        return ResponseResult.success(creditService.getCredit(creditGetDto.getCardNumber()));
+    public ResponseResult<CreditVo> getCreditById(@PathVariable("cardNumber") String cardNumber) {
+        return ResponseResult.success(creditService.getCredit(cardNumber));
+    }
+
+    /**
+     * 获取某一个用户的所有银行卡信息
+     * @param pageNum 页号
+     * @param pageSize 页大小
+     * @return 银行卡信息
+     */
+    @GetMapping
+    @Operation(summary = "获取该用户的所有银行卡信息")
+    public ResponseResult<IPage<CreditVo> > getCredits(@RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum, @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
+        Long userId = UserContextUtil.getUserId();
+        return ResponseResult.success(creditService.getCreditListByUserId(userId, pageNum, pageSize));
     }
 }

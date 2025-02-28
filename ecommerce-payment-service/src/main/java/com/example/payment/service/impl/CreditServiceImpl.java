@@ -2,6 +2,8 @@ package com.example.payment.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.common.exception.*;
 import com.example.common.util.UserContextUtil;
@@ -159,11 +161,12 @@ public class CreditServiceImpl extends ServiceImpl<CreditMapper, Credit> impleme
 
         // 更新数据库余额
         credit.setBalance(credit.getBalance() - amount);
-        LambdaUpdateWrapper<Credit> wrapper = new LambdaUpdateWrapper<>();
-        wrapper.eq(Credit::getCardNumber, cardNumber)
-                .set(Credit::getBalance, credit.getBalance() - amount);
-        this.update(credit, wrapper);
+        this.updateById(credit);
     }
 
-
+    @Override
+    public IPage<CreditVo> getCreditListByUserId(Long userId, Integer pageNum, Integer pageSize) throws UserException, SystemException {
+        IPage<CreditVo> page = new Page<>(pageNum, pageSize);
+        return creditMapper.selectToVo(page, userId);
+    }
 }

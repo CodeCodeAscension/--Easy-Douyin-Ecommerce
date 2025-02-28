@@ -50,13 +50,26 @@ public class ExceptionAdvice {
 
     @ExceptionHandler(SystemException.class)
     public ResponseResult<Object> systemException(SystemException e) {
-        log.error("SystemException: "+e.getMessage(), e);
+        log.error("SystemException: {}", e.getMessage(), e);
         return ResponseResult.error(e.getCode(), e.getMessage());
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseResult<Object> runtimeException(RuntimeException e) {
+        log.info("RuntimeException: {} {}", e.getMessage(), e.getCause().getMessage());
+        Throwable throwable = e.getCause();
+        if (throwable instanceof UserException) {
+            return ResponseResult.error(((UserException) throwable).getCode(), throwable.getMessage());
+        } else if (throwable instanceof SystemException) {
+            return ResponseResult.error(ResultCode.SERVER_ERROR, throwable.getMessage());
+        } else {
+            return ResponseResult.error(ResultCode.SERVER_ERROR, e.getMessage());
+        }
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseResult<Object> exception(Exception e) {
-        log.error("UnknownException: "+e.getMessage(), e);
+        log.error("UnknownException: {}", e.getMessage(), e);
         return ResponseResult.error(ResultCode.SERVER_ERROR, e.getMessage());
     }
 }

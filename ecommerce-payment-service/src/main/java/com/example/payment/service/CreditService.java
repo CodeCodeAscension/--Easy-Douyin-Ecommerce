@@ -1,5 +1,6 @@
 package com.example.payment.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.common.exception.SystemException;
 import com.example.common.exception.UserException;
@@ -65,4 +66,15 @@ public interface CreditService extends IService<Credit> {
      * @throws SystemException 系统异常
      */
     void pay(Long userId, String cardNumber, Float amount) throws UserException, SystemException;
+
+    /**
+     * 获得某个用户的银行卡所有信息
+     * @param userId 用户ID
+     * @param pageNum 页数
+     * @param pageSize 页大小
+     * @return IPage(CreditVo)对象
+     * @throws UserException 用户异常
+     * @throws SystemException 系统异常
+     */
+    IPage<CreditVo> getCreditListByUserId(Long userId, Integer pageNum, Integer pageSize) throws UserException, SystemException;
 }

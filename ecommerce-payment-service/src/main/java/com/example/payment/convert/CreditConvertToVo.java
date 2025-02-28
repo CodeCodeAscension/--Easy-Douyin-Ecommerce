@@ -9,7 +9,7 @@ public class CreditConvertToVo {
     public static CreditVo convertToVo(Credit credit) {
         return CreditVo.builder()
                 .cardNumber(credit.getCardNumber())
-                .cvv(credit.getCardCvv())
+                .cardCvv(credit.getCardCvv())
                 .userId(credit.getUserId())
                 .balance(credit.getBalance())
                 .expireDate(credit.getExpireDate())

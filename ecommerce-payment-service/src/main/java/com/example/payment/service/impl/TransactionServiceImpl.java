@@ -1,14 +1,19 @@
 package com.example.payment.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.api.client.OrderClient;
 import com.example.api.client.ProductClient;
 import com.example.api.domain.dto.payment.ChargeCancelDto;
 import com.example.api.domain.dto.payment.ChargeDto;
+import com.example.api.domain.dto.product.DecProductDto;
 import com.example.api.domain.po.CartItem;
 import com.example.api.domain.vo.order.OrderInfoVo;
 import com.example.api.domain.vo.payment.ChargeVo;
 import com.example.api.domain.vo.product.ProductInfoVo;
+import com.example.api.enums.OrderStatus;
 import com.example.common.config.rabbitmq.PayQueue;
 import com.example.common.config.rabbitmq.RabbitQueuesConfig;
 import com.example.common.domain.ResponseResult;
@@ -18,10 +23,13 @@ import com.example.common.exception.*;
 import com.example.common.util.UserContextUtil;
 import com.example.payment.domain.po.Credit;
 import com.example.payment.domain.po.Transaction;
+import com.example.payment.domain.vo.TransactionInfoVo;
+import com.example.payment.enums.TransactionStatusEnum;
 import com.example.payment.mapper.CreditMapper;
 import com.example.payment.mapper.TransactionMapper;
 import com.example.payment.service.CreditService;
 import com.example.payment.service.TransactionService;
+import com.example.payment.util.RedisHashUtil;
 import io.seata.spring.annotation.GlobalTransactional;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +41,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -44,11 +51,14 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
 
     // 新增常量定义
     // 使用ConcurrentHashMap存储待取消的交易ID和取消时间戳
-    private final Map<String, Long> scheduledCancellations = new ConcurrentHashMap<>();
-    private static final String CANCEL_LOCK_KEY = "payment:cancel-lock:";
+//    private final Map<String, Long> scheduledCancellations = new ConcurrentHashMap<>();
+    private static final String CANCEL_LOCK_KEY = "ecommerce-payment:cancel-lock:";
+    private static final String SCHEDULED_KEY = "ecommerce-payment:scheduled:";
 
     // 新增Redis依赖注入
     private final RedisTemplate<String, Object> redisTemplate;
+//    private final HashOperations<String, String, Long> scheduledHashOperations;
+    private final RedisHashUtil scheduledHashOperations;
 
     @Resource
     private CreditMapper creditMapper;
@@ -65,17 +75,30 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
 
     private final ProductClient productClient;
 
+    private final TransactionMapper transactionMapper;
+
     @GlobalTransactional(name = "paymentCharge", rollbackFor = Exception.class)
     @Override
     public ChargeVo charge(ChargeDto chargeDto) throws UserException, SystemException {
         try {
+            // 检查这个orderId是否已经创建了交易信息
+            LambdaQueryWrapper<Transaction> exist = new LambdaQueryWrapper<>();
+            exist.eq(Transaction::getOrderId, chargeDto.getOrderId());
+            if(transactionMapper.exists(exist)) {
+                throw new BadRequestException("该订单ID已经生成了对应的交易记录");
+            }
             Long userId = UserContextUtil.getUserId();
             Credit credit = creditService.checkCreditPermission(userId, chargeDto.getCreditId());
 
             // 验证订单状态
             ResponseResult<OrderInfoVo> orderResult = orderClient.getOrderById(chargeDto.getOrderId());
-            if (orderResult.getCode() != 200 || orderResult.getData().getStatus() != 1) {
-                throw new BadRequestException("订单状态异常");
+            if (orderResult.getCode() != 200) {
+                log.error("订单服务状态异常：{}", orderResult.getMsg());
+                throw new SystemException("订单服务状态异常："+orderResult.getMsg());
+            } else if (orderResult.getData() == null) {
+                throw new NotFoundException("未找到指定的订单");
+            } else if (!Objects.equals(orderResult.getData().getStatus(), OrderStatus.WAIT_FOR_PAY.getCode())) {
+                throw new BadRequestException("该订单不处于待支付的状态");
             }
 
             // 生成预支付记录
@@ -92,40 +115,59 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
 
             ChargeVo chargeVo = new ChargeVo();
             chargeVo.setTransactionId(transId);
+            chargeVo.setPreTransactionId(transId);
             return chargeVo;
+        } catch (UserException e) {
+            log.info("支付请求处理失败: {}", e.getMessage());
+            throw e;
         } catch (Exception e) {
             log.error("支付请求处理失败: {}", e.getMessage());
-            throw new BadRequestException(e.getMessage());
+            throw new SystemException(e);
         }
     }
 
     @GlobalTransactional(name = "paymentConfirm", rollbackFor = Exception.class)
     @Override
-    public void confirmCharge(String transactionId) throws UserException, SystemException {
+    public void confirmCharge(String preTransactionId) throws UserException, SystemException {
+        Transaction transaction = validateTransaction(preTransactionId, TransactionStatusEnum.WAIT_FOR_CONFIRM);
+//      Credit credit = creditMapper.selectById(transaction.getCreditId());
+        String transactionId = transaction.getTransactionId();
         try {
-            Transaction transaction = validateTransaction(transactionId, 0);
-            Credit credit = creditMapper.selectById(transaction.getCreditId());
-
             // 使用Redis分布式锁防止重复确认
-            String lockKey = CANCEL_LOCK_KEY + transactionId;
+            String lockKey = CANCEL_LOCK_KEY + transaction.getTransactionId();
             Boolean lockAcquired = redisTemplate.opsForValue().setIfAbsent(lockKey, "locked", 30, TimeUnit.SECONDS);
             if (Boolean.FALSE.equals(lockAcquired)) {
                 throw new BadRequestException("支付操作正在进行中，请稍后重试");
             }
-
             try {
                 // 扣除余额
-                if (credit.getBalance() < transaction.getAmount()) {
-                    throw new BadRequestException("余额不足");
+                creditService.pay(transaction.getUserId(), transaction.getCreditId(), transaction.getAmount());
+//                if (credit.getBalance() < transaction.getAmount()) {
+//                    throw new BadRequestException("余额不足");
+//                }
+//                credit.setBalance(credit.getBalance() - transaction.getAmount());
+//                creditMapper.updateById(credit);
+                // 扣除库存
+                String orderId = transaction.getOrderId();
+                ResponseResult<OrderInfoVo> orderResult = orderClient.getOrderById(orderId);
+                if (orderResult.getCode() != ResultCode.SUCCESS || orderResult.getData() == null) {
+                    throw new SystemException(orderResult.getMsg());
                 }
-                credit.setBalance(credit.getBalance() - transaction.getAmount());
-                creditMapper.updateById(credit);
+                orderResult.getData().getCartItems().forEach(cartItem -> {
+                    DecProductDto dto = new DecProductDto();
+                    dto.setProductId(cartItem.getProductId());
+                    dto.setDecStock(cartItem.getQuantity());
+                    ResponseResult<Object> response = productClient.decProductStock(dto);
+                    if (response.getCode() != ResultCode.SUCCESS) {
+                        throw new SystemException(response.getMsg());
+                    }
+                });
 
                 // 更新交易状态
-                updateTransactionStatus(transaction, 1, null);
+                updateTransactionStatus(transaction, TransactionStatusEnum.PAY_SUCCESS, null);
 
                 // 取消定时任务
-                cancelScheduledTask(transactionId);
+                cancelScheduledTask(transaction.getTransactionId());
 
                 List<ProductQuantity> products = getProducts(transaction.getOrderId());
                 // 发送支付成功消息
@@ -136,33 +178,39 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
         } catch (Exception e) {
             log.error("支付确认失败: {}", e.getMessage());
             handlePaymentFailure(transactionId, e.getMessage());
-            throw new BadRequestException(e.getMessage());
+            throw new SystemException(e.getMessage());
         }
     }
 
-    @GlobalTransactional(name = "paymentCancel", rollbackFor = Exception.class)
     @Override
-    public void cancelCharge(String transactionId) throws UserException, SystemException {
+    public void cancelCharge(String preTransactionId) throws UserException, SystemException {
 //        checkUserLogin();
-        Transaction transaction = this.getById(transactionId);
-        if (transaction == null) {
-            throw new NotFoundException("交易记录不存在");
-        }
+        Long userId = UserContextUtil.getUserId();
+        cancelCharge(userId, preTransactionId);
+    }
 
-        if (transaction.getStatus() != 0) {
-            throw new BadRequestException("当前状态无法取消");
-        }
-
+    /**
+     * 取消支付（内部方法）
+     * @param userId 用户ID
+     * @param preTransactionId 预交易ID
+     * @throws UserException 用户异常
+     * @throws SystemException 系统异常
+     */
+    @GlobalTransactional(name = "paymentCancel", rollbackFor = Exception.class)
+    private void cancelCharge(Long userId, String preTransactionId) throws UserException, SystemException {
+        // 取消定时任务
+        cancelScheduledTask(preTransactionId);
+        Transaction transaction = transactionMapper.findByIdAndPreId(userId, null, preTransactionId);
         // 更新交易状态为已取消
-        transaction.setStatus(3);
+        transaction.setStatus(TransactionStatusEnum.CANCELED);
         boolean update = this.updateById(transaction);
         if (!update) {
             log.error("交易状态更新失败");
             throw new DatabaseException("交易状态更新失败", new ConcurrentModificationException());
         }
-
         sendPaymentCancelMessage(transaction);
     }
+
 
     @Override
     public void autoCancelCharge(ChargeCancelDto chargeCancelDto) throws UserException, SystemException {
@@ -170,27 +218,53 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
         String transactionId = chargeCancelDto.getPreTransactionId();
 
         // 验证交易记录
-        Transaction transaction = this.getById(transactionId);
-        if (transaction == null) {
-            throw new NotFoundException("交易记录不存在");
+        Long userId = UserContextUtil.getUserId();
+        Transaction transaction = transactionMapper.findByIdAndPreId(userId, null, transactionId);
+        if(transaction == null) {
+            throw new NotFoundException("未找到指定的交易记录");
         }
-        if (transaction.getStatus() != 0) {
-            throw new BadRequestException("当前状态无法取消");
+        if(!transaction.getStatus().equals(TransactionStatusEnum.WAIT_FOR_CONFIRM)) {
+            throw new UserException(ResultCode.FORBIDDEN, "订单当前的状态不可以设置定时取消");
         }
 
+        // 先取消之前的定时任务
+        cancelScheduledTask(transactionId);
         if (chargeCancelDto.getStatus()) {
             // 设置/修改定时取消
-            scheduleAutoCancel(transactionId, chargeCancelDto.getCancelAfterMinutes());
+            scheduleAutoCancel(transaction.getTransactionId(), chargeCancelDto.getCancelAfterMinutes());
         }
     }
 
+    @Override
+    public TransactionInfoVo getTransaction(Long userId, String transactionId, String preTransactionId) throws UserException, SystemException {
+        Transaction transaction = transactionMapper.findByIdAndPreId(userId, transactionId, preTransactionId);
+        if(transaction == null) {
+            throw new NotFoundException("未找到指定ID的交易记录");
+        }
+        return TransactionInfoVo.builder()
+                .transactionId(transaction.getTransactionId())
+                .preTransactionId(transaction.getPreTransactionId())
+                .status(transaction.getStatus())
+                .amount(transaction.getAmount())
+                .createTime(transaction.getCreateTime())
+                .updateTime(transaction.getUpdateTime())
+                .reason(transaction.getReason())
+                .orderId(transaction.getOrderId())
+                .creditId(transaction.getCreditId())
+                .build();
+    }
 
+    @Override
+    public IPage<TransactionInfoVo> getTransactionInfos(Integer pageNum, Integer pageSize, Long userId) throws UserException, SystemException {
+        IPage<TransactionInfoVo> page = new Page<>(pageNum, pageSize);
+        return transactionMapper.findByUserId(page, userId);
+    }
 
-//    工具方法
+    //    工具方法
 
     /**
      * 发送支付启动消息
-     * @param preTransaction 预交易ID
+     * @param preTransaction 交易对象
      */
     private void sendPaymentStartMessage(Transaction preTransaction) {
         PayStartMessage message = new PayStartMessage();
@@ -198,20 +272,20 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
 
         rabbitTemplate.convertAndSend(
                 mqConfig.getExchangeName(),
-                mqConfig.getQueues().pay.getStart(),
+                mqConfig.getQueues().getPay().getStart(),
                 message
         );
     }
 
     /**
      * 发送支付取消消息
-     * @param transaction 交易ID
+     * @param transaction 交易对象
      */
     private void sendPaymentCancelMessage(Transaction transaction) {
         PayCancelMessage message = new PayCancelMessage();
         message.setOrderId(transaction.getOrderId());
 
-        PayQueue payQueue = mqConfig.getQueues().pay;
+        PayQueue payQueue = mqConfig.getQueues().getPay();
         rabbitTemplate.convertAndSend(
                 mqConfig.getExchangeName(),
                 payQueue.getCancel(),
@@ -221,7 +295,7 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
 
     /**
      * 发送支付失败消息
-     * @param transaction 交易ID
+     * @param transaction 交易对象
      * @param products 商品信息
      */
     private void sendPaymentFailedMessage(Transaction transaction, List<ProductQuantity> products) {
@@ -230,7 +304,7 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
         message.setProducts(products);
         rabbitTemplate.convertAndSend(
                 mqConfig.getExchangeName(),
-                mqConfig.getQueues().pay.getFail(),
+                mqConfig.getQueues().getPay().getFail(),
                 message
         );
     }
@@ -246,7 +320,7 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
         message.setProducts(products);
         rabbitTemplate.convertAndSend(
                 mqConfig.getExchangeName(),
-                mqConfig.getQueues().pay.getSuccess(),
+                mqConfig.getQueues().getPay().getSuccess(),
                 message
         );
     }
@@ -304,13 +378,13 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
      */
     private Transaction buildPreTransaction(Credit credit, ChargeDto chargeDto, String transId, Float amount) {
         return Transaction.builder()
-                .transId(transId)
-                .preTransId(transId)
+                .transactionId(transId)
+                .preTransactionId(transId)
                 .userId(credit.getUserId())
                 .orderId(chargeDto.getOrderId())
                 .creditId(chargeDto.getCreditId())
                 .amount(amount)
-                .status(0)
+                .status(TransactionStatusEnum.WAIT_FOR_CONFIRM)
                 .createTime(LocalDateTime.now())
                 .updateTime(LocalDateTime.now())
                 .deleted(0)
@@ -325,7 +399,7 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
     private void handlePaymentFailure(String transactionId, String reason) {
         Transaction transaction = this.getById(transactionId);
         if (transaction != null) {
-            updateTransactionStatus(transaction, 2, reason);
+            updateTransactionStatus(transaction, TransactionStatusEnum.PAY_FAIL, reason);
             List<ProductQuantity> products = getProducts(transaction.getOrderId());
             sendPaymentFailedMessage(transaction, products);
             cancelScheduledTask(transactionId);
@@ -338,7 +412,7 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
      * @param status 交易状态
      * @param reason 原因
      */
-    private void updateTransactionStatus(Transaction transaction, Integer status, String reason) {
+    private void updateTransactionStatus(Transaction transaction, TransactionStatusEnum status, String reason) {
         transaction.setStatus(status);
         transaction.setReason(reason);
         transaction.setUpdateTime(LocalDateTime.now());
@@ -352,7 +426,8 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
      */
     void scheduleAutoCancel(String transactionId, int minutes) {
         long cancelTime = System.currentTimeMillis() + minutes * 60 * 1000L;
-        scheduledCancellations.put(transactionId, cancelTime);
+//        scheduledCancellations.put(transactionId, cancelTime);
+        scheduledHashOperations.put(SCHEDULED_KEY, transactionId, cancelTime);
         log.info("已设置交易{}在{}分钟后自动取消", transactionId, minutes);
     }
 
@@ -361,7 +436,8 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
      * @param transactionId 交易ID
      */
     private void cancelScheduledTask(String transactionId) {
-        scheduledCancellations.remove(transactionId);
+//        scheduledCancellations.remove(transactionId);
+        scheduledHashOperations.delete(SCHEDULED_KEY, transactionId);
         log.info("已移除交易{}的自动取消任务", transactionId);
     }
 
@@ -372,10 +448,10 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
     public void processScheduledCancellations() {
         long now = System.currentTimeMillis();
         // 创建副本避免并发修改
-        Set<String> transactionIds = new HashSet<>(scheduledCancellations.keySet());
+        Set<String> transactionIds = new HashSet<>(scheduledHashOperations.keys(SCHEDULED_KEY));
 
         for (String transactionId : transactionIds) {
-            Long cancelTime = scheduledCancellations.get(transactionId);
+            Long cancelTime = scheduledHashOperations.get(SCHEDULED_KEY, transactionId);
             if (cancelTime == null || cancelTime > now) {
                 continue;
             }
@@ -391,13 +467,15 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
                 }
 
                 Transaction transaction = this.getById(transactionId);
-                if (transaction != null && transaction.getStatus() == 0) {
+                if (transaction != null && transaction.getStatus().equals(TransactionStatusEnum.WAIT_FOR_CONFIRM)) {
                     log.info("执行自动取消支付: {}", transactionId);
-                    cancelCharge(transactionId);
+                    cancelCharge(null, transactionId);
                 }
                 // 移除已处理的任务
-                scheduledCancellations.remove(transactionId);
+//                scheduledCancellations.remove(transactionId);
+                scheduledHashOperations.delete(SCHEDULED_KEY, transactionId);
             } catch (Exception e) {
+                e.printStackTrace();
                 log.error("自动取消支付失败: {}", e.getMessage());
             } finally {
                 redisTemplate.delete(lockKey);
@@ -407,16 +485,16 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
 
     /**
      * 验证交易记录
-     * @param transactionId 交易ID
+     * @param preTransactionId 预交易ID
      * @param expectedStatus 预期状态
      * @return 交易对象
      */
-    private Transaction validateTransaction(String transactionId, int expectedStatus) {
-        Transaction transaction = this.getById(transactionId);
+    private Transaction validateTransaction(String preTransactionId, TransactionStatusEnum expectedStatus) {
+        Transaction transaction = transactionMapper.findByIdAndPreId(null, null, preTransactionId);
         if (transaction == null) {
             throw new NotFoundException("交易记录不存在");
         }
-        if (transaction.getStatus() != expectedStatus) {
+        if (!transaction.getStatus().equals(expectedStatus)) {
             throw new BadRequestException("当前状态无法操作");
         }
         return transaction;

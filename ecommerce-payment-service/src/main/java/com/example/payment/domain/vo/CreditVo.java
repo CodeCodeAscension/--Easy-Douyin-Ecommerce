@@ -21,7 +21,7 @@ public class CreditVo {
     @Schema(description = "银行卡号")
     private String cardNumber;
     @Schema(description = "卡CVV")
-    private Integer cvv;
+    private Integer cardCvv;
     @Schema(description = "所属用户ID")
     private Long userId;
     @Schema(description = "余额")

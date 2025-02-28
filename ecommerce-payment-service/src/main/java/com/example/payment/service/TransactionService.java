@@ -1,13 +1,14 @@
 package com.example.payment.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.api.domain.dto.payment.ChargeCancelDto;
 import com.example.api.domain.dto.payment.ChargeDto;
 import com.example.api.domain.vo.payment.ChargeVo;
-import com.example.common.domain.ResponseResult;
 import com.example.common.exception.SystemException;
 import com.example.common.exception.UserException;
 import com.example.payment.domain.po.Transaction;
+import com.example.payment.domain.vo.TransactionInfoVo;
 
 public interface TransactionService extends IService<Transaction> {
 
@@ -22,11 +23,11 @@ public interface TransactionService extends IService<Transaction> {
 
     /**
      * 取消支付
-     * @param transactionId 交易ID
+     * @param preTransactionId 预交易ID
      * @throws UserException 用户异常
      * @throws SystemException 系统异常
      */
-    void cancelCharge(String transactionId) throws UserException, SystemException;
+    void cancelCharge(String preTransactionId) throws UserException, SystemException;
 
     /**
      * 定期取消支付
@@ -34,13 +35,35 @@ public interface TransactionService extends IService<Transaction> {
      * @throws UserException 用户异常
      * @throws SystemException 系统异常
      */
-    void autoCancelCharge(ChargeCancelDto chargeCancelDto);
+    void autoCancelCharge(ChargeCancelDto chargeCancelDto) throws UserException, SystemException;
 
     /**
      * 确认支付
-     * @param transactionId 交易ID
+     * @param preTransactionId 交易ID
      * @throws UserException 用户异常
      * @throws SystemException 系统异常
      */
-    void confirmCharge(String transactionId);
+    void confirmCharge(String preTransactionId) throws UserException, SystemException;
+
+    /**
+     * 获取交易信息
+     * @param userId 用户ID
+     * @param transactionId 交易ID
+     * @param preTransactionId 预交易ID
+     * @throws UserException 用户异常
+     * @throws SystemException 系统异常
+     * @return 交易信息
+     */
+    TransactionInfoVo getTransaction(Long userId, String transactionId, String preTransactionId) throws UserException, SystemException;
+
+    /**
+     * 获取某个用户的所有交易信息
+     * @param pageNum 页号
+     * @param pageSize 页数
+     * @param userId 用户ID
+     * @return IPage TransactionInfoVo 对象
+     * @throws UserException 用户异常
+     * @throws SystemException 系统异常
+     */
+    IPage<TransactionInfoVo> getTransactionInfos(Integer pageNum, Integer pageSize, Long userId) throws UserException, SystemException;
 }

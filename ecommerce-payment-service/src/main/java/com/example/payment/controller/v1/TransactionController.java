@@ -1,9 +1,15 @@
 package com.example.payment.controller.v1;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.api.domain.dto.payment.ChargeCancelDto;
 import com.example.api.domain.dto.payment.ChargeDto;
 import com.example.api.domain.vo.payment.ChargeVo;
 import com.example.common.domain.ResponseResult;
+import com.example.common.exception.SystemException;
+import com.example.common.util.UserContextUtil;
+import com.example.payment.domain.dto.TransactionInfoDto;
+import com.example.payment.domain.vo.TransactionInfoVo;
 import com.example.payment.service.TransactionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,6 +30,22 @@ public class TransactionController {
 
     private final TransactionService transactionService;
 
+    @GetMapping("/byId")
+    @Operation(summary = "获取支付信息")
+    public ResponseResult<TransactionInfoVo> getTransactionInfo(@RequestBody TransactionInfoDto transactionInfoDto) {
+        Long userId = UserContextUtil.getUserId();
+        String transactionId = transactionInfoDto.getTransactionId();
+        String preTransactionId = transactionInfoDto.getPreTransactionId();
+        return ResponseResult.success(transactionService.getTransaction(userId, transactionId, preTransactionId));
+    }
+
+    @GetMapping
+    @Operation(summary = "获取用户所有支付信息")
+    public ResponseResult<IPage<TransactionInfoVo>> getTransactionInfos(@RequestParam(value = "pageNum",defaultValue = "1") Integer pageNum, @RequestParam(value = "pageSize",defaultValue = "10")Integer pageSize) {
+        Long userId = UserContextUtil.getUserId();
+        return ResponseResult.success(transactionService.getTransactionInfos(pageNum, pageSize,userId));
+    }
+
     @PostMapping
     @Operation(summary = "支付接口")
     public ResponseResult<ChargeVo> charge(@RequestBody @Validated ChargeDto chargeDto) {
@@ -32,8 +54,8 @@ public class TransactionController {
 
     @DeleteMapping
     @Operation(summary = "取消支付")
-    public ResponseResult<Object> cancelCharge(@RequestParam String transactionId) {
-        transactionService.cancelCharge(transactionId);
+    public ResponseResult<Object> cancelCharge(@RequestParam String preTransactionId) {
+        transactionService.cancelCharge(preTransactionId);
         return ResponseResult.success();
     }
 
@@ -46,8 +68,8 @@ public class TransactionController {
 
     @PostMapping("/confirm")
     @Operation(summary = "确认支付")
-    public ResponseResult<Object> confirmCharge(@RequestParam String transactionId) {
-        transactionService.confirmCharge(transactionId);
+    public ResponseResult<Object> confirmCharge(@RequestParam String preTransactionId) {
+        transactionService.confirmCharge(preTransactionId);
         return ResponseResult.success();
     }
 }
