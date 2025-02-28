@@ -1,13 +1,13 @@
-package com.example.cart.controller;
+package com.example.cart.controller.v1;
 
 
 import com.example.cart.domain.dto.AddItemDTO;
 import com.example.cart.domain.vo.CartInfoVo;
 import com.example.cart.service.ICartService;
 import com.example.common.domain.ResponseResult;
-//import io.swagger.annotations.Api;
-//import io.swagger.annotations.ApiOperation;
-import io.swagger.v3.oas.models.responses.ApiResponse;
+import com.example.common.domain.ResultCode;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
  * @author author
  * @since 2025-02-14
  */
-//@Api("购物车相关接口")
+@Tag(name = "购物车接口", description = "购物车接口")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/carts")
@@ -27,20 +27,14 @@ public class CartController {
 
     private final ICartService iCartService;
 
-//    @ApiOperation("添加购物车")
+    @Operation(summary = "添加购物车")
     @PostMapping
     public ResponseResult<AddItemDTO> addCart(@RequestBody AddItemDTO addItemDTO){
+        iCartService.addCart(addItemDTO);
+        return ResponseResult.success();
+   }
 
-        AddItemDTO addItemDTO1 = iCartService.addCart(addItemDTO);
-        if (addItemDTO1!=null){
-            return ResponseResult.success(addItemDTO1);
-        }
-
-        return ResponseResult.error(500,"添加购物车失败");
-    }
-
-
-   // @ApiOperation("清空购物车")
+    @Operation(summary = "清空购物车")
     @DeleteMapping
     public ResponseResult<Void> deleteCartItem(){
 
@@ -49,13 +43,11 @@ public class CartController {
         if (b){
             return ResponseResult.success();
         }
-        return ResponseResult.error(500,"清空购物车失败");
+        return ResponseResult.error(ResultCode.SERVER_ERROR,"清空购物车失败");
 
     }
 
-
-   // @ApiOperation("获取购物车信息")
-
+    @Operation(summary = "获取购物车信息")
     @GetMapping
     public ResponseResult<CartInfoVo> getCartInfo(){
 
@@ -64,9 +56,7 @@ public class CartController {
         if (cartInfo!=null){
             return ResponseResult.success(cartInfo);
         }
-        return ResponseResult.error(500,"获取购物车信息失败");
-
+        return ResponseResult.error(ResultCode.SERVER_ERROR,"获取购物车信息失败");
     }
-
 
 }

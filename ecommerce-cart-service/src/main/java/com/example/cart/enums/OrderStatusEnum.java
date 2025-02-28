@@ -2,9 +2,9 @@ package com.example.cart.enums;
 
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
+import com.example.common.exception.BadRequestException;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -29,6 +29,6 @@ public enum OrderStatusEnum {
                 return status;
             }
         }
-        throw new IllegalArgumentException("Invalid status code: " + code);
+        throw new BadRequestException("Invalid status code: " + code);
     }
 }

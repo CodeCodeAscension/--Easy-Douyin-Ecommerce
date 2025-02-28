@@ -3,6 +3,8 @@ package com.example.cart.domain.po;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
+
+import java.io.Serial;
 import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
@@ -27,7 +29,7 @@ import lombok.experimental.Accessors;
 @TableName("cart_item")
 @Schema(description = "购物车物品数据库")
 public class CartItem implements Serializable {
-
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Schema(description = "购物车物品ID")
