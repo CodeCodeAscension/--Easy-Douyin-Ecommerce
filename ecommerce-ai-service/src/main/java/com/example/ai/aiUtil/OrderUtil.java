@@ -1,6 +1,5 @@
 package com.example.ai.aiUtil;
 
-import com.example.api.client.OrderClient;
 import com.example.api.domain.po.Address;
 import com.example.api.domain.vo.order.OrderInfoVo;
 import com.example.common.domain.ResponseResult;

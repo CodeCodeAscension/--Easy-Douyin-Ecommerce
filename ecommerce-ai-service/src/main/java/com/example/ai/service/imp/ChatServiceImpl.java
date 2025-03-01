@@ -101,7 +101,7 @@ public class ChatServiceImpl implements ChatService {
     // ai聊天
     @Override
     public String processChatAssistant(String userQuery) {
-        String prompt = processPrompt.getPromptTemplate();
+        Prompt prompt = processPrompt.createPrompt(userQuery);
         try {
 
            //实现与ai大模型聊天对话
