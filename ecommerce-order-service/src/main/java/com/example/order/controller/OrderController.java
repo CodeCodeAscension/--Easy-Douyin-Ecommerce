@@ -1,4 +1,4 @@
-package com.example.cart.controller;
+package com.example.order.controller;
 
 
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -7,14 +7,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * <p>
- * 购物车物品数据库 前端控制器
+ * 订单信息数据库 前端控制器
  * </p>
  *
  * @author author
- * @since 2025-02-14
+ * @since 2025-02-28
  */
 @RestController
-@RequestMapping("/cart-item")
-public class CartItemController {
+@RequestMapping("/order")
+public class OrderController {
 
 }

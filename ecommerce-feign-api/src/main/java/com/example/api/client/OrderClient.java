@@ -37,6 +37,7 @@ public interface OrderClient {
     @PostMapping("/api/v1/orders/paid")
     ResponseResult<Object> markOrderPaid(@RequestBody MarkOrderPaidDto markOrderPaidDto);
 
+
     @GetMapping("/api/v1/orders/search")
     ResponseResult<List<OrderInfoVo>> searchOrders(@RequestBody SearchOrderDto searchOrderDto);
 }

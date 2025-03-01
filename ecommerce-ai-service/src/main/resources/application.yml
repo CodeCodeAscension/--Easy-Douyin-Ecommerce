@@ -7,7 +7,7 @@ ecommerce:
     port: @database.port@
     user: @database.user@
     pwd: @database.pwd@
-    table: test
+    table: db_cart
   knife4j:
     title: AI服务
     description: AI服务
@@ -24,3 +24,7 @@ ecommerce:
     virtual: /
     user: @rabbitmq.user@
     pwd: @rabbitmq.pwd@
+spring:
+  ai:
+    zhipuai:
+      api-key: write-your-own-zhipuai-access-key
