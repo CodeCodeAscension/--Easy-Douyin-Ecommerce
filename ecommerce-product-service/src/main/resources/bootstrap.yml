@@ -2,7 +2,7 @@ spring:
   application:
     name: product-service
   profiles:
-    active: dev4
+    active: dev
   cloud:
     nacos:
       server-addr: @nacos.dashboard@

@@ -7,7 +7,7 @@ ecommerce:
     port: @database.port@
     user: @database.user@
     pwd: @database.pwd@
-    table: db_product
+    table: test
   knife4j:
     title: 商品服务
     description: 商品服务
