@@ -2,6 +2,8 @@ package com.example.cart.domain.po;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
+
+import java.io.Serial;
 import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
@@ -26,7 +28,7 @@ import lombok.experimental.Accessors;
 @TableName("cart")
 @Schema(description = "购物车信息数据库")
 public class Cart implements Serializable {
-
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Schema(description = "购物车ID")
@@ -35,9 +37,6 @@ public class Cart implements Serializable {
 
     @Schema(description = "用户ID")
     private Long userId;
-
-    // @Schema(description = "购物车的商品ID，是一个json列表")
-    // private String cartItems;
 
     @Schema(description = "状态（0待支付，1已支付，2已删除）")
     private OrderStatusEnum status;

@@ -31,7 +31,6 @@ public class ChatServiceImpl implements ChatService {
     private final OrderClient orderClient;
     private final OrderPromptTemplate promptTemplate;
     private final ObjectMapper objectMapper;
-    private final ChatService chatService;
     private final com.example.ai.aiUtil.processPrompt processPrompt;
 
     @Override
@@ -70,7 +69,7 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public List<OrderInfoVo> processOrderAuto(aiOrderQueryDto userQuery) throws JsonProcessingException {
         // 调用ai模型查询订单信息
-        List<OrderInfoVo> orderInfoVos = chatService.processOrderQuery(userQuery);
+        List<OrderInfoVo> orderInfoVos = processOrderQuery(userQuery);
 
         //如果不需要确认下单，则调用订单服务进行下单,返回下单的订单信息
         if (!userQuery.getNeedConfirm()) {
