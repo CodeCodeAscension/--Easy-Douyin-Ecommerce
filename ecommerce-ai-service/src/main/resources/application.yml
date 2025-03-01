@@ -27,4 +27,4 @@ ecommerce:
 spring:
   ai:
     zhipuai:
-      api-key: 39abb2bacb4346f8ba3aa4fd82c61201.QzjaFOYGlAcvswdm
+      api-key: write-your-own-zhipuai-access-key
