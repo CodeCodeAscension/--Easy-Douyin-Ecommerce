@@ -2,6 +2,7 @@ package com.example.product.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 import lombok.NonNull;
@@ -22,10 +23,10 @@ public class UpdateProductDto {
 
     @Schema(description = "商品描述")
     private String description;
-
-    @NonNull
+    
     @Schema(description = "商品价格")
     @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT)
+    @DecimalMin(value = "0.0", inclusive = false)
     private Float price;
 
     @Schema(description = "商品库存")

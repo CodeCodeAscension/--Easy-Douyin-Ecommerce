@@ -2,6 +2,8 @@ package com.example.product.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.example.common.domain.ResponseResult;
+import com.example.common.exception.SystemException;
+import com.example.common.util.UserContextUtil;
 import com.example.product.domain.dto.*;
 import com.example.product.domain.vo.ProductInfoVo;
 import com.example.product.service.IProductService;
@@ -66,6 +68,7 @@ public class ProductController {
     @PutMapping("/add")
     @Operation(summary = "增加库存")
     public ResponseResult<Object> addProductStock(@RequestBody @Validated AddProductDto addProductDto) {
+        CheckUserLogin();
         return iProductService.addProductStock(addProductDto);
     }
 
@@ -77,6 +80,7 @@ public class ProductController {
     @PutMapping("/dec")
     @Operation(summary = "减少库存")
     public ResponseResult<Object> decProductStock(@RequestBody @Validated DecProductDto decProductDto) {
+        CheckUserLogin();
         return iProductService.decProductStock(decProductDto);
     }
 
@@ -88,6 +92,7 @@ public class ProductController {
     @PostMapping
     @Operation(summary = "创建商品")
     public ResponseResult<Object> createProduct(@RequestBody @Validated CreateProductDto createProductDto) {
+        CheckUserLogin();
         return iProductService.createProduct(createProductDto);
     }
 
@@ -99,6 +104,16 @@ public class ProductController {
     @PutMapping
     @Operation(summary = "更新商品信息")
     public ResponseResult<Object> updateProduct(@RequestBody @Validated UpdateProductDto updateProductDto) {
+        CheckUserLogin();
         return iProductService.updateProduct(updateProductDto);
+    }
+
+    private Long CheckUserLogin() {
+        Long userId = UserContextUtil.getUserId();
+        if (userId == null) {
+            log.error("用户未登录");
+            throw new SystemException("用户未登录");
+        }
+        return userId;
     }
 }

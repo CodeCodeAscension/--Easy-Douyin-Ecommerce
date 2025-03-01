@@ -81,8 +81,6 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
     @Transactional
     @Override
     public ResponseResult<Object> createProduct(CreateProductDto createProductDto) {
-        CheckUserLogin();
-
         // 1. 校验分类是否存在并获取分类ID
         List<Long> categoryIds = validateAndGetCategoryIds(createProductDto.getCategories());
 
@@ -121,8 +119,6 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
      */
     @Override
     public ResponseResult<Object> updateProduct(UpdateProductDto updateProductDto) {
-        CheckUserLogin();
-
         // 1. 查询现有商品
         Product product = getById(updateProductDto.getId());
         if (product == null) {
@@ -301,8 +297,6 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
      */
     @Override
     public ResponseResult<Object> addProductStock(AddProductDto addProductDto) {
-        CheckUserLogin();
-
         // 根据商品ID查询商品信息
         Long productId = addProductDto.getProductId();
         Product product = productMapper.selectById(productId);
@@ -333,8 +327,6 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
      */
     @Override
     public ResponseResult<Object> decProductStock(DecProductDto decProductDto) {
-        CheckUserLogin();
-
         // 根据商品ID查询商品信息
         Long productId = decProductDto.getProductId();
         Product product = productMapper.selectById(productId);
@@ -441,15 +433,6 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
                 .createTime((LocalDateTime) source.get("createTime"))
                 .updateTime((LocalDateTime) source.get("updateTime"))
                 .build();
-    }
-
-    private Long CheckUserLogin() {
-        Long userId = UserContextUtil.getUserId();
-        if (userId == null) {
-            log.error("用户未登录");
-            throw new SystemException("用户未登录");
-        }
-        return userId;
     }
 
     private List<Long> validateAndGetCategoryIds(List<String> categoryNames) {

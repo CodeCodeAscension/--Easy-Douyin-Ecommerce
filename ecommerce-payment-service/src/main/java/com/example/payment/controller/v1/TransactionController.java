@@ -60,7 +60,7 @@ public class TransactionController {
     }
 
     @PutMapping
-    @Operation(summary = "设置定时支付")
+    @Operation(summary = "设置定时取消支付")
     public ResponseResult<Object> autoCancelCharge(@RequestBody @Validated ChargeCancelDto chargeCancelDto) {
         transactionService.autoCancelCharge(chargeCancelDto);
         return ResponseResult.success();
