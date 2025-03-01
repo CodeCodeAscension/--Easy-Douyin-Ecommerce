@@ -14,6 +14,8 @@ import com.example.cart.service.ICartService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.common.domain.ResponseResult;
 import com.example.common.domain.ResultCode;
+import com.example.common.exception.BadRequestException;
+import com.example.common.exception.NotFoundException;
 import com.example.common.exception.SystemException;
 import com.example.common.util.UserContextUtil;
 import lombok.RequiredArgsConstructor;
@@ -67,6 +69,12 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         ResponseResult<ProductInfoVo> productInfoById = productClient.getProductInfoById(addItemDTO.getProductId());
         if(productInfoById.getCode() != ResultCode.SUCCESS || productInfoById.getData() == null) {
             throw new SystemException(productInfoById.getMsg());
+        }
+        if(productInfoById.getData().getStatus() != 0) {
+            throw new BadRequestException("商品未上架");
+        }
+        if(productInfoById.getData().getStock() < addItemDTO.getQuantity()) {
+            throw new BadRequestException("商品存货不足");
         }
 
         //判断购物车中是否已经有该商品,如果有，则更新数量，如果没有，则添加商品
@@ -136,7 +144,9 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
                     })
                     .collect(Collectors.toList());
             cartInfoVo.setCartItems(cartItemInfoList);
+            return  cartInfoVo;
+        } else {
+            throw new NotFoundException("该用户还没有购物车信息");
         }
-        return  cartInfoVo;
     }
 }

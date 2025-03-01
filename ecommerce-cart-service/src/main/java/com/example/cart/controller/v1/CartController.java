@@ -6,6 +6,7 @@ import com.example.cart.domain.vo.CartInfoVo;
 import com.example.cart.service.ICartService;
 import com.example.common.domain.ResponseResult;
 import com.example.common.domain.ResultCode;
+import com.example.common.exception.NotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -37,14 +38,10 @@ public class CartController {
     @Operation(summary = "清空购物车")
     @DeleteMapping
     public ResponseResult<Void> deleteCartItem(){
-
-        Boolean b = iCartService.deleteCartItem();
-
-        if (b){
-            return ResponseResult.success();
+        if(!iCartService.deleteCartItem()) {
+            throw new NotFoundException("该用户的购物车内暂无商品");
         }
-        return ResponseResult.error(ResultCode.SERVER_ERROR,"清空购物车失败");
-
+        return ResponseResult.success();
     }
 
     @Operation(summary = "获取购物车信息")
