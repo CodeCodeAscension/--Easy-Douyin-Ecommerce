@@ -1,7 +1,7 @@
 package com.example.order.service;
 
-import com.example.order.domain.Address;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.api.domain.po.Address;
 
 /**
  * <p>

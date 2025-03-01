@@ -1,7 +1,8 @@
 package com.example.order.mapper;
 
-import com.example.order.domain.Address;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.example.api.domain.po.Address;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
  * <p>
@@ -11,6 +12,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @author author
  * @since 2025-02-28
  */
+@Mapper
 public interface AddressMapper extends BaseMapper<Address> {
 
 }

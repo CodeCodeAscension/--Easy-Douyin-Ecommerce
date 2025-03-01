@@ -2,7 +2,10 @@ package com.example.order.mapper;
 
 import com.example.order.domain.OrderItem;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Mapper;
 
+
+@Mapper
 /**
  * <p>
  * 订单商品信息数据库 Mapper 接口

@@ -6,10 +6,12 @@ import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
 
-import com.example.order.enums.OrderStatusEnum;
+import com.example.api.enums.OrderStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 
 /**
@@ -21,6 +23,8 @@ import lombok.experimental.Accessors;
  * @since 2025-02-28
  */
 @Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("order")
@@ -49,7 +53,7 @@ public class Order implements Serializable {
     private String orderItems;
 
     @Schema(description = "状态（0待支付，1已支付，2已取消）")
-    private OrderStatusEnum status;
+    private OrderStatus status;
 
     @Schema(description = "创建时间")
     private LocalDateTime createTime;

@@ -1,14 +1,19 @@
 package com.example.api.domain.dto.order;
 
+
 import com.example.api.domain.po.Address;
 import com.example.api.domain.po.CartItem;
 //import io.swagger.annotations.ApiModel;
 //import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
 @Data
+@Getter
+@Setter
 //@ApiModel(description = "下订单请求")
 public class PlaceOrderDto {
 //    @ApiModelProperty("使用的货币")

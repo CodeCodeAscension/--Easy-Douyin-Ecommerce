@@ -1,6 +1,6 @@
 package com.example.order.service.impl;
 
-import com.example.order.domain.Address;
+import com.example.api.domain.po.Address;
 import com.example.order.mapper.AddressMapper;
 import com.example.order.service.IAddressService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
