@@ -108,12 +108,11 @@ public class ProductController {
         return iProductService.updateProduct(updateProductDto);
     }
 
-    private Long CheckUserLogin() {
+    private void CheckUserLogin() {
         Long userId = UserContextUtil.getUserId();
         if (userId == null) {
             log.error("用户未登录");
             throw new SystemException("用户未登录");
         }
-        return userId;
     }
 }
