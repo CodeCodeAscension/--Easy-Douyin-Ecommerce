@@ -23,7 +23,7 @@ public class UpdateProductDto {
 
     @Schema(description = "商品描述")
     private String description;
-    
+
     @Schema(description = "商品价格")
     @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT)
     @DecimalMin(value = "0.0", inclusive = false)

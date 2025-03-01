@@ -46,6 +46,11 @@ public interface IProductService extends IService<Product> {
     ResponseResult<Object> decProductStock(DecProductDto decProductDto);
 
     /**
+     * 增加销量
+     */
+    ResponseResult<Object> addProductSales(AddProductSoldDto addProductSoldDto);
+
+    /**
      * 更新商品信息
      */
     ResponseResult<Object> updateProduct(UpdateProductDto updateProductDto);

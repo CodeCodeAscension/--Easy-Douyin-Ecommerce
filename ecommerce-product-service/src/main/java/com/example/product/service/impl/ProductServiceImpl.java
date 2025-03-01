@@ -306,10 +306,6 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
             throw new NotFoundException("商品不存在");
         }
 
-        // 减少销量
-        Integer decSold = addProductDto.getAddStock();
-        product.setSold(product.getSold() - decSold);
-
         // 增加库存
         Integer addStock = addProductDto.getAddStock();
         product.setStoke(product.getStoke() + addStock);
@@ -344,11 +340,37 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
         }
 
         product.setStoke(product.getStoke() - decStock);
-        product.setSold(product.getSold() + decStock);
+//        product.setSold(product.getSold() + decStock);
 
         // 同步到ES
         syncProductToES(product);
         return ResponseResult.success();
+    }
+
+    /**
+     * 增加库存
+     *
+     * @param addProductSoldDto
+     */
+    @Override
+    public ResponseResult<Object> addProductSales(AddProductSoldDto addProductSoldDto) {
+        // 根据商品ID查询商品信息
+        Long productId = addProductSoldDto.getProductId();
+        Product product = productMapper.selectById(productId);
+
+        if (product == null) {
+            log.error("商品不存在，productId: {}", productId);
+            throw new NotFoundException("商品不存在");
+        }
+
+        // 增加销量
+        Integer addStock = addProductSoldDto.getAddSold();
+        product.setSold(product.getStoke() + addStock);
+
+        // 同步到ES
+        syncProductToES(product);
+        return ResponseResult.success();
+
     }
 
 

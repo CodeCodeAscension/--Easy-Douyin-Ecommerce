@@ -18,5 +18,6 @@ spring:
           - dataId: redis-config.yaml
           - dataId: rabbitmq-config.yaml
           - dataId: elasticsearch-config.yaml
+          - dataId: mq-queues-config.yaml
         group: DEFAULT_GROUP
         refresh-enabled: true
