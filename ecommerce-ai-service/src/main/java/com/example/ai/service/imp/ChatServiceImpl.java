@@ -104,7 +104,7 @@ public class ChatServiceImpl implements ChatService {
         Prompt prompt = processPrompt.createPrompt(userQuery);
         try {
 
-           //实现与ai大模型聊天对话
+           //实现与ai大模型聊天对话功能
             String response = ChatClient.create(chatModel)
                     .prompt(prompt)
                     .tools(new DateTimeTools())
