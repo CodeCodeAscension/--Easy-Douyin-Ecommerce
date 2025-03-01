@@ -1,14 +1,15 @@
-package com.example.ai.aiUtil;
+package com.example.ai.tool;
 
 import java.time.LocalDateTime;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.stereotype.Component;
 
-public class DateTimeTools {
+@Component
+public class DateTimeTool {
 
-    @Tool(description = "这个方法可以获取当前时间,以用于分析当前是几点和今天是星期几这样的问题")
+    @Tool(description = "获取用户时区中的当前日期和时间")
     String getCurrentDateTime() {
         return LocalDateTime.now().atZone(LocaleContextHolder.getTimeZone().toZoneId()).toString();
     }
-
 }

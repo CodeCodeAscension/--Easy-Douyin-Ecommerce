@@ -1,15 +1,10 @@
-package com.example.ai.aiUtil;
+package com.example.ai.prompt;
 
-import com.example.api.enums.OrderStatus;
-import lombok.Data;
-import lombok.Getter;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-
 @Component
-public class processPrompt {
+public class ProcessPrompt {
 
     private static final String PROMPT_TEMPLATE = """
             
@@ -19,8 +14,7 @@ public class processPrompt {
             当前用户输入：{input}
             """;
 
-    public Prompt createPrompt(String userInput)
-    {
+    public Prompt createPrompt(String userInput) {
         String prompt = PROMPT_TEMPLATE.replace("{input}", userInput);
         return new Prompt(prompt);
     }
