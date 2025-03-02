@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @Accessors(chain = true)
 @TableName("category")
 @Schema(description = "商品分类实体类")
+@NoArgsConstructor
 public class Category implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

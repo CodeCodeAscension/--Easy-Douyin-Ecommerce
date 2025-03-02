@@ -27,6 +27,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -40,6 +41,7 @@ import org.springframework.util.StringUtils;
 import java.beans.FeatureDescriptor;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -98,6 +100,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         syncFullProductToES(product.getId());
     }
 
+    @Transactional
     @Override
     public void updateProduct(UpdateProductDto updateProductDto) {
         // 1. 查询现有商品
@@ -140,6 +143,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         } catch (NotFoundException ex) {
             throw ex;
         } catch (Exception ex) {
+            ex.printStackTrace();
             log.error("数据库异常：{}", ex.getMessage());
             // 数据库异常，尝试从ES中搜索数据
             GetRequest request = new GetRequest(ProductsIndex.name, productId.toString());
@@ -200,7 +204,8 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
         // 商品名称模糊查询
         if (StringUtils.hasText(searchProductsDto.getProductName())) {
-            boolQuery.must(QueryBuilders.fuzzyQuery(ProductsIndex.productName, searchProductsDto.getProductName()).fuzziness(Fuzziness.AUTO));
+            boolQuery.must(QueryBuilders.matchQuery(ProductsIndex.productName, searchProductsDto.getProductName()));
+//            boolQuery.must(QueryBuilders.fuzzyQuery(ProductsIndex.productName, searchProductsDto.getProductName()).fuzziness(Fuzziness.AUTO));
         }
 
         // 价格范围查询
@@ -368,8 +373,8 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         map.put(ProductsIndex.merchantName, product.getMerchantName());
         map.put(ProductsIndex.status, product.getStatus().getCode());
         map.put(ProductsIndex.categoryName, iProCateRelService.getProductCategoryNames(product.getId()));
-        map.put(ProductsIndex.createTime, product.getCreateTime());
-        map.put(ProductsIndex.updateTime, product.getUpdateTime());
+        map.put(ProductsIndex.createTime, product.getCreateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));
+        map.put(ProductsIndex.updateTime, product.getUpdateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));
         return map;
     }
 
@@ -405,8 +410,8 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 .merchantName((String) source.get("merchantName"))
                 .categories(categories)
                 .status((Integer) source.get("status"))
-                .createTime((LocalDateTime) source.get("createTime"))
-                .updateTime((LocalDateTime) source.get("updateTime"))
+                .createTime(LocalDateTime.parse((String)source.get("createTime")))
+                .updateTime(LocalDateTime.parse((String)source.get("createTime")))
                 .build();
     }
 

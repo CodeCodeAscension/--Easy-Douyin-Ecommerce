@@ -5,9 +5,7 @@ import com.example.product.enums.ProductStatusEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 import lombok.experimental.Accessors;
 
 import java.io.Serial;
@@ -18,7 +16,9 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("product")
-@Schema
+@Schema(description = "商品实体类")
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class Product implements Serializable {
     @Serial

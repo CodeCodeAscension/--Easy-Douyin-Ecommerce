@@ -20,6 +20,7 @@ public class CreateProductDto {
     private String name;
 
     @Schema(description = "商品描述")
+    @NotEmpty
     private String description;
 
     @NonNull
@@ -29,7 +30,7 @@ public class CreateProductDto {
 
     @Schema(description = "商品库存")
     @Min(0)
-    private Integer stock;
+    private Integer stock = 0;
 
     @NotEmpty
     @Schema(description = "商家名称")

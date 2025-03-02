@@ -56,8 +56,12 @@ public class ExceptionAdvice {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseResult<Object> runtimeException(RuntimeException e) {
-        log.info("RuntimeException: {} {}", e.getMessage(), e.getCause().getMessage());
         Throwable throwable = e.getCause();
+        if(throwable == null) {
+            log.error("RuntimeException: {}", e.getMessage());
+            return ResponseResult.error(ResultCode.SERVER_ERROR, e.getMessage());
+        }
+        log.info("RuntimeException: {} {}", e.getMessage(), e.getCause().getMessage());
         if (throwable instanceof UserException) {
             return ResponseResult.error(((UserException) throwable).getCode(), throwable.getMessage());
         } else if (throwable instanceof SystemException) {

@@ -33,13 +33,13 @@ public class ProductController {
 
     @GetMapping
     @Operation(summary = "指定某种类别查询商品信息")
-    public ResponseResult<IPage<ProductInfoVo>> listProducts(@RequestBody ListProductsDto listProductsDto) {
+    public ResponseResult<IPage<ProductInfoVo>> listProducts(@RequestBody @Validated ListProductsDto listProductsDto) {
         return ResponseResult.success(iProductService.getProductInfoByCategory(listProductsDto));
     }
 
     @GetMapping("/search")
     @Operation(summary = "指定条件查询商品信息")
-    public ResponseResult<IPage<ProductInfoVo>> searchProducts(@RequestBody SearchProductsDto searchProductsDto) {
+    public ResponseResult<IPage<ProductInfoVo>> searchProducts(@RequestBody @Validated SearchProductsDto searchProductsDto) {
         return ResponseResult.success(iProductService.searchProductInfo(searchProductsDto));
     }
 

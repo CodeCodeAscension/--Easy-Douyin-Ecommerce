@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.io.Serial;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 @Accessors(chain = true)
 @TableName("product_category_relation")
 @Schema(description = "商品分类关联实体类")
+@NoArgsConstructor
 public class ProCateRel implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

@@ -88,11 +88,11 @@ public class ProductsIndex {
                   "status": { "type": "integer" },
                   "createTime": {
                     "type": "date",
-                    "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd'T'HH:mm:ss.SSS'Z'||epoch_millis"
+                    "format": "yyyy-MM-dd'T'HH:mm:ss"
                   },
                   "updateTime": {
                     "type": "date",
-                    "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd'T'HH:mm:ss.SSS'Z'||epoch_millis"
+                    "format": "yyyy-MM-dd'T'HH:mm:ss"
                   }
                 }
               }

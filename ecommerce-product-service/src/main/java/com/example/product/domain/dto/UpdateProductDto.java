@@ -4,9 +4,9 @@ import com.example.product.enums.ProductStatusEnum;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.NonNull;
 
 import java.util.List;
 
@@ -14,11 +14,10 @@ import java.util.List;
 @Schema(description = "更新商品信息")
 public class UpdateProductDto {
 
-    @NonNull
+    @NotNull
     @Schema(description = "商品ID")
     private Long id;
 
-    @NotEmpty
     @Schema(description = "商品名称")
     private String name;
 
@@ -31,16 +30,16 @@ public class UpdateProductDto {
     private Float price;
 
     @Schema(description = "商品库存")
+    @Min(0)
     private Integer stock;
 
     @Schema(description = "商品销量")
+    @Min(0)
     private Integer sold;
 
-    @NotEmpty
     @Schema(description = "商家名称")
     private String merchantName;
 
-    @NotEmpty
     @Schema(description = "商品类别")
     private List<String> categories;
 

@@ -15,13 +15,13 @@ public enum ProductStatusEnum {
 
     @EnumValue
     @JsonValue
-    private final Integer code;
+    private final int code;
     private final String description;
 
     @JsonCreator
-    public static ProductStatusEnum fromCode(Integer code) {
+    public static ProductStatusEnum fromCode(int code) {
         for (ProductStatusEnum productStatusEnum : ProductStatusEnum.values()) {
-            if (productStatusEnum.getCode().equals(code)) {
+            if (productStatusEnum.getCode() == code) {
                 return productStatusEnum;
             }
         }
