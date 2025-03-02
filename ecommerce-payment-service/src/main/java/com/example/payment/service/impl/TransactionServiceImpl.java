@@ -15,7 +15,7 @@ import com.example.api.domain.vo.payment.ChargeVo;
 import com.example.api.domain.vo.product.ProductInfoVo;
 import com.example.api.enums.OrderStatus;
 import com.example.common.config.rabbitmq.PayQueue;
-import com.example.common.config.rabbitmq.RabbitQueuesConfig;
+import com.example.common.config.rabbitmq.RabbitQueueNamesConfig;
 import com.example.common.domain.ResponseResult;
 import com.example.common.domain.ResultCode;
 import com.example.common.domain.message.*;
@@ -67,7 +67,7 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
     private OrderClient orderClient;
 
     @Resource
-    private RabbitQueuesConfig mqConfig;
+    private RabbitQueueNamesConfig mqConfig;
 
     private final RabbitTemplate rabbitTemplate;
 

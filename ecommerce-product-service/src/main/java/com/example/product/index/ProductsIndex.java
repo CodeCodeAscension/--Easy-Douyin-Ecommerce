@@ -69,4 +69,33 @@ public class ProductsIndex {
      * 更新时间
      */
     public static final String updateTime = "updateTime";
+
+    /**
+     * 创建索引库
+     */
+    public static final String indexTemplate = """
+            {
+              "mappings": {
+                "properties": {
+                  "id": { "type": "keyword" },
+                  "name": { "type": "text", "analyzer": "ik_max_word" },
+                  "description": { "type": "text", "analyzer": "ik_max_word" },
+                  "price": { "type": "float" },
+                  "sold": { "type": "integer" },
+                  "stock": { "type": "integer" },
+                  "merchantName": { "type": "keyword" },
+                  "categories": { "type": "keyword" },
+                  "status": { "type": "integer" },
+                  "createTime": {
+                    "type": "date",
+                    "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd'T'HH:mm:ss.SSS'Z'||epoch_millis"
+                  },
+                  "updateTime": {
+                    "type": "date",
+                    "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd'T'HH:mm:ss.SSS'Z'||epoch_millis"
+                  }
+                }
+              }
+            }
+            """;
 }

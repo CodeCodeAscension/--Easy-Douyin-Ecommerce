@@ -1,25 +1,16 @@
 package com.example.product.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.example.common.domain.ResponseResult;
-import com.example.common.exception.DatabaseException;
-import com.example.common.exception.NotFoundException;
-import com.example.common.exception.SystemException;
-import com.example.common.exception.UserException;
-import com.example.common.util.UserContextUtil;
+import com.example.api.domain.dto.product.*;
+import com.example.common.exception.*;
 import com.example.product.convert.ProductInfoVoConvert;
 import com.example.product.domain.dto.*;
-import com.example.product.domain.po.Category;
-import com.example.product.domain.po.ProCateRel;
 import com.example.product.domain.po.Product;
-import com.example.product.domain.vo.ProductInfoVo;
-import com.example.product.enums.ProductStatusEnum;
+import com.example.api.domain.vo.product.ProductInfoVo;
 import com.example.product.index.ProductsIndex;
-import com.example.product.mapper.productMapper;
+import com.example.product.mapper.ProductMapper;
 import com.example.product.service.ICategoryService;
 import com.example.product.service.IProCateRelService;
 import com.example.product.service.IProductService;
@@ -48,8 +39,6 @@ import org.springframework.util.StringUtils;
 
 import java.beans.FeatureDescriptor;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -57,10 +46,10 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ProductServiceImpl extends ServiceImpl<productMapper, Product> implements IProductService {
+public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> implements IProductService {
 
     @Resource
-    private productMapper productMapper;
+    private ProductMapper productMapper;
 
     @Resource
     private ICategoryService iCategoryService;
@@ -71,18 +60,17 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
     @Resource
     private RestHighLevelClient elasticsearchClient;
 
+    @Resource
+    private ProductInfoVoConvert productInfoVoConvert;
+
 
     // ================================ 商品操作 ================================
-    /**
-     * 创建商品
-     *
-     * @param createProductDto
-     */
+
     @Transactional
     @Override
-    public ResponseResult<Object> createProduct(CreateProductDto createProductDto) {
+    public void createProduct(CreateProductDto createProductDto) throws SystemException {
         // 1. 校验分类是否存在并获取分类ID
-        List<Long> categoryIds = validateAndGetCategoryIds(createProductDto.getCategories());
+        List<Long> categoryIds = iCategoryService.validateAndGetCategoryIds(createProductDto.getCategories());
 
         // 2. 构建商品实体
         Product product = Product.builder()
@@ -90,7 +78,7 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
                 .description(createProductDto.getDescription())
                 .price(createProductDto.getPrice())
                 .sold(0)
-                .stoke(createProductDto.getStock() != null ? createProductDto.getStock() : 0) // 需要根据业务需求调整
+                .stock(createProductDto.getStock() != null ? createProductDto.getStock() : 0) // 需要根据业务需求调整
                 .merchantName(createProductDto.getMerchantName())
                 .status(createProductDto.getStatus())
                 .createTime(LocalDateTime.now())
@@ -104,21 +92,14 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
         }
 
         // 4. 保存分类关系
-        saveProductCategories(product.getId(), categoryIds);
+        iProCateRelService.saveProductCategories(product.getId(), categoryIds);
 
         // 5. 同步到Elasticsearch
         syncFullProductToES(product.getId());
-
-        return ResponseResult.success();
     }
 
-    /**
-     * 更新商品信息
-     *
-     * @param updateProductDto
-     */
     @Override
-    public ResponseResult<Object> updateProduct(UpdateProductDto updateProductDto) {
+    public void updateProduct(UpdateProductDto updateProductDto) {
         // 1. 查询现有商品
         Product product = getById(updateProductDto.getId());
         if (product == null) {
@@ -130,12 +111,8 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
 
         // 3. 更新分类关系（如果传了categories）
         if (updateProductDto.getCategories() != null) {
-            List<Long> categoryIds = validateAndGetCategoryIds(updateProductDto.getCategories());
-            // 删除旧关系
-            iProCateRelService.remove(Wrappers.<ProCateRel>lambdaQuery()
-                    .eq(ProCateRel::getProductId, product.getId()));
-            // 添加新关系
-            saveProductCategories(product.getId(), categoryIds);
+            List<Long> newCategoryIds = iCategoryService.validateAndGetCategoryIds(updateProductDto.getCategories());
+            iProCateRelService.updateProductCategories(product.getId(), new HashSet<>(newCategoryIds));
         }
 
         product.setUpdateTime(LocalDateTime.now());
@@ -148,40 +125,39 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
 
         // 5. 同步到Elasticsearch
         syncFullProductToES(product.getId());
-
-        return ResponseResult.success();
     }
 
     // ================================ 查询服务 ================================
 
-    /**
-     * 根据商品ID查询商品信息
-     *
-     * @param productId
-     */
     @Override
-    public ResponseResult<ProductInfoVo> getProductInfoById(Long productId) {
-        GetRequest request = new GetRequest(ProductsIndex.name, productId.toString());
+    public ProductInfoVo getProductInfoById(Long productId) throws UserException, SystemException {
         try {
-            GetResponse response = elasticsearchClient.get(request, RequestOptions.DEFAULT);
-            if (!response.isExists()) {
-                throw new  NotFoundException("商品不存在");
+            Product product = this.getById(productId);
+            if(product == null) {
+                throw new NotFoundException("商品不存在");
             }
-            Map<String, Object> source = response.getSourceAsMap();
-            ProductInfoVo vo = convertToVo(source);
-            return ResponseResult.success(vo);
-        } catch (IOException e) {
-            throw new SystemException("ES查询失败", e);
+            return productInfoVoConvert.convertToProductInfoVo(product);
+        } catch (NotFoundException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            log.error("数据库异常：{}", ex.getMessage());
+            // 数据库异常，尝试从ES中搜索数据
+            GetRequest request = new GetRequest(ProductsIndex.name, productId.toString());
+            try {
+                GetResponse response = elasticsearchClient.get(request, RequestOptions.DEFAULT);
+                if (!response.isExists()) {
+                    throw new NotFoundException("商品不存在");
+                }
+                Map<String, Object> source = response.getSourceAsMap();
+                return this.convertToVo(source);
+            } catch (IOException e) {
+                throw new SystemException("ES查询失败", e);
+            }
         }
     }
 
-    /**
-     * 指定某种类别查询商品信息
-     *
-     * @param listProductsDto
-     */
     @Override
-    public ResponseResult<IPage<ProductInfoVo>> getProductInfoByCategory(ListProductsDto listProductsDto) {
+    public IPage<ProductInfoVo> getProductInfoByCategory(ListProductsDto listProductsDto) throws UserException, SystemException {
         SearchRequest searchRequest = new SearchRequest(ProductsIndex.name);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
@@ -208,28 +184,22 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
                     .collect(Collectors.toList());
 
             // 构建分页结果
-            Page<ProductInfoVo> pageResult = new Page<>(page, size, response.getHits().getTotalHits().value);
+            Page<ProductInfoVo> pageResult = new Page<>(page, size, Objects.requireNonNull(response.getHits().getTotalHits()).value);
             pageResult.setRecords(products);
-            return ResponseResult.success(pageResult);
-        } catch (IOException e) {
-            throw new SystemException("ES查询失败", e);
+            return pageResult;
+        } catch (Exception e) {
+            throw new DatabaseException("ES查询失败", e);
         }
     }
 
-    /**
-     * 指定条件查询商品信息
-     *
-     * @param searchProductsDto
-     */
     @Override
-    public ResponseResult<IPage<ProductInfoVo>> seachProductInfo(SearchProductsDto searchProductsDto) {
+    public IPage<ProductInfoVo> searchProductInfo(SearchProductsDto searchProductsDto) throws UserException, SystemException {
         SearchRequest searchRequest = new SearchRequest(ProductsIndex.name);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
 
         // 商品名称模糊查询
         if (StringUtils.hasText(searchProductsDto.getProductName())) {
-//            boolQuery.must(QueryBuilders.wildcardQuery("name", "*" + searchProductsDto.getProductName() + "*"));
             boolQuery.must(QueryBuilders.fuzzyQuery(ProductsIndex.productName, searchProductsDto.getProductName()).fuzziness(Fuzziness.AUTO));
         }
 
@@ -257,8 +227,8 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
         }
 
         // 库存查询
-        if (searchProductsDto.getStoke() != null) {
-            boolQuery.filter(QueryBuilders.rangeQuery(ProductsIndex.stock).gte(searchProductsDto.getStoke()));
+        if (searchProductsDto.getStock() != null) {
+            boolQuery.filter(QueryBuilders.rangeQuery(ProductsIndex.stock).gte(searchProductsDto.getStock()));
         }
 
         // 分页设置
@@ -276,100 +246,79 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
                     .map(hit -> convertToVo(hit.getSourceAsMap()))
                     .collect(Collectors.toList());
 
-//            // 按创建时间倒序
-//            if (products.size() > 1) {
-//                products.sort(Comparator.comparing(ProductInfoVo::getCreateTime).reversed());
-//            }
-
-            Page<ProductInfoVo> pageResult = new Page<>(page, size, response.getHits().getTotalHits().value);
+            Page<ProductInfoVo> pageResult = new Page<>(page, size, Objects.requireNonNull(response.getHits().getTotalHits()).value);
             pageResult.setRecords(products);
-            return ResponseResult.success(pageResult);
+            return pageResult;
         } catch (IOException e) {
-            throw new SystemException("ES查询失败", e);
+            throw new DatabaseException("ES查询失败", e);
         }
     }
 
     // ================================ 库存操作 ================================
-    /**
-     * 增加库存
-     *
-     * @param addProductDto
-     */
+
     @Override
-    public ResponseResult<Object> addProductStock(AddProductDto addProductDto) {
+    public void addProductStock(AddProductDto addProductDto) throws UserException, SystemException {
         // 根据商品ID查询商品信息
         Long productId = addProductDto.getProductId();
         Product product = productMapper.selectById(productId);
 
         if (product == null) {
-            log.error("商品不存在，productId: {}", productId);
             throw new NotFoundException("商品不存在");
         }
 
         // 增加库存
         Integer addStock = addProductDto.getAddStock();
-        product.setStoke(product.getStoke() + addStock);
+        product.setStock(product.getStock() + addStock);
 
         // 同步到ES
         syncProductToES(product);
-        return ResponseResult.success();
-
     }
 
     /**
      * 减少库存
-     *
-     * @param decProductDto
+     * @param decProductDto dto
+     * @throws UserException 用户异常
+     * @throws SystemException 系统异常
      */
     @Override
-    public ResponseResult<Object> decProductStock(DecProductDto decProductDto) {
+    public void decProductStock(DecProductDto decProductDto) throws UserException, SystemException {
         // 根据商品ID查询商品信息
         Long productId = decProductDto.getProductId();
         Product product = productMapper.selectById(productId);
 
         if (product == null) {
-            log.error("商品不存在，productId: {}", productId);
             throw new NotFoundException("商品不存在");
         }
 
         // 减少库存
         Integer decStock = decProductDto.getDecStock();
-        if (product.getStoke() < decStock) {
+        if (product.getStock() < decStock) {
             log.error("库存不足，productId: {}", productId);
-            throw new DatabaseException("库存不足");
+            throw new BadRequestException("库存不足");
         }
 
-        product.setStoke(product.getStoke() - decStock);
-//        product.setSold(product.getSold() + decStock);
+        product.setStock(product.getStock() - decStock);
 
         // 同步到ES
         syncProductToES(product);
-        return ResponseResult.success();
     }
 
-    /**
-     * 增加库存
-     *
-     * @param addProductSoldDto
-     */
     @Override
-    public ResponseResult<Object> addProductSales(AddProductSoldDto addProductSoldDto) {
+    public void addProductSales(AddProductSoldDto addProductSoldDto) throws UserException, SystemException {
         // 根据商品ID查询商品信息
         Long productId = addProductSoldDto.getProductId();
         Product product = productMapper.selectById(productId);
 
         if (product == null) {
-            log.error("商品不存在，productId: {}", productId);
             throw new NotFoundException("商品不存在");
         }
 
         // 增加销量
         Integer addStock = addProductSoldDto.getAddSold();
-        product.setSold(product.getStoke() + addStock);
+        product.setSold(product.getStock() + addStock);
 
         // 同步到ES
         syncProductToES(product);
-        return ResponseResult.success();
 
     }
 
@@ -377,9 +326,11 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
     // ================================ 数据同步 ================================
     /**
      * 更新商品信息（双写MySQL和ES）
+     * @param product 商品对象
+     * @throws DatabaseException 数据库异常
      */
     @Transactional
-    public void syncProductToES(Product product) {
+    protected void syncProductToES(Product product) throws DatabaseException {
         // 1. 更新MySQL
         int update = productMapper.updateById(product);
         if (update == 0) {
@@ -397,10 +348,15 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
             log.info("商品同步到ES成功，ID: {}", product.getId());
         } catch (IOException e) {
             log.error("商品同步到ES失败，ID: {}", product.getId(), e);
-            throw new SystemException("ES同步失败", e);
+            throw new DatabaseException("ES同步失败", e);
         }
     }
 
+    /**
+     * 将商品对象转化为Map数据
+     * @param product 商品对象
+     * @return Map对象
+     */
     private Map<String, Object> convertToMap(Product product) {
         Map<String, Object> map = new HashMap<>();
         map.put(ProductsIndex.productId, product.getId());
@@ -408,23 +364,20 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
         map.put(ProductsIndex.description, product.getDescription());
         map.put(ProductsIndex.price, product.getPrice());
         map.put(ProductsIndex.sold, product.getSold());
-        map.put(ProductsIndex.stock, product.getStoke());
+        map.put(ProductsIndex.stock, product.getStock());
         map.put(ProductsIndex.merchantName, product.getMerchantName());
-        map.put(ProductsIndex.status, product.getStatus());
+        map.put(ProductsIndex.status, product.getStatus().getCode());
+        map.put(ProductsIndex.categoryName, iProCateRelService.getProductCategoryNames(product.getId()));
         map.put(ProductsIndex.createTime, product.getCreateTime());
         map.put(ProductsIndex.updateTime, product.getUpdateTime());
-
-        // 获取关联表信息
-        List<ProCateRel> proCateRels = iProCateRelService.list(Wrappers.<ProCateRel>lambdaQuery().eq(ProCateRel::getProductId, product.getId()));
-        // 获取分类id列表
-        List<Long> categoryIds = proCateRels.stream().map(ProCateRel::getCategoryId).collect(Collectors.toList());
-        // 获取分类名称列表
-        List<Category> categories = iCategoryService.listByIds(categoryIds);
-        List<String> categoryNames = categories.stream().map(Category::getCategoryName).collect(Collectors.toList());
-        map.put(ProductsIndex.categoryName, categoryNames);
         return map;
     }
 
+    /**
+     * 将ES查询结果转化为ProductInfoVo对象
+     * @param source ES查询结果
+     * @return vo对象
+     */
     private ProductInfoVo convertToVo(Map<String, Object> source) {
         // 处理 categories 字段
         Object categoriesValue = source.get(ProductsIndex.categoryName);
@@ -448,7 +401,7 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
                 .description((String) source.get("description"))
                 .price(((Number) source.get("price")).floatValue())
                 .sold((Integer) source.get("sold"))
-                .stoke((Integer) source.get("stock"))
+                .stock((Integer) source.get("stock"))
                 .merchantName((String) source.get("merchantName"))
                 .categories(categories)
                 .status((Integer) source.get("status"))
@@ -457,87 +410,14 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
                 .build();
     }
 
-    private List<Long> validateAndGetCategoryIds(List<String> categoryNames) {
-        List<Category> categories = iCategoryService.list(
-                Wrappers.<Category>lambdaQuery().in(Category::getCategoryName, categoryNames)
-        );
-
-        if (categories.size() != categoryNames.size()) {
-            List<String> existNames = categories.stream()
-                    .map(Category::getCategoryName)
-                    .collect(Collectors.toList());
-            List<String> notExist = categoryNames.stream()
-                    .filter(name -> !existNames.contains(name))
-                    .collect(Collectors.toList());
-
-            // 新增分类
-            List<Category> newCategories = notExist.stream()
-                    .map(name -> new Category().setCategoryName(name))
-                    .collect(Collectors.toList());
-
-            // 增加创建时间和更新时间
-            LocalDateTime now = LocalDateTime.now();
-            newCategories.forEach(c -> {
-                c.setCreateTime(now);
-                c.setUpdateTime(now);
-            });
-
-            if (!iCategoryService.saveBatch(newCategories)) {
-                throw new DatabaseException("保存分类失败");
-            }
-
-            // 重新查询分类
-            categories = iCategoryService.list(
-                    Wrappers.<Category>lambdaQuery().in(Category::getCategoryName, categoryNames)
-            );
-        }
-
-        return categories.stream()
-                .map(Category::getId)
-                .collect(Collectors.toList());
-    }
-
-    private void saveProductCategories(Long productId, List<Long> categoryIds) {
-        List<ProCateRel> relations = categoryIds.stream()
-                .map(cid -> new ProCateRel(productId, cid))
-                .collect(Collectors.toList());
-        // 保存创建时间和更新时间
-        LocalDateTime now = LocalDateTime.now();
-        relations.forEach(r -> {
-            r.setCreateTime(now);
-            r.setUpdateTime(now);
-        });
-        if (!iProCateRelService.saveBatch(relations)) {
-            throw new RuntimeException("保存分类关系失败");
-        }
-    }
-
     /**
      * 完整同步商品数据到ES（包含分类名称）
+     * @param productId 商品ID
      */
     private void syncFullProductToES(Long productId) {
-        Product product = getById(productId);
-        List<ProCateRel> relations = iProCateRelService.list(
-                Wrappers.<ProCateRel>lambdaQuery().eq(ProCateRel::getProductId, productId)
-        );
-
-        List<String> categoryNames = iCategoryService.listByIds(
-                relations.stream().map(ProCateRel::getCategoryId).collect(Collectors.toList())
-        ).stream().map(Category::getCategoryName).collect(Collectors.toList());
-
+        Product product = this.getById(productId);
         // 构建ES文档
-        Map<String, Object> doc = new HashMap<>();
-        doc.put(ProductsIndex.productId, product.getId());
-        doc.put(ProductsIndex.productName, product.getName());
-        doc.put(ProductsIndex.description, product.getDescription());
-        doc.put(ProductsIndex.price, product.getPrice());
-        doc.put(ProductsIndex.sold, product.getSold());
-        doc.put(ProductsIndex.stock, product.getStoke());
-        doc.put(ProductsIndex.merchantName, product.getMerchantName());
-        doc.put(ProductsIndex.status, product.getStatus());
-        doc.put(ProductsIndex.categoryName, categoryNames);
-        doc.put(ProductsIndex.createTime, product.getCreateTime());
-        doc.put(ProductsIndex.updateTime, product.getUpdateTime());
+        Map<String, Object> doc = this.convertToMap(product);
         log.info(product.getCreateTime().toString());
 
         // 更新ES
@@ -553,6 +433,11 @@ public class ProductServiceImpl extends ServiceImpl<productMapper, Product> impl
         }
     }
 
+    /**
+     * 获得对象中属性为null的字段名
+     * @param source 对象
+     * @return 字符串数组
+     */
     private String[] getNullPropertyNames(Object source) {
         BeanWrapper src = new BeanWrapperImpl(source);
         return Arrays.stream(src.getPropertyDescriptors())

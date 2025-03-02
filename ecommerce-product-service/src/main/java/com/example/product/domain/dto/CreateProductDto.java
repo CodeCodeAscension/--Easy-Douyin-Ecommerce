@@ -1,5 +1,6 @@
 package com.example.product.domain.dto;
 
+import com.example.product.enums.ProductStatusEnum;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
@@ -39,5 +40,5 @@ public class CreateProductDto {
     private List<String> categories;
 
     @Schema(description = "状态（0上架，1下架）")
-    private Integer status = 0;
+    private ProductStatusEnum status = ProductStatusEnum.PUT_ON;
 }

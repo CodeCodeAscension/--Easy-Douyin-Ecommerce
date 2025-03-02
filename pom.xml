@@ -65,6 +65,8 @@
                 <rabbitmq.port>5672</rabbitmq.port>
                 <rabbitmq.user>guest</rabbitmq.user>
                 <rabbitmq.pwd>guest</rabbitmq.pwd>
+                <elasticsearch.host>vlsmb-kotori.local</elasticsearch.host>
+                <elasticsearch.port>9200</elasticsearch.port>
             </properties>
         </profile>
 <!--    环境二-->
@@ -83,6 +85,8 @@
                 <rabbitmq.port>5672</rabbitmq.port>
                 <rabbitmq.user>guest</rabbitmq.user>
                 <rabbitmq.pwd>guest</rabbitmq.pwd>
+                <elasticsearch.host>192.168.150.101</elasticsearch.host>
+                <elasticsearch.port>9200</elasticsearch.port>
             </properties>
         </profile>
 <!--环境三-->

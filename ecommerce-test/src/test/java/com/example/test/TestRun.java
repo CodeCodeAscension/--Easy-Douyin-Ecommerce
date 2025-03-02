@@ -1,6 +1,6 @@
 package com.example.test;
 
-import com.example.common.config.rabbitmq.RabbitQueuesConfig;
+import com.example.common.config.rabbitmq.RabbitQueueNamesConfig;
 import com.example.test.service.TestService;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -19,11 +19,11 @@ public class TestRun {
     }
 
     @Autowired
-    private RabbitQueuesConfig rabbitQueuesConfig;
+    private RabbitQueueNamesConfig rabbitQueueNamesConfig;
 
     @Test
     public void testRabbit() {
-        rabbitTemplate.convertAndSend(rabbitQueuesConfig.exchangeName, rabbitQueuesConfig.queues.pay.start, "Hello World");
+        rabbitTemplate.convertAndSend(rabbitQueueNamesConfig.exchangeName, rabbitQueueNamesConfig.queues.pay.start, "Hello World");
     }
 
     @Autowired

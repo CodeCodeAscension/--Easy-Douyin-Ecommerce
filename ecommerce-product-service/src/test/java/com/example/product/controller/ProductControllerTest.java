@@ -1,7 +1,7 @@
 package com.example.product.controller;
 
 import com.example.common.domain.ResponseResult;
-import com.example.product.domain.vo.ProductInfoVo;
+import com.example.api.domain.vo.product.ProductInfoVo;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

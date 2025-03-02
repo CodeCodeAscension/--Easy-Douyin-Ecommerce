@@ -1,28 +1,44 @@
 package com.example.api.domain.dto.product;
 
-//import io.swagger.annotations.ApiModel;
-//import io.swagger.annotations.ApiModelProperty;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-//@ApiModel(description = "查询商品请求")
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Schema(description = "指定条件搜索商品DTO")
 public class SearchProductsDto {
-//    @ApiModelProperty("第几页")
+    @Schema(description = "页码")
     private Integer page;
-//    @ApiModelProperty("每页数量")
-    private Long pageSize;
-//    @ApiModelProperty("商品名称")
+
+    @Schema(description = "每页数量")
+    private Integer pageSize;
+
+    @Schema(description = "商品名称")
     private String productName;
-//    @ApiModelProperty("商品价格下限")
+
+    @Schema(description = "最低价格")
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT)
     private Float priceLow;
-//    @ApiModelProperty("商品价格上限")
+
+    @Schema(description = "最高价格")
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT)
     private Float priceHigh;
-//    @ApiModelProperty("销量")
-    private Integer stock;
-//    @ApiModelProperty("库存")
+
+    @Schema(description = "销量")
     private Integer sold;
-//    @ApiModelProperty("商家名称")
+
+    @Schema(description = "库存")
+    private Integer stock;
+
+    @Schema(description = "商家名称")
     private String merchantName;
-//    @ApiModelProperty("类别")
+
+    @Schema(description = "分类名称")
     private String categoryName;
 }
