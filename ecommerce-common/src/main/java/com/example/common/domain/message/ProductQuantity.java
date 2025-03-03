@@ -1,9 +1,16 @@
 package com.example.common.domain.message;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 @Data
-public class ProductQuantity {
+@AllArgsConstructor
+public class ProductQuantity implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
     private Long productId;
     private Integer quantity;
 }

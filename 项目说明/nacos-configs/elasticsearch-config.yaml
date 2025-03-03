@@ -1,0 +1,4 @@
+ecommerce:
+  elasticsearch:
+    connect-timeout: 5000
+    socket-timeout: 10000

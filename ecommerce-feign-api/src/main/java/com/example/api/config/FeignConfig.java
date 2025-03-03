@@ -1,5 +1,6 @@
 package com.example.api.config;
 
+import com.example.common.exception.UnauthorizedException;
 import com.example.common.util.UserContextUtil;
 import feign.Logger;
 import feign.RequestInterceptor;
@@ -16,14 +17,12 @@ public class FeignConfig {
 
     @Bean
     public RequestInterceptor userInfoRequestInterceptor(){
-        return new RequestInterceptor() {
-            @Override
-            public void apply(RequestTemplate template) {
+        return template -> {
+            try {
                 Long userId = UserContextUtil.getUserId();
-                if(userId == null) {
-                    return;
-                }
                 template.header("X-User-Id", userId.toString());
+            } catch (UnauthorizedException e) {
+                return;
             }
         };
     }

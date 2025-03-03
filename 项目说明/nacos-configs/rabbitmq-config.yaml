@@ -8,3 +8,12 @@ spring:
     listener:
       simple:
         prefetch: 1
+        acknowledge-mode: auto
+        retry:
+          enabled: true
+          initial-interval: 1000ms
+          multiplier: 1
+          max-attempts: 3
+          stateless: true
+
+    publisher-confirm-type: correlated

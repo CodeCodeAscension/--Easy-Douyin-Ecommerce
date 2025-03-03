@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Data
 @ConfigurationProperties(prefix = "ecommerce.rabbitmq")
 @Component
-public class RabbitQueuesConfig {
+public class RabbitQueueNamesConfig {
     public String exchangeName;
     public Queues queues;
 }

@@ -78,6 +78,7 @@
         <dependency>
             <groupId>org.springframework.amqp</groupId>
             <artifactId>spring-rabbit</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

@@ -65,6 +65,8 @@
                 <rabbitmq.port>5672</rabbitmq.port>
                 <rabbitmq.user>guest</rabbitmq.user>
                 <rabbitmq.pwd>guest</rabbitmq.pwd>
+                <elasticsearch.host>vlsmb-kotori.local</elasticsearch.host>
+                <elasticsearch.port>9200</elasticsearch.port>
             </properties>
         </profile>
 <!--    环境二-->
@@ -83,6 +85,8 @@
                 <rabbitmq.port>5672</rabbitmq.port>
                 <rabbitmq.user>guest</rabbitmq.user>
                 <rabbitmq.pwd>guest</rabbitmq.pwd>
+                <elasticsearch.host>192.168.150.101</elasticsearch.host>
+                <elasticsearch.port>9200</elasticsearch.port>
             </properties>
         </profile>
 <!--环境三-->
@@ -108,17 +112,19 @@
             <id>dev4</id>
             <properties>
                 <env>dev4</env>
-                <database.host>vlsmb-nagamori.local</database.host>
+                <database.host>localhost</database.host>
                 <database.port>3306</database.port>
                 <database.user>root</database.user>
-                <database.pwd>root</database.pwd>
-                <sentinel.dashboard>vlsmb-nagamori.local:8090</sentinel.dashboard>
-                <nacos.dashboard>vlsmb-nagamori.local:8848</nacos.dashboard>
-                <redis.cluster-addr>192.168.11.136:7001,192.168.11.136:7002,192.168.11.136:7003,192.168.11.136:7004,192.168.11.136:7005,192.168.11.136:7006</redis.cluster-addr>
-                <rabbitmq.host>192.168.11.136</rabbitmq.host>
+                <database.pwd>2781307050.wl</database.pwd>
+                <sentinel.dashboard>localhost:8090</sentinel.dashboard>
+                <nacos.dashboard>localhost:8848</nacos.dashboard>
+                <redis.cluster-addr>localhost:7001,localhost:7002,localhost:7003,localhost:7004,localhost:7005,localhost:7006</redis.cluster-addr>
+                <rabbitmq.host>localhost</rabbitmq.host>
                 <rabbitmq.port>5672</rabbitmq.port>
                 <rabbitmq.user>guest</rabbitmq.user>
                 <rabbitmq.pwd>guest</rabbitmq.pwd>
+                <elasticsearch.host>localhost</elasticsearch.host>
+                <elasticsearch.port>9200</elasticsearch.port>
             </properties>
         </profile>
 <!--环境五-->
