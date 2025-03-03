@@ -2,7 +2,7 @@ spring:
   application:
     name: checkout-service
   profiles:
-    active: dev
+    active: dev4
   cloud:
     nacos:
       server-addr: @nacos.dashboard@
@@ -17,4 +17,5 @@ spring:
           - dataId: seata-config.yaml
           - dataId: redis-config.yaml
           - dataId: rabbitmq-config.yaml
+          - dataId: mq-queues-config.yaml
         group: DEFAULT_GROUP

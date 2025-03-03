@@ -1,9 +1,10 @@
 package com.example.api.client;
 
 import com.example.api.client.fallback.PaymentClientFallBack;
-import com.example.api.domain.dto.payment.ChargeCancelDto;
 import com.example.api.domain.dto.payment.ChargeDto;
+import com.example.api.domain.dto.payment.TransactionInfoDto;
 import com.example.api.domain.vo.payment.ChargeVo;
+import com.example.api.domain.vo.payment.TransactionInfoVo;
 import com.example.common.domain.ResponseResult;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,10 @@ public interface PaymentClient {
     @DeleteMapping("/api/v1/payments")
     ResponseResult<Object> cancelCharge(@RequestParam Integer transactionId);
 
-    // 定期取消支付
-    @PutMapping("/api/v1/payments")
-    ResponseResult<Object> autoCancelCharge(@RequestBody ChargeCancelDto chargeCancelDto);
+    // 确认支付
+    @PostMapping("/confirm")
+    ResponseResult<Object> confirmCharge(@RequestParam String preTransactionId);
+
+    @GetMapping("/api/v1/payments/byId")
+    ResponseResult<TransactionInfoVo> getTransactionInfo(@RequestBody TransactionInfoDto transactionInfoDto);
 }

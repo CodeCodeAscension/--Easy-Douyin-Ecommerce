@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.payment.mapper.TransactionMapper">
+    <select id="findByIdAndPreId" resultType="com.example.payment.domain.po.Transaction">
+        SELECT * FROM transaction
+        <where>
+            <if test="userId != null">
+                user_id = #{userId}
+            </if>
+            <if test="transactionId != null">
+                AND transaction_id = #{transactionId}
+            </if>
+            <if test="preTransactionId != null">
+                AND pre_transaction_id = #{preTransactionId}
+            </if>
+        </where>
+    </select>
+</mapper>

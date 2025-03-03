@@ -1,9 +1,10 @@
 package com.example.api.client.fallback;
 
 import com.example.api.client.PaymentClient;
-import com.example.api.domain.dto.payment.ChargeCancelDto;
 import com.example.api.domain.dto.payment.ChargeDto;
+import com.example.api.domain.dto.payment.TransactionInfoDto;
 import com.example.api.domain.vo.payment.ChargeVo;
+import com.example.api.domain.vo.payment.TransactionInfoVo;
 import com.example.common.domain.ResponseResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.openfeign.FallbackFactory;
@@ -28,8 +29,14 @@ public class PaymentClientFallBack implements FallbackFactory<PaymentClient> {
             }
 
             @Override
-            public ResponseResult<Object> autoCancelCharge(ChargeCancelDto chargeCancelDto) {
-                log.error("payment-service-exception:autoCancelCharge, "+cause.getMessage());
+            public ResponseResult<Object> confirmCharge(String preTransactionId) {
+                log.error("payment-service-exception:confirmCharge, "+cause.getMessage());
+                return ResponseResult.errorFeign(cause);
+            }
+
+            @Override
+            public ResponseResult<TransactionInfoVo> getTransactionInfo(TransactionInfoDto transactionInfoDto) {
+                log.error("payment-service-exception:getTransactionInfo, "+cause.getMessage());
                 return ResponseResult.errorFeign(cause);
             }
         };

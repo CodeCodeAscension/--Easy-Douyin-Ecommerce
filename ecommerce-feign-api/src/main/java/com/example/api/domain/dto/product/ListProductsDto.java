@@ -1,16 +1,26 @@
 package com.example.api.domain.dto.product;
 
-//import io.swagger.annotations.ApiModel;
-//import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Min;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-//@ApiModel(description = "查询商品信息请求")
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Schema(description = "根据分类查询商品列表DTO")
 public class ListProductsDto {
-//    @ApiModelProperty("第几页")
-    private Integer page;
-//    @ApiModelProperty("每页数量")
-    private Long pageSize;
-//    @ApiModelProperty("类别")
+    @Schema(description = "页码")
+    @Min(1)
+    private Integer page = 1;
+
+    @Schema(description = "每页数量")
+    @Min(1)
+    private Integer pageSize = 20;
+
+    @Schema(description = "商品名称")
     private String categoryName;
 }
