@@ -42,7 +42,6 @@ CREATE TABLE `address` (
 
 LOCK TABLES `address` WRITE;
 /*!40000 ALTER TABLE `address` DISABLE KEYS */;
-INSERT INTO `address` VALUES (1,0,'sdesef','ferwsf','fewf','fewrrf','123','2025-02-25 15:14:42','2025-02-25 15:14:42'),(1896568592137441282,1891176539272523778,'fdrgfr','','','','123','2025-03-03 22:29:24','2025-03-03 22:37:12');
 /*!40000 ALTER TABLE `address` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -90,6 +89,8 @@ CREATE TABLE `order_item` (
   `id` bigint NOT NULL COMMENT '订单商品ID',
   `order_id` varchar(255) NOT NULL,
   `cart_item_id` bigint NOT NULL COMMENT '购物车商品ID',
+  `product_id` bigint DEFAULT NULL COMMENT '商品ID',
+  `quantity` int DEFAULT NULL COMMENT '数量',
   `cost` decimal(10,2) NOT NULL COMMENT '总消费',
   `status` int NOT NULL DEFAULT '0' COMMENT '状态（0待支付，1已支付，2已删除）',
   `create_time` datetime NOT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -147,4 +148,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-03 23:10:33
+-- Dump completed on 2025-03-04  1:05:09

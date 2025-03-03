@@ -15,6 +15,6 @@ public interface CartClient {
     ResponseResult<CartInfoVo> getCartInfo();
 
     // 获得某个CartItem的信息
-    @GetMapping("/items/{id}")
+    @GetMapping("/api/v1/carts/items/{id}")
     ResponseResult<CartItem> getCartItem(@PathVariable Long id);
 }

@@ -34,7 +34,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.rmi.NotBoundException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -53,7 +52,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     private final RabbitTemplate rabbitTemplate;
     private final IAddressService iAddressService;
-    private final ProductClient productClient;
     private final IOrderItemService orderItemService;
 
     @Override
@@ -83,10 +81,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             orderItemService.updateOrderItemByOrderId(order.getOrderId(), placeOrderDto.getCartItems());
             orderResult.setOrderId(order.getOrderId());
             //设置订单ttl半个小时
-            rabbitTemplate.convertAndSend(RabbitMQDLXConfig.ORDER_EXCHANGE, RabbitMQDLXConfig.ORDER_ROUTING_KEY, orderResult.getOrderId(), message -> {
-                message.getMessageProperties().setExpiration("1800000");
-                return message;
-            });
+            rabbitTemplate.convertAndSend(
+                    RabbitMQDLXConfig.ORDER_EXCHANGE,
+                    RabbitMQDLXConfig.ORDER_ROUTING_KEY,
+                    orderResult.getOrderId(),
+                    message -> {
+                        message.getMessageProperties().setExpiration(String.valueOf(30 * 60 * 1000L));
+                        return message;
+                    });
             return orderResult;
         } else {
             throw new DatabaseException("数据库异常");
@@ -97,9 +99,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateOrder(@NotNull UpdateOrderDto updateOrderDto) {
-        if(updateOrderDto.getCartItems() == null || updateOrderDto.getCartItems().isEmpty()) {
-            throw new BadRequestException("至少要有一件商品");
-        }
         //封装po
         Order order = this.getById(updateOrderDto.getOrderId());
         if(order == null) {
@@ -122,14 +121,31 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Override
     public OrderInfoVo getOrderById(String orderId) {
-        Order order = getOne(lambdaQuery().eq(Order::getOrderId, orderId));
+        Order order = getOne(Wrappers.<Order>lambdaQuery().eq(Order::getOrderId, orderId));
         return getOrderInfoVo(order);
+    }
+
+    @Override
+    public void cancelOrder(Long userId, String orderId) throws BadRequestException, NotFoundException {
+        Order order = getOne(Wrappers.<Order>lambdaQuery()
+                .eq(Order::getOrderId, orderId)
+                .eq(Order::getUserId, userId)
+        );
+        if(order == null) {
+            throw new NotFoundException("该订单不存在");
+        }
+        if(order.getStatus() != OrderStatus.WAIT_FOR_PAY) {
+            throw new BadRequestException("该订单不可以取消");
+        }
+        order.setStatus(OrderStatus.CANCELED);
+        order.setUpdateTime(LocalDateTime.now());
+        updateById(order);
     }
 
     //自动取消订单
     @Override
     public Boolean autoCancelOrder(String orderId, Integer status) {
-        Order order = getOne(lambdaQuery().eq(Order::getOrderId, orderId));
+        Order order = getOne(Wrappers.<Order>lambdaQuery().eq(Order::getOrderId, orderId));
         if (order != null) {
             order.setStatus(OrderStatus.fromCode(status));
             order.setUpdateTime(LocalDateTime.now());

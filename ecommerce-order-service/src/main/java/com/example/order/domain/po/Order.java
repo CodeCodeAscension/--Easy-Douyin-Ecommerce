@@ -29,7 +29,7 @@ import lombok.experimental.Accessors;
 @Setter
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("order")
+@TableName("`order`")
 @Schema(description = "订单信息数据库")
 public class Order implements Serializable {
     @Serial

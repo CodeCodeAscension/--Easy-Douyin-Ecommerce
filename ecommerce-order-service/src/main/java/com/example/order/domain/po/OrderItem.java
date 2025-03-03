@@ -40,8 +40,14 @@ public class OrderItem implements Serializable {
     @Schema(description = "所属订单ID")
     private String orderId;
 
-    @Schema(description = "购物车商品ID")
+    @Schema(description = "购物车itemID")
     private Long cartItemId;
+
+    @Schema(description = "商品ID")
+    private Long productId;
+
+    @Schema(description = "商品数量")
+    private Integer quantity;
 
     @Schema(description = "总消费")
     private Float cost;

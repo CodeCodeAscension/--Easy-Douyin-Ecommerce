@@ -11,7 +11,6 @@ import com.example.common.exception.DatabaseException;
 import com.example.common.exception.NotFoundException;
 import com.example.order.domain.po.Order;
 import com.baomidou.mybatisplus.extension.service.IService;
-import org.springframework.dao.DataAccessException;
 
 /**
  * <p>
@@ -49,7 +48,21 @@ public interface IOrderService extends IService<Order> {
      */
     OrderInfoVo getOrderById(String orderId);
 
-    //根据订单id修改订单状态为已取消
+    /**
+     * 取消订单
+     * @param userId 用户ID
+     * @param orderId 订单ID
+     * @throws BadRequestException 参数异常
+     * @throws NotFoundException 未找到异常
+     */
+    void cancelOrder(Long userId, String orderId) throws BadRequestException, NotFoundException;
+
+    /**
+     * 自动取消订单
+     * @param orderId 订单ID
+     * @param status 状态值
+     * @return 是否成功
+     */
     Boolean autoCancelOrder(String orderId ,Integer status);
 
     /**

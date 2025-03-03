@@ -22,6 +22,5 @@ public class UpdateOrderDto {
     @Email
     private String email;
     @Schema(description = "下单的商品")
-    @NotEmpty
     private List<CartItem> cartItems;
 }
