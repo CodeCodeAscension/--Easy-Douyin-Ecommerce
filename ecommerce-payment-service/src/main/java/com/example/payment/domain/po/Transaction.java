@@ -1,7 +1,7 @@
 package com.example.payment.domain.po;
 
 import com.baomidou.mybatisplus.annotation.*;
-import com.example.payment.enums.TransactionStatusEnum;
+import com.example.api.enums.TransactionStatusEnum;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

@@ -17,6 +17,8 @@ import com.example.checkout.domain.vo.CheckoutVo;
 import com.example.checkout.mapper.CheckoutMapper;
 import com.example.checkout.service.CheckoutService;
 import com.example.common.domain.ResponseResult;
+import com.example.common.exception.BadRequestException;
+import com.example.common.exception.DatabaseException;
 import com.example.common.exception.SystemException;
 import com.example.common.util.UserContextUtil;
 import io.seata.spring.annotation.GlobalTransactional;
@@ -36,6 +38,7 @@ public class CheckoutServiceImpl extends ServiceImpl<CheckoutMapper, CheckoutPo>
 
     @Resource
     private PaymentClient paymentClient;
+    
     /**
      * 订单结算
      * 自动免密支付
@@ -70,14 +73,14 @@ public class CheckoutServiceImpl extends ServiceImpl<CheckoutMapper, CheckoutPo>
             // 发起支付请求
             ResponseResult<ChargeVo> charge = paymentClient.charge(chargeDto);
             if (charge.getCode() != 200) {
-                throw new SystemException(new RuntimeException("支付请求失败"));
+                throw new BadRequestException("支付请求失败");
             }
 
             // 确认支付
             ChargeVo chargeVo = charge.getData();
             ResponseResult<Object> result =paymentClient.confirmCharge(chargeVo.getTransactionId());
             if (result.getCode() != 200) {
-                throw new SystemException(new RuntimeException("支付确认失败"));
+                throw new BadRequestException("支付确认失败");
             }
 
             // 获取交易信息
@@ -87,7 +90,7 @@ public class CheckoutServiceImpl extends ServiceImpl<CheckoutMapper, CheckoutPo>
 
             ResponseResult<TransactionInfoVo> transactionInfo = paymentClient.getTransactionInfo(transactionInfoDto);
             if (transactionInfo.getCode() != 200) {
-                throw new SystemException(new RuntimeException("获取交易信息失败"));
+                throw new BadRequestException("获取交易信息失败");
             }
             TransactionInfoVo transactionInfoVo = transactionInfo.getData();
 
@@ -106,7 +109,7 @@ public class CheckoutServiceImpl extends ServiceImpl<CheckoutMapper, CheckoutPo>
                     .build();
 
             if (!save(checkoutPo)) {
-                throw new SystemException(new RuntimeException("保存结算信息失败"));
+                throw new DatabaseException("保存结算信息失败");
             }
 
             // 返回结算信息

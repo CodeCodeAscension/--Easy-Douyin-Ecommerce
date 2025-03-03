@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/checkout")
-@Tag(name = "结算服务", description = "结算服务")
+@Tag(name = "结算服务", description = "结算服务(自动免密支付)")
 public class CheckoutController {
 
     @Resource

@@ -7,7 +7,7 @@ import com.example.api.domain.vo.payment.ChargeVo;
 import com.example.common.exception.SystemException;
 import com.example.common.exception.UserException;
 import com.example.payment.domain.po.Transaction;
-import com.example.payment.domain.vo.TransactionInfoVo;
+import com.example.api.domain.vo.payment.TransactionInfoVo;
 
 public interface TransactionService extends IService<Transaction> {
 

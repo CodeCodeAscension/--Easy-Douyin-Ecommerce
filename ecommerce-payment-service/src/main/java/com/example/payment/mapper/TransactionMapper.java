@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.example.common.cache.MybatisRedisCache;
 import com.example.payment.domain.po.Transaction;
-import com.example.payment.domain.vo.TransactionInfoVo;
+import com.example.api.domain.vo.payment.TransactionInfoVo;
 import org.apache.ibatis.annotations.CacheNamespace;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
