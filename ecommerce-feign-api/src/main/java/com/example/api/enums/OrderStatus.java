@@ -1,5 +1,6 @@
 package com.example.api.enums;
 
+import com.baomidou.mybatisplus.annotation.EnumValue;
 import com.example.common.exception.BadRequestException;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -16,6 +17,7 @@ public enum OrderStatus {
     CANCELED(4,"已取消");
 
     @JsonValue
+    @EnumValue
     private final Integer code;
     private final String description;
 

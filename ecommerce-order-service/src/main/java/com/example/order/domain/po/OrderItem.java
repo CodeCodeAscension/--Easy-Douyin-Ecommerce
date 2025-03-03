@@ -1,5 +1,6 @@
-package com.example.order.domain;
+package com.example.order.domain.po;
 
+import java.io.Serial;
 import java.math.BigDecimal;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -9,8 +10,7 @@ import java.io.Serializable;
 
 import com.example.order.enums.OrderItemStatusEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 import lombok.experimental.Accessors;
 
 /**
@@ -26,21 +26,33 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @TableName("order_item")
 @Schema(description = "订单商品信息数据库")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class OrderItem implements Serializable {
-
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Schema(description = "订单商品ID")
     @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;
 
-    @Schema(description = "购物车商品ID")
+    @Schema(description = "所属订单ID")
+    private String orderId;
+
+    @Schema(description = "购物车itemID")
     private Long cartItemId;
 
-    @Schema(description = "总消费")
-    private BigDecimal cost;
+    @Schema(description = "商品ID")
+    private Long productId;
 
-    @Schema(description = "状态（0待支付，1已支付，2已删除）")
+    @Schema(description = "商品数量")
+    private Integer quantity;
+
+    @Schema(description = "总消费")
+    private Float cost;
+
+    @Schema(description = "状态（0待支付，1已支付，2已取消）")
     private OrderItemStatusEnum status;
 
     @Schema(description = "创建时间")

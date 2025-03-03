@@ -1,14 +1,25 @@
 package com.example.api.domain.po;
 
-//import io.swagger.annotations.ApiModel;
-//import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-//@ApiModel(description = "购物车物品实体类")
+@Schema(description = "购物车物品")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class CartItem {
-//    @ApiModelProperty("商品ID")
+    @Schema(description = "购物车ID")
+    @NotNull
+    private Long cartItemId;
+    @Schema(description = "商品ID")
+    @NotNull
     private Long productId;
-//    @ApiModelProperty("商品数量")
+    @Schema(description = "商品数量")
+    @NotNull
     private Integer quantity;
 }

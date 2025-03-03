@@ -50,7 +50,7 @@ spring:
         - id: order
           uri: lb://order-service
           predicates:
-            - Path=/api/v1/orders/**,/api/v1/order/**
+            - Path=/api/v1/orders/**,/api/v1/order/**,/api/v1/addresses/**
           filters:
             - LoginAuth
 

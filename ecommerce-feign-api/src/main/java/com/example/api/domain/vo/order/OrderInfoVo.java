@@ -1,31 +1,30 @@
 package com.example.api.domain.vo.order;
 
-import com.example.api.domain.po.Address;
 import com.example.api.domain.po.CartItem;
-//import io.swagger.annotations.ApiModel;
-//import io.swagger.annotations.ApiModelProperty;
+import com.example.api.enums.OrderStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-//@ApiModel(description = "用户订单信息")
+@Schema(description = "用户订单信息")
 public class OrderInfoVo {
-//    @ApiModelProperty("订单ID")
+    @Schema(description = "订单ID")
     private String orderId;
-//    @ApiModelProperty("支付状态（0待支付，1已支付，2已取消）")
-    private Integer status;
-//    @ApiModelProperty("使用的货币")
+    @Schema(description = "支付状态（0待支付，1已支付，2已取消）")
+    private OrderStatus status;
+    @Schema(description = "使用的货币")
     private String userCurrency;
-//    @ApiModelProperty("地址")
-    private Address address;
-//    @ApiModelProperty("电子邮件")
+    @Schema(description = "地址")
+    private AddressInfoVo address;
+    @Schema(description = "电子邮件")
     private String email;
-//    @ApiModelProperty("下单的商品")
+    @Schema(description = "下单的商品")
     private List<CartItem> cartItems;
-//    @ApiModelProperty("创建时间")
+    @Schema(description = "创建时间")
     private LocalDateTime createTime;
-//    @ApiModelProperty("修改时间")
+    @Schema(description = "修改时间")
     private LocalDateTime updateTime;
 }

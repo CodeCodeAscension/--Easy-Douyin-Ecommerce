@@ -1,6 +1,15 @@
 package com.example.order.service;
 
-import com.example.order.domain.Order;
+import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
+import com.example.api.domain.dto.order.PlaceOrderDto;
+import com.example.api.domain.dto.order.SearchOrderDto;
+import com.example.api.domain.dto.order.UpdateOrderDto;
+import com.example.api.domain.po.OrderResult;
+import com.example.api.domain.vo.order.OrderInfoVo;
+import com.example.common.exception.BadRequestException;
+import com.example.common.exception.DatabaseException;
+import com.example.common.exception.NotFoundException;
+import com.example.order.domain.po.Order;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -13,4 +22,65 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IOrderService extends IService<Order> {
 
+    /**
+     * 创建订单记录
+     * @param userId 用户ID
+     * @param placeOrderDto dto
+     * @return 创建结果
+     * @throws DatabaseException 数据库异常
+     * @throws BadRequestException 参数异常
+     */
+    OrderResult createOrder(Long userId, PlaceOrderDto placeOrderDto) throws DatabaseException, BadRequestException;
+
+    /**
+     * 更新订单信息
+     * @param updateOrderDto dto
+     * @throws DatabaseException 数据库异常
+     * @throws BadRequestException 参数异常
+     * @throws NotFoundException 未找到异常
+     */
+    void updateOrder(UpdateOrderDto updateOrderDto) throws DatabaseException, BadRequestException, NotFoundException;
+
+    /**
+     * 查询订单信息
+     * @param orderId 订单号
+     * @return 订单信息
+     */
+    OrderInfoVo getOrderById(String orderId);
+
+    /**
+     * 取消订单
+     * @param userId 用户ID
+     * @param orderId 订单ID
+     * @throws BadRequestException 参数异常
+     * @throws NotFoundException 未找到异常
+     */
+    void cancelOrder(Long userId, String orderId) throws BadRequestException, NotFoundException;
+
+    /**
+     * 自动取消订单
+     * @param orderId 订单ID
+     * @param status 状态值
+     * @return 是否成功
+     */
+    Boolean autoCancelOrder(String orderId ,Integer status);
+
+    /**
+     * 获得某个用户的所有订单
+     * @param userId 用户ID
+     * @param pageSize 页大小
+     * @param pageNum 页号
+     * @return 订单信息
+     */
+    PageDTO<OrderInfoVo> getAllOrders(Long userId, Integer pageSize, Integer pageNum);
+
+    /**
+     * 查询某个用户订单信息
+     * @param userId 用户ID
+     * @param pageSize 页大小
+     * @param pageNum 页号
+     * @param seatchOrderDto 查询dto
+     * @return 订单信息
+     */
+    PageDTO<OrderInfoVo> searchOrders(Long userId, Integer pageSize, Integer pageNum, SearchOrderDto seatchOrderDto);
 }

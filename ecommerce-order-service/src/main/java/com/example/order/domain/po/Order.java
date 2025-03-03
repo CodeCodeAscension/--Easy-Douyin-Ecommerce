@@ -2,12 +2,18 @@ package com.example.order.domain.po;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
+
+import java.io.Serial;
 import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
+
+import com.example.api.enums.OrderStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 
 /**
@@ -19,12 +25,14 @@ import lombok.experimental.Accessors;
  * @since 2025-02-28
  */
 @Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("order")
+@TableName("`order`")
 @Schema(description = "订单信息数据库")
 public class Order implements Serializable {
-
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Schema(description = "订单ID")
@@ -43,11 +51,8 @@ public class Order implements Serializable {
     @Schema(description = "用户邮箱")
     private String email;
 
-    @Schema(description = "下单的商品ID列表")
-    private String orderItems;
-
     @Schema(description = "状态（0待支付，1已支付，2已取消）")
-    private Integer status;
+    private OrderStatus status;
 
     @Schema(description = "创建时间")
     private LocalDateTime createTime;

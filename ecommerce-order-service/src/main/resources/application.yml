@@ -24,3 +24,14 @@ ecommerce:
     virtual: /
     user: @rabbitmq.user@
     pwd: @rabbitmq.pwd@
+#    queue:
+#      order: "order.queue"
+#      dlx: "order.dlx.queue"
+#    exchange:
+#      order: "order.exchange"
+#      dlx: "order.dlx.exchange"
+#    routing-key:
+#      order:
+#        create: "order.create"
+#      dlx:
+#        cancel: "order.cancel"

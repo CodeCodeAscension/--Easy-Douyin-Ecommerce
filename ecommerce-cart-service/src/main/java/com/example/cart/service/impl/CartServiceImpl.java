@@ -17,6 +17,7 @@ import com.example.common.domain.ResultCode;
 import com.example.common.exception.BadRequestException;
 import com.example.common.exception.NotFoundException;
 import com.example.common.exception.SystemException;
+import com.example.common.exception.UserException;
 import com.example.common.util.UserContextUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -68,7 +69,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         //判断商品是否有货,以及商品是否下架
         ResponseResult<ProductInfoVo> productInfoById = productClient.getProductInfoById(addItemDTO.getProductId());
         if(productInfoById.getCode() != ResultCode.SUCCESS || productInfoById.getData() == null) {
-            throw new SystemException(productInfoById.getMsg());
+            throw new UserException(productInfoById.getCode(), productInfoById.getMsg());
         }
         if(productInfoById.getData().getStatus() != 0) {
             throw new BadRequestException("商品未上架");
