@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.api.client.OrderClient;
 import com.example.api.client.ProductClient;
-import com.example.api.domain.dto.payment.ChargeCancelDto;
 import com.example.api.domain.dto.payment.ChargeDto;
 import com.example.api.domain.dto.product.DecProductDto;
 import com.example.api.domain.po.CartItem;
@@ -25,7 +24,6 @@ import com.example.payment.domain.po.Credit;
 import com.example.payment.domain.po.Transaction;
 import com.example.payment.domain.vo.TransactionInfoVo;
 import com.example.payment.enums.TransactionStatusEnum;
-import com.example.payment.mapper.CreditMapper;
 import com.example.payment.mapper.TransactionMapper;
 import com.example.payment.service.CreditService;
 import com.example.payment.service.TransactionService;
@@ -50,18 +48,13 @@ import java.util.stream.Collectors;
 public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Transaction> implements TransactionService {
 
     // 新增常量定义
-    // 使用ConcurrentHashMap存储待取消的交易ID和取消时间戳
-//    private final Map<String, Long> scheduledCancellations = new ConcurrentHashMap<>();
     private static final String CANCEL_LOCK_KEY = "ecommerce-payment:cancel-lock:";
     private static final String SCHEDULED_KEY = "ecommerce-payment:scheduled:";
 
     // 新增Redis依赖注入
     private final RedisTemplate<String, Object> redisTemplate;
-//    private final HashOperations<String, String, Long> scheduledHashOperations;
+    // 使用RedisHash存储待取消的交易ID和取消时间戳
     private final RedisHashUtil scheduledHashOperations;
-
-    @Resource
-    private CreditMapper creditMapper;
 
     @Resource
     private OrderClient orderClient;
@@ -130,7 +123,6 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
     @Override
     public void confirmCharge(String preTransactionId) throws UserException, SystemException {
         Transaction transaction = validateTransaction(preTransactionId, TransactionStatusEnum.WAIT_FOR_CONFIRM);
-//      Credit credit = creditMapper.selectById(transaction.getCreditId());
         String transactionId = transaction.getTransactionId();
         try {
             // 使用Redis分布式锁防止重复确认
@@ -142,11 +134,7 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
             try {
                 // 扣除余额
                 creditService.pay(transaction.getUserId(), transaction.getCreditId(), transaction.getAmount());
-//                if (credit.getBalance() < transaction.getAmount()) {
-//                    throw new BadRequestException("余额不足");
-//                }
-//                credit.setBalance(credit.getBalance() - transaction.getAmount());
-//                creditMapper.updateById(credit);
+
                 // 扣除库存
                 String orderId = transaction.getOrderId();
                 ResponseResult<OrderInfoVo> orderResult = orderClient.getOrderById(orderId);
@@ -184,7 +172,6 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
 
     @Override
     public void cancelCharge(String preTransactionId) throws UserException, SystemException {
-//        checkUserLogin();
         Long userId = UserContextUtil.getUserId();
         cancelCharge(userId, preTransactionId);
     }
@@ -209,30 +196,6 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
             throw new DatabaseException("交易状态更新失败", new ConcurrentModificationException());
         }
         sendPaymentCancelMessage(transaction);
-    }
-
-
-    @Override
-    public void autoCancelCharge(ChargeCancelDto chargeCancelDto) throws UserException, SystemException {
-//        checkUserLogin();
-        String transactionId = chargeCancelDto.getPreTransactionId();
-
-        // 验证交易记录
-        Long userId = UserContextUtil.getUserId();
-        Transaction transaction = transactionMapper.findByIdAndPreId(userId, null, transactionId);
-        if(transaction == null) {
-            throw new NotFoundException("未找到指定的交易记录");
-        }
-        if(!transaction.getStatus().equals(TransactionStatusEnum.WAIT_FOR_CONFIRM)) {
-            throw new UserException(ResultCode.FORBIDDEN, "订单当前的状态不可以设置定时取消");
-        }
-
-        // 先取消之前的定时任务
-        cancelScheduledTask(transactionId);
-        if (chargeCancelDto.getStatus()) {
-            // 设置/修改定时取消
-            scheduleAutoCancel(transaction.getTransactionId(), chargeCancelDto.getCancelAfterMinutes());
-        }
     }
 
     @Override
@@ -426,7 +389,6 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
      */
     void scheduleAutoCancel(String transactionId, int minutes) {
         long cancelTime = System.currentTimeMillis() + minutes * 60 * 1000L;
-//        scheduledCancellations.put(transactionId, cancelTime);
         scheduledHashOperations.put(SCHEDULED_KEY, transactionId, cancelTime);
         log.info("已设置交易{}在{}分钟后自动取消", transactionId, minutes);
     }
@@ -436,7 +398,6 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
      * @param transactionId 交易ID
      */
     private void cancelScheduledTask(String transactionId) {
-//        scheduledCancellations.remove(transactionId);
         scheduledHashOperations.delete(SCHEDULED_KEY, transactionId);
         log.info("已移除交易{}的自动取消任务", transactionId);
     }

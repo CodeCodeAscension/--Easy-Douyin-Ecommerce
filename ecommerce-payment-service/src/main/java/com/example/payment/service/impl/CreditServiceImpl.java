@@ -110,7 +110,6 @@ public class CreditServiceImpl extends ServiceImpl<CreditMapper, Credit> impleme
 
     @Override
     public Credit checkCreditPermission(Long userId, String cardNumber) throws UserException, SystemException {
-//        Long userId = UserContextUtil.getUserId();
         LambdaQueryWrapper<Credit> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Credit::getUserId, userId)
                     .eq(Credit::getCardNumber, cardNumber)
@@ -125,17 +124,6 @@ public class CreditServiceImpl extends ServiceImpl<CreditMapper, Credit> impleme
             log.info("信用卡不存在，cardNumber: {}", cardNumber);
             throw new NotFoundException("信用卡不存在");
         }
-//
-//        if (!userId.equals(credit.getUserId())) {
-//            log.info("用户ID不符合，userId: {}, creditUserId: {}", userId, credit.getUserId());
-//            throw new BadRequestException("指定用户Id与银行卡记录不符合");
-//        }
-//
-//        if(!credit.getStatus().equals(CreditStatusEnum.NORMAL)) {
-//            // 抛出过期异常
-//            log.info("银行卡 {} 无法使用", cardNumber);
-//            throw new BadRequestException("指定银行卡无法使用");
-//        }
         // 检验有效期
         if(credit.getExpireDate().isBefore(LocalDate.now())) {
             // 更新数据库

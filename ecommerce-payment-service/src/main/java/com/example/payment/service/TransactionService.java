@@ -2,7 +2,6 @@ package com.example.payment.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.example.api.domain.dto.payment.ChargeCancelDto;
 import com.example.api.domain.dto.payment.ChargeDto;
 import com.example.api.domain.vo.payment.ChargeVo;
 import com.example.common.exception.SystemException;
@@ -28,14 +27,6 @@ public interface TransactionService extends IService<Transaction> {
      * @throws SystemException 系统异常
      */
     void cancelCharge(String preTransactionId) throws UserException, SystemException;
-
-    /**
-     * 定期取消支付
-     * @param chargeCancelDto dto
-     * @throws UserException 用户异常
-     * @throws SystemException 系统异常
-     */
-    void autoCancelCharge(ChargeCancelDto chargeCancelDto) throws UserException, SystemException;
 
     /**
      * 确认支付

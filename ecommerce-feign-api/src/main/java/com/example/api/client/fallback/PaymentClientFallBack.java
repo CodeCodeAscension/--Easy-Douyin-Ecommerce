@@ -1,7 +1,6 @@
 package com.example.api.client.fallback;
 
 import com.example.api.client.PaymentClient;
-import com.example.api.domain.dto.payment.ChargeCancelDto;
 import com.example.api.domain.dto.payment.ChargeDto;
 import com.example.api.domain.vo.payment.ChargeVo;
 import com.example.common.domain.ResponseResult;
@@ -24,12 +23,6 @@ public class PaymentClientFallBack implements FallbackFactory<PaymentClient> {
             @Override
             public ResponseResult<Object> cancelCharge(Integer transactionId) {
                 log.error("payment-service-exception:cancelCharge, "+cause.getMessage());
-                return ResponseResult.errorFeign(cause);
-            }
-
-            @Override
-            public ResponseResult<Object> autoCancelCharge(ChargeCancelDto chargeCancelDto) {
-                log.error("payment-service-exception:autoCancelCharge, "+cause.getMessage());
                 return ResponseResult.errorFeign(cause);
             }
         };

@@ -1,12 +1,9 @@
 package com.example.payment.controller.v1;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.example.api.domain.dto.payment.ChargeCancelDto;
 import com.example.api.domain.dto.payment.ChargeDto;
 import com.example.api.domain.vo.payment.ChargeVo;
 import com.example.common.domain.ResponseResult;
-import com.example.common.exception.SystemException;
 import com.example.common.util.UserContextUtil;
 import com.example.payment.domain.dto.TransactionInfoDto;
 import com.example.payment.domain.vo.TransactionInfoVo;
@@ -56,13 +53,6 @@ public class TransactionController {
     @Operation(summary = "取消支付")
     public ResponseResult<Object> cancelCharge(@RequestParam String preTransactionId) {
         transactionService.cancelCharge(preTransactionId);
-        return ResponseResult.success();
-    }
-
-    @PutMapping
-    @Operation(summary = "设置定时取消支付")
-    public ResponseResult<Object> autoCancelCharge(@RequestBody @Validated ChargeCancelDto chargeCancelDto) {
-        transactionService.autoCancelCharge(chargeCancelDto);
         return ResponseResult.success();
     }
 

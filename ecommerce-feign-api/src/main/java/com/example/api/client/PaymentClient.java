@@ -1,7 +1,6 @@
 package com.example.api.client;
 
 import com.example.api.client.fallback.PaymentClientFallBack;
-import com.example.api.domain.dto.payment.ChargeCancelDto;
 import com.example.api.domain.dto.payment.ChargeDto;
 import com.example.api.domain.vo.payment.ChargeVo;
 import com.example.common.domain.ResponseResult;
@@ -18,7 +17,4 @@ public interface PaymentClient {
     @DeleteMapping("/api/v1/payments")
     ResponseResult<Object> cancelCharge(@RequestParam Integer transactionId);
 
-    // 定期取消支付
-    @PutMapping("/api/v1/payments")
-    ResponseResult<Object> autoCancelCharge(@RequestBody ChargeCancelDto chargeCancelDto);
 }
