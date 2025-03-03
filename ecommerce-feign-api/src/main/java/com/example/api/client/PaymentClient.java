@@ -17,4 +17,7 @@ public interface PaymentClient {
     @DeleteMapping("/api/v1/payments")
     ResponseResult<Object> cancelCharge(@RequestParam Integer transactionId);
 
+    // 确认支付
+    @PostMapping("/confirm")
+    ResponseResult<Object> confirmCharge(@RequestParam String preTransactionId);
 }

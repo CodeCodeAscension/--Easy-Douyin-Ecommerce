@@ -25,6 +25,12 @@ public class PaymentClientFallBack implements FallbackFactory<PaymentClient> {
                 log.error("payment-service-exception:cancelCharge, "+cause.getMessage());
                 return ResponseResult.errorFeign(cause);
             }
+
+            @Override
+            public ResponseResult<Object> confirmCharge(String preTransactionId) {
+                log.error("payment-service-exception:confirmCharge, "+cause.getMessage());
+                return ResponseResult.errorFeign(cause);
+            }
         };
     }
 }
