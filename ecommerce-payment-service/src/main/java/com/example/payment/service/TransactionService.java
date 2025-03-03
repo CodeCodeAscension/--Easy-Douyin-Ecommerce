@@ -8,6 +8,7 @@ import com.example.common.exception.SystemException;
 import com.example.common.exception.UserException;
 import com.example.payment.domain.po.Transaction;
 import com.example.api.domain.vo.payment.TransactionInfoVo;
+import io.seata.spring.annotation.GlobalTransactional;
 
 public interface TransactionService extends IService<Transaction> {
 
@@ -27,6 +28,15 @@ public interface TransactionService extends IService<Transaction> {
      * @throws SystemException 系统异常
      */
     void cancelCharge(String preTransactionId) throws UserException, SystemException;
+
+    /**
+     * 取消支付（内部方法）
+     * @param userId 用户ID
+     * @param preTransactionId 预交易ID
+     * @throws UserException 用户异常
+     * @throws SystemException 系统异常
+     */
+     void cancelCharge(Long userId, String preTransactionId) throws UserException, SystemException;
 
     /**
      * 确认支付

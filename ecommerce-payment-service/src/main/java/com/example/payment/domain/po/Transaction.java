@@ -2,9 +2,7 @@ package com.example.payment.domain.po;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.example.api.enums.TransactionStatusEnum;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
@@ -15,7 +13,9 @@ import java.time.LocalDateTime;
 @Accessors(chain = true)
 @TableName("transaction")
 @Builder
-public class Transaction implements Serializable{
+@AllArgsConstructor
+@NoArgsConstructor
+public class Transaction implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

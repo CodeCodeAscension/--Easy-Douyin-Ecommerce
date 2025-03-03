@@ -5,6 +5,7 @@ import com.example.common.exception.BadRequestException;
 import com.example.common.exception.DatabaseException;
 import com.example.common.exception.NotFoundException;
 import com.example.common.util.UserContextUtil;
+import com.example.payment.config.RabbitMQTimeoutConfig;
 import com.example.payment.domain.dto.CreditDto;
 import com.example.payment.domain.dto.CreditUpdateDto;
 import com.example.payment.domain.po.Credit;
@@ -25,6 +26,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.reactivestreams.Publisher;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
@@ -45,6 +48,21 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class CreditServiceCRUDTest {
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    @Test
+    public void testRabbit() {
+        rabbitTemplate.convertAndSend(
+                RabbitMQTimeoutConfig.EXCHANGE_NAME,
+                RabbitMQTimeoutConfig.ROUTING_KEY,
+                "Hello World",
+                message -> {
+                    message.getMessageProperties().setExpiration(String.valueOf(1 * 60 * 1000L));
+                    return message;
+                });
+    }
 
     @Mock
     private CreditMapper creditMapper;

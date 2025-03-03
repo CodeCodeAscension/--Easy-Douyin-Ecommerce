@@ -51,6 +51,7 @@ public class ExceptionAdvice {
     @ExceptionHandler(SystemException.class)
     public ResponseResult<Object> systemException(SystemException e) {
         log.error("SystemException: {}", e.getMessage(), e);
+        e.doSomething();
         return ResponseResult.error(e.getCode(), e.getMessage());
     }
 
@@ -65,6 +66,7 @@ public class ExceptionAdvice {
         if (throwable instanceof UserException) {
             return ResponseResult.error(((UserException) throwable).getCode(), throwable.getMessage());
         } else if (throwable instanceof SystemException) {
+            ((SystemException) throwable).doSomething();
             return ResponseResult.error(ResultCode.SERVER_ERROR, throwable.getMessage());
         } else {
             return ResponseResult.error(ResultCode.SERVER_ERROR, e.getMessage());

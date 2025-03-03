@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,12 +19,16 @@ public class RabbitMQConfig {
     // ================== 库存相关队列声明 ==================
     @Bean
     public Queue paySuccessProductQueue() {
-        return new Queue(config.getQueues().getPay().getSuccess().concat(".product"), true);
+        return QueueBuilder.durable(config.getQueues().getPay().getSuccess().concat(".product"))
+                .lazy()
+                .build();
     }
 
     @Bean
     public Queue payFailProductQueue() {
-        return new Queue(config.getQueues().getPay().getFail().concat(".product"), true);
+        return QueueBuilder.durable(config.getQueues().getPay().getFail().concat(".product"))
+                .lazy()
+                .build();
     }
 
     // ================== 队列绑定交换器 ==================

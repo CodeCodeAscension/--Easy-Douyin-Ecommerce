@@ -21,6 +21,7 @@ import com.example.common.domain.ResultCode;
 import com.example.common.domain.message.*;
 import com.example.common.exception.*;
 import com.example.common.util.UserContextUtil;
+import com.example.payment.config.RabbitMQTimeoutConfig;
 import com.example.payment.domain.po.Credit;
 import com.example.payment.domain.po.Transaction;
 import com.example.api.enums.TransactionStatusEnum;
@@ -36,6 +37,8 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -70,7 +73,7 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
 
     private final TransactionMapper transactionMapper;
 
-    @GlobalTransactional(name = "paymentCharge", rollbackFor = Exception.class)
+    @Transactional
     @Override
     public ChargeVo charge(ChargeDto chargeDto) throws UserException, SystemException {
         try {
@@ -85,7 +88,7 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
 
             // 验证订单状态
             ResponseResult<OrderInfoVo> orderResult = orderClient.getOrderById(chargeDto.getOrderId());
-            if (orderResult.getCode() != 200) {
+            if (orderResult.getCode() != ResultCode.SUCCESS) {
                 log.error("订单服务状态异常：{}", orderResult.getMsg());
                 throw new SystemException("订单服务状态异常："+orderResult.getMsg());
             } else if (orderResult.getData() == null) {
@@ -154,9 +157,6 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
                 // 更新交易状态
                 updateTransactionStatus(transaction, TransactionStatusEnum.PAY_SUCCESS, null);
 
-                // 取消定时任务
-                cancelScheduledTask(transaction.getTransactionId());
-
                 List<ProductQuantity> products = getProducts(transaction.getOrderId());
                 // 发送支付成功消息
                 sendPaymentSuccessMessage(transaction, products);
@@ -165,8 +165,10 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
             }
         } catch (Exception e) {
             log.error("支付确认失败: {}", e.getMessage());
-            handlePaymentFailure(transactionId, e.getMessage());
-            throw new SystemException(e.getMessage());
+            throw new SystemException(e.getMessage(), () -> {
+                // 处理失败的方法抛到全局事物外解决
+                handlePaymentFailure(transactionId, e.getMessage());
+            });
         }
     }
 
@@ -183,18 +185,21 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
      * @throws UserException 用户异常
      * @throws SystemException 系统异常
      */
-    @GlobalTransactional(name = "paymentCancel", rollbackFor = Exception.class)
-    private void cancelCharge(Long userId, String preTransactionId) throws UserException, SystemException {
+    @Transactional
+    public void cancelCharge(Long userId, String preTransactionId) throws UserException, SystemException {
         // 取消定时任务
-        cancelScheduledTask(preTransactionId);
         Transaction transaction = transactionMapper.findByIdAndPreId(userId, null, preTransactionId);
         // 更新交易状态为已取消
+        if(transaction.getStatus() != TransactionStatusEnum.WAIT_FOR_CONFIRM) {
+            throw new BadRequestException("订单无法取消");
+        }
         transaction.setStatus(TransactionStatusEnum.CANCELED);
         boolean update = this.updateById(transaction);
         if (!update) {
             log.error("交易状态更新失败");
             throw new DatabaseException("交易状态更新失败", new ConcurrentModificationException());
         }
+        // 发送pay.cancel消息
         sendPaymentCancelMessage(transaction);
     }
 
@@ -295,14 +300,19 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
      */
     private List<ProductQuantity> getProducts(String orderId) {
         ResponseResult<OrderInfoVo> orderResult = orderClient.getOrderById(orderId);
-        if (orderResult.getCode() != 200) {
-            throw new NotFoundException("订单信息不存在");
+        if (orderResult.getCode() != ResultCode.SUCCESS) {
+            return null;
         }
 
-        List<CartItem> cartItems = orderResult.getData().getCartItems();
-        return cartItems.stream()
-                .map(item -> new ProductQuantity(item.getProductId(), item.getQuantity()))
-                .collect(Collectors.toList());
+        try {
+            List<CartItem> cartItems = orderResult.getData().getCartItems();
+            return cartItems.stream()
+                    .map(item -> new ProductQuantity(item.getProductId(), item.getQuantity()))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("获取商品信息：: {}", e.getMessage());
+            return null;
+        }
     }
 
     /**
@@ -359,13 +369,16 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
      * @param transactionId 交易ID
      * @param reason 失败原因
      */
-    private void handlePaymentFailure(String transactionId, String reason) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    protected void handlePaymentFailure(String transactionId, String reason) {
         Transaction transaction = this.getById(transactionId);
         if (transaction != null) {
+            if(reason.length() > 200) {
+                reason = reason.substring(0, 200);
+            }
             updateTransactionStatus(transaction, TransactionStatusEnum.PAY_FAIL, reason);
             List<ProductQuantity> products = getProducts(transaction.getOrderId());
             sendPaymentFailedMessage(transaction, products);
-            cancelScheduledTask(transactionId);
         }
     }
 
@@ -387,59 +400,45 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
      * @param transactionId 交易ID
      * @param minutes 时间
      */
-    void scheduleAutoCancel(String transactionId, int minutes) {
+    private void scheduleAutoCancel(String transactionId, int minutes) {
+        // 将订单和取消时间存储到Redis中
         long cancelTime = System.currentTimeMillis() + minutes * 60 * 1000L;
         scheduledHashOperations.put(SCHEDULED_KEY, transactionId, cancelTime);
+        // 发送MQ消息到延迟队列中
+        rabbitTemplate.convertAndSend(
+                RabbitMQTimeoutConfig.EXCHANGE_NAME,
+                RabbitMQTimeoutConfig.ROUTING_KEY,
+                transactionId,
+                message -> {
+                    message.getMessageProperties().setExpiration(String.valueOf(minutes * 60 * 1000L));
+                    return message;
+                });
         log.info("已设置交易{}在{}分钟后自动取消", transactionId, minutes);
     }
 
     /**
-     * 取消定时任务
-     * @param transactionId 交易ID
-     */
-    private void cancelScheduledTask(String transactionId) {
-        scheduledHashOperations.delete(SCHEDULED_KEY, transactionId);
-        log.info("已移除交易{}的自动取消任务", transactionId);
-    }
-
-    /**
-     * 定时任务扫描方法（每分钟执行一次）
+     * 定时任务扫描方法，主动检查订单状态（每分钟执行一次）
      */
     @Scheduled(cron = "0 * * * * ?")
     public void processScheduledCancellations() {
-        long now = System.currentTimeMillis();
         // 创建副本避免并发修改
         Set<String> transactionIds = new HashSet<>(scheduledHashOperations.keys(SCHEDULED_KEY));
-
         for (String transactionId : transactionIds) {
-            Long cancelTime = scheduledHashOperations.get(SCHEDULED_KEY, transactionId);
-            if (cancelTime == null || cancelTime > now) {
+            Transaction tran = this.getById(transactionId);
+            if (tran == null || tran.getStatus() != TransactionStatusEnum.WAIT_FOR_CONFIRM) {
+                // 说明这个订单已经进行过处理
+                scheduledHashOperations.delete(SCHEDULED_KEY, transactionId);
                 continue;
             }
-
-            // 使用Redis分布式锁保证原子性
-            String lockKey = CANCEL_LOCK_KEY + transactionId;
-            try {
-                Boolean lockAcquired = redisTemplate.opsForValue().setIfAbsent(
-                        lockKey, "locked", 30, TimeUnit.SECONDS
-                );
-                if (Boolean.FALSE.equals(lockAcquired)) {
-                    continue;
-                }
-
-                Transaction transaction = this.getById(transactionId);
-                if (transaction != null && transaction.getStatus().equals(TransactionStatusEnum.WAIT_FOR_CONFIRM)) {
-                    log.info("执行自动取消支付: {}", transactionId);
-                    cancelCharge(null, transactionId);
-                }
-                // 移除已处理的任务
-//                scheduledCancellations.remove(transactionId);
-                scheduledHashOperations.delete(SCHEDULED_KEY, transactionId);
-            } catch (Exception e) {
-                e.printStackTrace();
-                log.error("自动取消支付失败: {}", e.getMessage());
-            } finally {
-                redisTemplate.delete(lockKey);
+            ResponseResult<OrderInfoVo> resp = orderClient.getOrderById(tran.getOrderId());
+            if (resp.getCode() != ResultCode.SUCCESS || resp.getData() == null) {
+                // 未知订单状态，跳过
+                log.error("order-service: {}", resp.getMsg());
+                continue;
+            }
+            if (resp.getData().getStatus() == 4) {
+                // 订单的状态已经变成了取消
+                sendPaymentCancelMessage(tran);
             }
         }
     }
