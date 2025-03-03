@@ -1,5 +1,6 @@
 package com.example.order.service.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.example.api.client.ProductClient;
@@ -7,26 +8,33 @@ import com.example.api.domain.dto.order.PlaceOrderDto;
 
 import com.example.api.domain.dto.order.SearchOrderDto;
 import com.example.api.domain.dto.order.UpdateOrderDto;
-import com.example.api.domain.po.Address;
 import com.example.api.domain.po.CartItem;
 import com.example.api.domain.po.OrderResult;
+import com.example.api.domain.vo.order.AddressInfoVo;
 import com.example.api.domain.vo.order.OrderInfoVo;
 import com.example.api.domain.vo.product.ProductInfoVo;
 import com.example.api.enums.OrderStatus;
+import com.example.common.exception.BadRequestException;
+import com.example.common.exception.DatabaseException;
+import com.example.common.exception.NotFoundException;
 import com.example.common.util.UserContextUtil;
 import com.example.order.config.RabbitMQDLXConfig;
-import com.example.order.domain.Order;
+import com.example.order.domain.po.Address;
+import com.example.order.domain.po.Order;
 import com.example.order.mapper.OrderMapper;
 import com.example.order.service.IAddressService;
+import com.example.order.service.IOrderItemService;
 import com.example.order.service.IOrderService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.rmi.NotBoundException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -43,92 +51,84 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements IOrderService {
 
-
-    private final RabbitMQDLXConfig rabbitMQDLXConfig;
     private final RabbitTemplate rabbitTemplate;
     private final IAddressService iAddressService;
     private final ProductClient productClient;
-    //创建订单
-    @Override
-    public OrderResult createOrder(@NotNull PlaceOrderDto placeOrderDto) {
-        //获取用户登录信息
-        Long userId = UserContextUtil.getUserId();
+    private final IOrderItemService orderItemService;
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public OrderResult createOrder(Long userId, PlaceOrderDto placeOrderDto) {
+        if(placeOrderDto.getCartItems() == null || placeOrderDto.getCartItems().isEmpty()) {
+            throw new BadRequestException("至少要有订单商品");
+        }
         //dto转po
         Order order = new Order();
-
         //拷贝属性
-        //获取当前时间
-        LocalDateTime now = LocalDateTime.now();
         order.setUserId(userId);
         order.setUserCurrency(placeOrderDto.getUserCurrency());
-        order.setAddressId(placeOrderDto.getAddress().getId());
+        order.setAddressId(placeOrderDto.getAddressId());
         order.setEmail(placeOrderDto.getEmail());
-        order.setOrderItems(placeOrderDto.getCartItems().toString());
         order.setStatus(OrderStatus.WAIT_FOR_PAY);
-        order.setCreateTime(now);
-        order.setUpdateTime(now);
+        order.setCreateTime(LocalDateTime.now());
+        order.setUpdateTime(LocalDateTime.now());
         order.setDeleted(0);
 
         //保存订单
         boolean save = save(order);
-
         //返回结果
         OrderResult orderResult = new OrderResult();
         if (save) {
+            //保存OrderItem信息
+            orderItemService.updateOrderItemByOrderId(order.getOrderId(), placeOrderDto.getCartItems());
             orderResult.setOrderId(order.getOrderId());
-
             //设置订单ttl半个小时
-            rabbitTemplate.convertAndSend(rabbitMQDLXConfig.getORDER_EXCHANGE(), rabbitMQDLXConfig.getORDER_ROUTING_KEY(), orderResult.getOrderId(), message -> {
+            rabbitTemplate.convertAndSend(RabbitMQDLXConfig.ORDER_EXCHANGE, RabbitMQDLXConfig.ORDER_ROUTING_KEY, orderResult.getOrderId(), message -> {
                 message.getMessageProperties().setExpiration("1800000");
                 return message;
             });
+            return orderResult;
+        } else {
+            throw new DatabaseException("数据库异常");
         }
-        return orderResult;
 
     }
 
-
-    //修改订单信息
-    @Transactional
     @Override
-    public Boolean updateOrder(@NotNull UpdateOrderDto updateOrderDto) {
-
-        //如果订单已支付或者取消不能修改
-        if (updateOrderDto.getStatus() .equals( OrderStatus.PAID.getCode())
-                || updateOrderDto.getStatus() .equals(OrderStatus.CANCELED.getCode())
-                ||updateOrderDto.getStatus().equals(OrderStatus.WAIT_FOR_PAY.getCode())) {
-            return false;
+    @Transactional(rollbackFor = Exception.class)
+    public void updateOrder(@NotNull UpdateOrderDto updateOrderDto) {
+        if(updateOrderDto.getCartItems() == null || updateOrderDto.getCartItems().isEmpty()) {
+            throw new BadRequestException("至少要有一件商品");
         }
-
         //封装po
-        Order order = new Order();
+        Order order = this.getById(updateOrderDto.getOrderId());
+        if(order == null) {
+            throw new NotFoundException("没有该订单");
+        } else if(order.getStatus() != OrderStatus.WAIT_FOR_PAY) {
+            throw new BadRequestException("此时订单不可以修改");
+        }
         order.setOrderId(updateOrderDto.getOrderId());
-        order.setStatus(OrderStatus.fromCode(updateOrderDto.getStatus()));
         order.setUserCurrency(updateOrderDto.getUserCurrency());
-        order.setAddressId(updateOrderDto.getAddress().getId());
+        order.setAddressId(updateOrderDto.getAddressId());
         order.setEmail(updateOrderDto.getEmail());
-        order.setOrderItems(updateOrderDto.getCartItems().toString());
         order.setUpdateTime(LocalDateTime.now());
 
-
-        return updateById(order);
-
-
+        if(!this.updateById(order)) {
+            throw new DatabaseException("数据库异常");
+        }
+        //更新OrderItem信息
+        orderItemService.updateOrderItemByOrderId(order.getOrderId(), updateOrderDto.getCartItems());
     }
 
-    //根据订单id查询订单信息
     @Override
     public OrderInfoVo getOrderById(String orderId) {
         Order order = getOne(lambdaQuery().eq(Order::getOrderId, orderId));
-        OrderInfoVo orderInfoVo = getOrderInfoVo(order);
-        if (orderInfoVo != null) return orderInfoVo;
-        return null;
+        return getOrderInfoVo(order);
     }
 
     //自动取消订单
     @Override
-    public Boolean autoCancelOrder(String orderId,Integer status) {
+    public Boolean autoCancelOrder(String orderId, Integer status) {
         Order order = getOne(lambdaQuery().eq(Order::getOrderId, orderId));
         if (order != null) {
             order.setStatus(OrderStatus.fromCode(status));
@@ -141,10 +141,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     // 分页查询订单信息
     @Override
-    public PageDTO<OrderInfoVo> getAllOrders(Integer pageSize, Integer pageNum) {
-        // 获取用户信息
-        Long userId = UserContextUtil.getUserId();
-
+    public PageDTO<OrderInfoVo> getAllOrders(Long userId, Integer pageSize, Integer pageNum) {
         // 分页查询订单信息
         Page<Order> page = this.lambdaQuery()
                 .eq(Order::getUserId, userId)
@@ -177,10 +174,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     // 条件分页查询订单信息
     @Override
-    public PageDTO<OrderInfoVo> searchOrders(Integer pageSize, Integer pageNum, @NotNull SearchOrderDto seatchOrderDto) {
-        // 获取用户信息
-        Long userId = UserContextUtil.getUserId();
-
+    public PageDTO<OrderInfoVo> searchOrders(Long userId, Integer pageSize, Integer pageNum, @NotNull SearchOrderDto seatchOrderDto) {
         // 分页查询订单信息
         Page<Order> page = this.lambdaQuery()
                 .eq(Order::getUserId, userId)
@@ -220,39 +214,15 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (order != null) {
             //封装vo
             OrderInfoVo orderInfoVo = new OrderInfoVo();
-            orderInfoVo.setOrderId(order.getOrderId());
-            orderInfoVo.setStatus(order.getStatus());
-            orderInfoVo.setUserCurrency(order.getUserCurrency());
-            orderInfoVo.setEmail(order.getEmail());
-            orderInfoVo.setCreateTime(order.getCreateTime());
-            orderInfoVo.setUpdateTime(order.getUpdateTime());
+            BeanUtils.copyProperties(order, orderInfoVo);
 
             //查询地址信息
             Address byId = iAddressService.getById(order.getAddressId());
-            orderInfoVo.setAddress(byId);
-
-            //查询商品信息
-            String orderItems = order.getOrderItems();
-            //解析json字符串,获取商品id列表
-            String[] split = orderItems.split(",");
-            //创建map，存储商品id和数量
-            Map<Long, Integer> productIdCountMap = new HashMap<>();
-            for (String s : split) {
-                Long productId = Long.valueOf(s);
-                productIdCountMap.put(productId, productIdCountMap.getOrDefault(productId, 0) + 1);
-            }
-            //遍历商品id列表，查询商品信息
-            for (String s : split) {
-                Long productId = Long.valueOf(s);
-                //根据商品id查询商品信息
-                ProductInfoVo data = productClient.getProductInfoById(productId).getData();
-                //封装CartItem
-                CartItem cartItem = new CartItem();
-                cartItem.setProductId(productId);
-                cartItem.setQuantity(productIdCountMap.get(productId));
-                orderInfoVo.getCartItems().add(cartItem);
-
-            }
+            AddressInfoVo addressInfoVo = new AddressInfoVo();
+            BeanUtils.copyProperties(byId, addressInfoVo);
+            orderInfoVo.setAddress(addressInfoVo);
+            //封装CartItems
+            orderInfoVo.setCartItems(orderItemService.getCartItemsByOrderId(order.getOrderId()));
             return orderInfoVo;
         }
         return null;

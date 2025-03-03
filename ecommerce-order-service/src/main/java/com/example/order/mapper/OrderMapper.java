@@ -1,7 +1,9 @@
 package com.example.order.mapper;
 
-import com.example.order.domain.Order;
+import com.example.common.cache.MybatisRedisCache;
+import com.example.order.domain.po.Order;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.CacheNamespace;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
@@ -13,6 +15,7 @@ import org.apache.ibatis.annotations.Mapper;
  * @since 2025-02-28
  */
 @Mapper
+@CacheNamespace(implementation = MybatisRedisCache.class)
 public interface OrderMapper extends BaseMapper<Order> {
 
 }

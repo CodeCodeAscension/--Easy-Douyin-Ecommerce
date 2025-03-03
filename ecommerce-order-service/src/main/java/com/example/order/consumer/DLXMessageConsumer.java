@@ -29,11 +29,11 @@ public class DLXMessageConsumer {
      *
      * @param message 死信队列中的消息
      */
-    @RabbitListener(queues = "order.cancel")
+    @RabbitListener(queues = RabbitMQDLXConfig.DLX_QUEUE)
     public void handleDlxMessage(@NotNull Message message) {
         try {
             // 获取消息内容
-            String messageBody = new String(message.getBody());
+            String messageBody = new String(message.getBody()).replace("\"", "");
 
             // 获取订单信息
             OrderInfoVo orderById = iOrderService.getOrderById(messageBody);

@@ -1,12 +1,11 @@
 package com.example.api.domain.po;
 
-//import io.swagger.annotations.ApiModel;
-//import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
-//@ApiModel(description = "订单信息实体类")
+@Schema(description = "创建订单结果")
 public class OrderResult {
-//    @ApiModelProperty("订单ID")
+    @Schema(description = "订单ID")
     private String orderId;
 }

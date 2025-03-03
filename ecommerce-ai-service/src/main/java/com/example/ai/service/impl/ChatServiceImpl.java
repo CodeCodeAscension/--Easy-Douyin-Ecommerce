@@ -116,7 +116,7 @@ public class ChatServiceImpl implements ChatService {
                 //vo转dto
                 PlaceOrderDto placeOrderDto = new PlaceOrderDto();
                 placeOrderDto.setUserCurrency(orderInfoVo.getUserCurrency());
-                placeOrderDto.setAddress(orderInfoVo.getAddress());
+                placeOrderDto.setAddressInfoVo(orderInfoVo.getAddressInfoVo());
                 placeOrderDto.setEmail(orderInfoVo.getEmail());
                 placeOrderDto.setCartItems(orderInfoVo.getCartItems());
 
