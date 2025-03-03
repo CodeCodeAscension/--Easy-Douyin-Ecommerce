@@ -5,8 +5,8 @@ import com.example.checkout.domain.dto.CheckoutDto;
 import com.example.checkout.domain.vo.CheckoutVo;
 import com.example.checkout.service.CheckoutService;
 import com.example.common.domain.ResponseResult;
+import com.example.common.util.UserContextUtil;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +28,7 @@ public class CheckoutController {
     @PostMapping
     @Operation(summary = "订单结算")
     public ResponseResult<CheckoutVo> checkout(@RequestBody @Validated CheckoutDto checkoutDto) {
-        return checkoutService.checkout(checkoutDto);
+        Long userId = UserContextUtil.getUserId();
+        return ResponseResult.success(checkoutService.checkout(userId, checkoutDto));
     }
 }
