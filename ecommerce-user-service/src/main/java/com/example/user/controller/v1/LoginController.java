@@ -12,7 +12,7 @@ import com.example.user.domain.dto.RegisterDto;
 import com.example.user.domain.po.User;
 import com.example.user.domain.vo.LoginVo;
 import com.example.user.domain.vo.RegisterVo;
-import com.example.user.service.IUserService;
+import com.example.user.service.UserService;
 import com.example.auth.util.JwtUtil;
 import com.example.auth.util.TokenRedisUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.*;
 public class LoginController {
 
     private final UserServiceConfig userServiceConfig;
-    private final IUserService iUserService;
+    private final UserService iUserService;
     private final JwtUtil jwtUtil;
     private final TokenRedisUtil redisUtil;
 

@@ -1,7 +1,6 @@
 com.example.common.config.MvcConfig
 com.example.common.config.MyBatisConfig
 com.example.common.config.RedisConfig
-com.example.common.config.UtilBeanConfig
 com.example.common.config.RabbitMQExchangeConfig
 com.example.common.config.rabbitmq.RabbitQueueNamesConfig
 com.example.common.config.RabbitInitConfig

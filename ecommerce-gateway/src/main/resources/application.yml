@@ -90,6 +90,13 @@ spring:
             - Path=/api/v1/products/**
             - Method=GET
 
+        - id: user-admin
+          uri: lb://user-service
+          predicates:
+            - Path=/api/v1/users/admin/**
+          filters:
+            - LoginAuth
+            - AdminAuth
         - id: user-auth
           uri: lb://user-service
           predicates:

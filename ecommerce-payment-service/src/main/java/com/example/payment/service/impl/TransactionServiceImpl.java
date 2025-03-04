@@ -16,6 +16,7 @@ import com.example.api.domain.vo.product.ProductInfoVo;
 import com.example.api.enums.OrderStatus;
 import com.example.common.config.rabbitmq.PayQueue;
 import com.example.common.config.rabbitmq.RabbitQueueNamesConfig;
+import com.example.common.config.rabbitmq.RetryableCorrelationData;
 import com.example.common.domain.ResponseResult;
 import com.example.common.domain.ResultCode;
 import com.example.common.domain.message.*;
@@ -237,11 +238,12 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
     private void sendPaymentStartMessage(Transaction preTransaction) {
         PayStartMessage message = new PayStartMessage();
         message.setOrderId(preTransaction.getOrderId());
-
+        RetryableCorrelationData data = new RetryableCorrelationData(message, mqConfig.getExchangeName(), mqConfig.getQueues().getPay().getStart());
         rabbitTemplate.convertAndSend(
-                mqConfig.getExchangeName(),
-                mqConfig.getQueues().getPay().getStart(),
-                message
+                data.getExchange(),
+                data.getRoutingKey(),
+                data.getMessage(),
+                data
         );
     }
 
@@ -252,12 +254,12 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
     private void sendPaymentCancelMessage(Transaction transaction) {
         PayCancelMessage message = new PayCancelMessage();
         message.setOrderId(transaction.getOrderId());
-
-        PayQueue payQueue = mqConfig.getQueues().getPay();
+        RetryableCorrelationData data = new RetryableCorrelationData(message, mqConfig.getExchangeName(), mqConfig.getQueues().getPay().getCancel());
         rabbitTemplate.convertAndSend(
-                mqConfig.getExchangeName(),
-                payQueue.getCancel(),
-                message
+                data.getExchange(),
+                data.getRoutingKey(),
+                data.getMessage(),
+                data
         );
     }
 
@@ -270,10 +272,12 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
         PayFailMessage message = new PayFailMessage();
         message.setOrderId(transaction.getOrderId());
         message.setProducts(products);
+        RetryableCorrelationData data = new RetryableCorrelationData(message, mqConfig.getExchangeName(), mqConfig.getQueues().getPay().getFail());
         rabbitTemplate.convertAndSend(
-                mqConfig.getExchangeName(),
-                mqConfig.getQueues().getPay().getFail(),
-                message
+                data.getExchange(),
+                data.getRoutingKey(),
+                data.getMessage(),
+                data
         );
     }
 
@@ -286,10 +290,12 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
         PaySuccessMessage message = new PaySuccessMessage();
         message.setOrderId(transaction.getOrderId());
         message.setProducts(products);
+        RetryableCorrelationData data = new RetryableCorrelationData(message, mqConfig.getExchangeName(), mqConfig.getQueues().getPay().getSuccess());
         rabbitTemplate.convertAndSend(
-                mqConfig.getExchangeName(),
-                mqConfig.getQueues().getPay().getSuccess(),
-                message
+                data.getExchange(),
+                data.getRoutingKey(),
+                data.getMessage(),
+                data
         );
     }
 
@@ -405,7 +411,7 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
         long cancelTime = System.currentTimeMillis() + minutes * 60 * 1000L;
         scheduledHashOperations.put(SCHEDULED_KEY, transactionId, cancelTime);
         // 发送MQ消息到延迟队列中
-        rabbitTemplate.convertAndSend(
+        RetryableCorrelationData data = new RetryableCorrelationData(
                 RabbitMQTimeoutConfig.EXCHANGE_NAME,
                 RabbitMQTimeoutConfig.ROUTING_KEY,
                 transactionId,
@@ -413,6 +419,7 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
                     message.getMessageProperties().setExpiration(String.valueOf(minutes * 60 * 1000L));
                     return message;
                 });
+        rabbitTemplate.convertAndSend(data.getExchange(), data.getRoutingKey(), data.getMessage(), data.getMessagePostProcessor(), data);
         log.info("已设置交易{}在{}分钟后自动取消", transactionId, minutes);
     }
 

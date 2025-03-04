@@ -1,25 +1,18 @@
 package com.example.common.config;
 
 import com.example.common.config.rabbitmq.RabbitQueueNamesConfig;
-import com.example.common.config.rabbitmq.RetryableCorrelationData;
-import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.retry.MessageRecoverer;
-import org.springframework.amqp.rabbit.retry.RepublishMessageRecoverer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.event.EventListener;
 
 /**
- * 在此定义整个项目的交换机以及交换机之间的关系，以及confirmCallback
+ * 在此定义整个项目的交换机以及交换机之间的关系
  * 各个服务的队列与交换机的绑定关系则在各自微服务中定义
  */
 @Configuration

@@ -14,6 +14,7 @@ import com.example.api.domain.vo.order.AddressInfoVo;
 import com.example.api.domain.vo.order.OrderInfoVo;
 import com.example.api.domain.vo.product.ProductInfoVo;
 import com.example.api.enums.OrderStatus;
+import com.example.common.config.rabbitmq.RetryableCorrelationData;
 import com.example.common.exception.BadRequestException;
 import com.example.common.exception.DatabaseException;
 import com.example.common.exception.NotFoundException;
@@ -81,14 +82,16 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             orderItemService.updateOrderItemByOrderId(order.getOrderId(), placeOrderDto.getCartItems());
             orderResult.setOrderId(order.getOrderId());
             //设置订单ttl半个小时
-            rabbitTemplate.convertAndSend(
+            RetryableCorrelationData data = new RetryableCorrelationData(
                     RabbitMQDLXConfig.ORDER_EXCHANGE,
                     RabbitMQDLXConfig.ORDER_ROUTING_KEY,
                     orderResult.getOrderId(),
                     message -> {
                         message.getMessageProperties().setExpiration(String.valueOf(30 * 60 * 1000L));
                         return message;
-                    });
+                    }
+            );
+            rabbitTemplate.convertAndSend(data.getExchange(), data.getRoutingKey(), data.getMessage(), data.getMessagePostProcessor(), data);
             return orderResult;
         } else {
             throw new DatabaseException("数据库异常");

@@ -1,8 +1,11 @@
 package com.example.user.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.api.domain.vo.user.UserInfoVo;
+import com.example.auth.enums.UserPower;
 import com.example.common.exception.DatabaseException;
 import com.example.common.exception.NotFoundException;
 import com.example.common.exception.SystemException;
@@ -14,11 +17,10 @@ import com.example.user.domain.dto.UserUpdateDto;
 import com.example.user.domain.po.User;
 import com.example.user.enums.UserStatus;
 import com.example.user.mapper.UserMapper;
-import com.example.user.service.IUserService;
+import com.example.user.service.UserService;
 import com.example.auth.util.BCryptUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -31,7 +33,7 @@ import java.time.LocalDateTime;
  */
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
+public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
     private final UserMapper userMapper;
     private final BCryptUtil bCryptUtil;
@@ -102,7 +104,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     public void disableUser(Long userId, LogoffDto logoffDto) throws UserException, SystemException {
         // 先判断是否存在
-        if(!userMapper.exists(new LambdaQueryWrapper<User>().eq(User::getUserId, userId))) {
+        if(!this.exists(Wrappers.<User>lambdaQuery()
+                .eq(User::getUserId, userId)
+                .eq(User::getStatus, UserStatus.NORMAL))) {
             throw new NotFoundException("要封禁或注销的用户ID不存在");
         }
         User user = new User();
@@ -118,13 +122,30 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     public void updateUserInfo(Long userId, UserUpdateDto userUpdateDto) throws UserException, SystemException {
         // 先判断是否存在
-        if(!userMapper.exists(new LambdaQueryWrapper<User>().eq(User::getUserId, userId))) {
-            throw new NotFoundException("要封禁或注销的用户ID不存在");
+        if(!this.exists(Wrappers.<User>lambdaQuery()
+                .eq(User::getUserId, userId)
+                .eq(User::getStatus, UserStatus.NORMAL))) {
+            throw new NotFoundException("用户ID不存在或不可用");
         }
         User user = new User();
         user.setUserId(userId);
         user.setUpdateTime(LocalDateTime.now());
         BeanUtils.copyProperties(userUpdateDto, user);
+        if(!this.updateById(user)) {
+            throw new DatabaseException("MybatisPlus更新数据库失败");
+        }
+    }
+
+    @Override
+    public void setUserAdminPower(Long userId, boolean status) throws UserException, SystemException {
+        // 先判断是否存在
+        if(!this.exists(Wrappers.<User>lambdaQuery()
+                .eq(User::getUserId, userId)
+                .eq(User::getStatus, UserStatus.NORMAL))) {
+            throw new NotFoundException("用户ID不存在或不可用");
+        }
+        User user = this.getById(userId);
+        user.setPower(status ? UserPower.ADMIN : UserPower.USER);
         if(!this.updateById(user)) {
             throw new DatabaseException("MybatisPlus更新数据库失败");
         }

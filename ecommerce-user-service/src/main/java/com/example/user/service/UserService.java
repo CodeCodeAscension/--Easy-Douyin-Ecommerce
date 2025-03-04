@@ -11,7 +11,7 @@ import com.example.user.domain.dto.RegisterDto;
 import com.example.user.domain.dto.UserUpdateDto;
 import com.example.user.domain.po.User;
 
-public interface IUserService extends IService<User> {
+public interface UserService extends IService<User> {
 
     /**
      * 根据用户邮箱去找是否存在可用的账号，并返回用户ID
@@ -61,4 +61,13 @@ public interface IUserService extends IService<User> {
      * @throws SystemException 系统异常
      */
     void updateUserInfo(Long userId, UserUpdateDto userUpdateDto) throws UserException, SystemException;
+
+    /**
+     * 设置某个用户的权限为管理员或者普通用户
+     * @param userId 用户ID
+     * @param status true为管理员，false为普通用户
+     * @throws UserException 用户异常
+     * @throws SystemException 系统异常
+     */
+    void setUserAdminPower(Long userId, boolean status) throws UserException, SystemException;
 }

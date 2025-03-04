@@ -1,0 +1,9 @@
+ecommerce:
+  rabbitmq:
+    exchange-name: "directExchange"
+    queues:
+      pay:
+        start: "pay.start"
+        cancel: "pay.cancel"
+        fail: "pay.fail"
+        success: "pay.success"
