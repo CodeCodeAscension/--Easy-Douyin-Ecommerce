@@ -1,8 +1,7 @@
 package com.example.order.consumer;
 
-import com.example.api.client.OrderClient;
 import com.example.api.domain.vo.order.OrderInfoVo;
-import com.example.api.enums.OrderStatus;
+import com.example.api.enums.OrderStatusEnum;
 import com.example.order.config.RabbitMQDLXConfig;
 import com.example.order.service.IOrderService;
 import lombok.RequiredArgsConstructor;
@@ -12,9 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -38,14 +34,14 @@ public class DLXMessageConsumer {
             // 获取订单信息
             OrderInfoVo orderById = iOrderService.getOrderById(messageBody);
             if (orderById == null ||
-                    orderById.getStatus().equals(OrderStatus.PAID) ||
-                    orderById.getStatus().equals(OrderStatus.CANCELED)) {
+                    orderById.getStatus().equals(OrderStatusEnum.PAID) ||
+                    orderById.getStatus().equals(OrderStatusEnum.CANCELED)) {
                 logger.info("Order {} is already paid or canceled.", messageBody);
                 return;
             }
 
             // 修改订单状态为已取消
-            boolean cancelResult = iOrderService.autoCancelOrder(messageBody, OrderStatus.CANCELED.getCode());
+            boolean cancelResult = iOrderService.autoCancelOrder(messageBody, OrderStatusEnum.CANCELED.getCode());
             if (cancelResult) {
                 logger.info("Order {} has been successfully canceled.", messageBody);
             } else {

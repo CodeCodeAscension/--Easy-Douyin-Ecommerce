@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
 
-import com.example.api.enums.OrderStatus;
+import com.example.api.enums.OrderStatusEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -52,7 +52,7 @@ public class Order implements Serializable {
     private String email;
 
     @Schema(description = "状态（0待支付，1已支付，2已取消）")
-    private OrderStatus status;
+    private OrderStatusEnum status;
 
     @Schema(description = "创建时间")
     private LocalDateTime createTime;

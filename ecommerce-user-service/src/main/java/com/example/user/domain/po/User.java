@@ -3,7 +3,7 @@ package com.example.user.domain.po;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.example.auth.enums.UserPower;
-import com.example.user.enums.UserStatus;
+import com.example.user.enums.UserStatusEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -41,7 +41,7 @@ public class User implements Serializable {
     @Schema(description = "偏好货币")
     private String userCurrency;
     @Schema(description = "账号状态")
-    private UserStatus status;
+    private UserStatusEnum status;
     @Schema(description = "注销或封禁原因")
     private String disableReason;
     @Schema(description = "创建时间")

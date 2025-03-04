@@ -1,7 +1,7 @@
 package com.example.user.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.example.api.domain.vo.user.UserInfoVo;
+import com.example.user.domain.vo.UserInfoVo;
 import com.example.common.exception.DatabaseException;
 import com.example.common.exception.SystemException;
 import com.example.common.exception.UserException;

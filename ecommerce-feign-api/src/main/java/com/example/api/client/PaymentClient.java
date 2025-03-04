@@ -15,14 +15,11 @@ public interface PaymentClient {
     @PostMapping("/api/v1/payments")
     ResponseResult<ChargeVo> charge(@RequestBody ChargeDto chargeDto);
 
-    // 取消支付
-    @DeleteMapping("/api/v1/payments")
-    ResponseResult<Object> cancelCharge(@RequestParam Integer transactionId);
-
     // 确认支付
     @PostMapping("/confirm")
     ResponseResult<Object> confirmCharge(@RequestParam String preTransactionId);
 
+    // 根据ID查询支付信息
     @GetMapping("/api/v1/payments/byId")
     ResponseResult<TransactionInfoVo> getTransactionInfo(@RequestBody TransactionInfoDto transactionInfoDto);
 }

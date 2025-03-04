@@ -19,43 +19,25 @@ public class OrderClientFallBack implements FallbackFactory<OrderClient> {
         return new OrderClient() {
             @Override
             public ResponseResult<PlaceOrderVo> placeOrder(PlaceOrderDto placeOrderDto) {
-                log.error("order-service-exception:placeOrder, "+cause.getMessage());
-                return ResponseResult.errorFeign(cause);
-            }
-
-            @Override
-            public ResponseResult<Object> updateOrder(UpdateOrderDto updateOrderDto) {
-                log.error("order-service-exception:updateOrder, "+cause.getMessage());
-                return ResponseResult.errorFeign(cause);
-            }
-
-            @Override
-            public ResponseResult<Object> autoCancelOrder(CancelOrderDto cancelOrderDto) {
-                log.error("order-service-exception:autoCancelOrder, "+cause.getMessage());
+                log.error("order-service-exception:placeOrder, {}", cause.getMessage());
                 return ResponseResult.errorFeign(cause);
             }
 
             @Override
             public ResponseResult<List<OrderInfoVo>> getAllOrders() {
-                log.error("order-service-exception:getAllOrders, "+cause.getMessage());
+                log.error("order-service-exception:getAllOrders, {}", cause.getMessage());
                 return ResponseResult.errorFeign(cause);
             }
 
             @Override
             public ResponseResult<OrderInfoVo> getOrderById(String orderId) {
-                log.error("order-service-exception:getOrderById, "+cause.getMessage());
-                return ResponseResult.errorFeign(cause);
-            }
-
-            @Override
-            public ResponseResult<Object> markOrderPaid(MarkOrderPaidDto markOrderPaidDto) {
-                log.error("order-service-exception:markOrderPaid, "+cause.getMessage());
+                log.error("order-service-exception:getOrderById, {}", cause.getMessage());
                 return ResponseResult.errorFeign(cause);
             }
 
             @Override
             public ResponseResult<List<OrderInfoVo>> searchOrders(SearchOrderDto searchOrderDto) {
-                log.error("order-service-exception:searchOrders, "+cause.getMessage());
+                log.error("order-service-exception:searchOrders, {}", cause.getMessage());
                 return ResponseResult.errorFeign(cause);
             }
         };

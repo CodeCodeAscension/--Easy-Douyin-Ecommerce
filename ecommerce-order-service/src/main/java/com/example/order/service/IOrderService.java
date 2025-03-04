@@ -3,7 +3,7 @@ package com.example.order.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.example.api.domain.dto.order.PlaceOrderDto;
 import com.example.api.domain.dto.order.SearchOrderDto;
-import com.example.api.domain.dto.order.UpdateOrderDto;
+import com.example.order.domain.dto.UpdateOrderDto;
 import com.example.api.domain.po.OrderResult;
 import com.example.api.domain.vo.order.OrderInfoVo;
 import com.example.common.exception.BadRequestException;

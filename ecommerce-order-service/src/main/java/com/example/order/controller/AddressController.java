@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.example.api.domain.vo.order.AddressInfoVo;
 import com.example.common.domain.ResponseResult;
 import com.example.common.util.UserContextUtil;
-import com.example.api.domain.dto.order.AddressDto;
+import com.example.order.domain.dto.AddressDto;
 import com.example.order.domain.dto.AddressUpdateDto;
 import com.example.order.service.IAddressService;
 import io.swagger.v3.oas.annotations.Operation;

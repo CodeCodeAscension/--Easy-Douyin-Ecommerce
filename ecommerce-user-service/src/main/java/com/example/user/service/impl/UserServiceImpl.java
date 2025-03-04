@@ -1,10 +1,9 @@
 package com.example.user.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.example.api.domain.vo.user.UserInfoVo;
+import com.example.user.domain.vo.UserInfoVo;
 import com.example.auth.enums.UserPower;
 import com.example.common.exception.DatabaseException;
 import com.example.common.exception.NotFoundException;
@@ -15,7 +14,7 @@ import com.example.user.domain.dto.LogoffDto;
 import com.example.user.domain.dto.RegisterDto;
 import com.example.user.domain.dto.UserUpdateDto;
 import com.example.user.domain.po.User;
-import com.example.user.enums.UserStatus;
+import com.example.user.enums.UserStatusEnum;
 import com.example.user.mapper.UserMapper;
 import com.example.user.service.UserService;
 import com.example.auth.util.BCryptUtil;
@@ -46,7 +45,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private User findEnabledUser(String email) {
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(User::getEmail, email);
-        queryWrapper.eq(User::getStatus, UserStatus.NORMAL);
+        queryWrapper.eq(User::getStatus, UserStatusEnum.NORMAL);
         return userMapper.selectOne(queryWrapper);
     }
 
@@ -66,7 +65,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User user = new User();
         user.setEmail(email);
         user.setPassword(password);
-        user.setStatus(UserStatus.NORMAL);
+        user.setStatus(UserStatusEnum.NORMAL);
         user.setCreateTime(LocalDateTime.now());
         user.setUpdateTime(LocalDateTime.now());
         if(!this.save(user)) {
@@ -97,7 +96,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         UserInfoVo userInfoVo = new UserInfoVo();
         BeanUtils.copyProperties(user, userInfoVo);
-        userInfoVo.setStatus(user.getStatus().getCode());
         return userInfoVo;
     }
 
@@ -106,7 +104,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 先判断是否存在
         if(!this.exists(Wrappers.<User>lambdaQuery()
                 .eq(User::getUserId, userId)
-                .eq(User::getStatus, UserStatus.NORMAL))) {
+                .eq(User::getStatus, UserStatusEnum.NORMAL))) {
             throw new NotFoundException("要封禁或注销的用户ID不存在");
         }
         User user = new User();
@@ -124,7 +122,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 先判断是否存在
         if(!this.exists(Wrappers.<User>lambdaQuery()
                 .eq(User::getUserId, userId)
-                .eq(User::getStatus, UserStatus.NORMAL))) {
+                .eq(User::getStatus, UserStatusEnum.NORMAL))) {
             throw new NotFoundException("用户ID不存在或不可用");
         }
         User user = new User();
@@ -141,7 +139,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 先判断是否存在
         if(!this.exists(Wrappers.<User>lambdaQuery()
                 .eq(User::getUserId, userId)
-                .eq(User::getStatus, UserStatus.NORMAL))) {
+                .eq(User::getStatus, UserStatusEnum.NORMAL))) {
             throw new NotFoundException("用户ID不存在或不可用");
         }
         User user = this.getById(userId);

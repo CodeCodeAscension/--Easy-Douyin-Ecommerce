@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
-public enum OrderStatus {
+public enum OrderStatusEnum {
     WAIT_FOR_CONFIRM(0, "待确认"),
     WAIT_FOR_PAY(1, "待支付"),
     PAID(2, "已支付"),
@@ -22,10 +22,10 @@ public enum OrderStatus {
     private final String description;
 
     @JsonCreator
-    public static OrderStatus fromCode(Integer code) {
-        for (OrderStatus orderStatus : OrderStatus.values()) {
-            if (orderStatus.getCode().equals(code)) {
-                return orderStatus;
+    public static OrderStatusEnum fromCode(Integer code) {
+        for (OrderStatusEnum orderStatusEnum : OrderStatusEnum.values()) {
+            if (orderStatusEnum.getCode().equals(code)) {
+                return orderStatusEnum;
             }
         }
         throw new BadRequestException("无效的订单状态");

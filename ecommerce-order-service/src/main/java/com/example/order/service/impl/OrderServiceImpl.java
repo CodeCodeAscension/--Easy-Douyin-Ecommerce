@@ -3,22 +3,18 @@ package com.example.order.service.impl;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
-import com.example.api.client.ProductClient;
 import com.example.api.domain.dto.order.PlaceOrderDto;
 
 import com.example.api.domain.dto.order.SearchOrderDto;
-import com.example.api.domain.dto.order.UpdateOrderDto;
-import com.example.api.domain.po.CartItem;
+import com.example.api.enums.OrderStatusEnum;
+import com.example.order.domain.dto.UpdateOrderDto;
 import com.example.api.domain.po.OrderResult;
 import com.example.api.domain.vo.order.AddressInfoVo;
 import com.example.api.domain.vo.order.OrderInfoVo;
-import com.example.api.domain.vo.product.ProductInfoVo;
-import com.example.api.enums.OrderStatus;
 import com.example.common.config.rabbitmq.RetryableCorrelationData;
 import com.example.common.exception.BadRequestException;
 import com.example.common.exception.DatabaseException;
 import com.example.common.exception.NotFoundException;
-import com.example.common.util.UserContextUtil;
 import com.example.order.config.RabbitMQDLXConfig;
 import com.example.order.domain.po.Address;
 import com.example.order.domain.po.Order;
@@ -68,7 +64,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         order.setUserCurrency(placeOrderDto.getUserCurrency());
         order.setAddressId(placeOrderDto.getAddressId());
         order.setEmail(placeOrderDto.getEmail());
-        order.setStatus(OrderStatus.WAIT_FOR_PAY);
+        order.setStatus(OrderStatusEnum.WAIT_FOR_PAY);
         order.setCreateTime(LocalDateTime.now());
         order.setUpdateTime(LocalDateTime.now());
         order.setDeleted(0);
@@ -106,7 +102,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         Order order = this.getById(updateOrderDto.getOrderId());
         if(order == null) {
             throw new NotFoundException("没有该订单");
-        } else if(order.getStatus() != OrderStatus.WAIT_FOR_PAY) {
+        } else if(order.getStatus() != OrderStatusEnum.WAIT_FOR_PAY) {
             throw new BadRequestException("此时订单不可以修改");
         }
         order.setOrderId(updateOrderDto.getOrderId());
@@ -137,10 +133,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if(order == null) {
             throw new NotFoundException("该订单不存在");
         }
-        if(order.getStatus() != OrderStatus.WAIT_FOR_PAY) {
+        if(order.getStatus() != OrderStatusEnum.WAIT_FOR_PAY) {
             throw new BadRequestException("该订单不可以取消");
         }
-        order.setStatus(OrderStatus.CANCELED);
+        order.setStatus(OrderStatusEnum.CANCELED);
         order.setUpdateTime(LocalDateTime.now());
         updateById(order);
     }
@@ -150,7 +146,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public Boolean autoCancelOrder(String orderId, Integer status) {
         Order order = getOne(Wrappers.<Order>lambdaQuery().eq(Order::getOrderId, orderId));
         if (order != null) {
-            order.setStatus(OrderStatus.fromCode(status));
+            order.setStatus(OrderStatusEnum.fromCode(status));
             order.setUpdateTime(LocalDateTime.now());
             return updateById(order);
         }

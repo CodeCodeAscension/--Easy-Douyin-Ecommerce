@@ -1,5 +1,6 @@
 package com.example.api.domain.vo.product;
 
+import com.example.api.enums.ProductStatusEnum;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -34,7 +35,7 @@ public class ProductInfoVo {
     @Schema(description = "所属类别")
     private List<String> categories;
     @Schema(description = "状态（0上架，1下架）")
-    private Integer status;
+    private ProductStatusEnum status;
     @Schema(description = "创建时间")
     private LocalDateTime createTime;
     @Schema(description = "修改时间")

@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.api.domain.vo.order.AddressInfoVo;
 import com.example.common.exception.DatabaseException;
 import com.example.common.exception.NotFoundException;
-import com.example.api.domain.dto.order.AddressDto;
+import com.example.order.domain.dto.AddressDto;
 import com.example.order.domain.dto.AddressUpdateDto;
 import com.example.order.domain.po.Address;
 

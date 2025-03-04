@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.api.domain.dto.product.*;
+import com.example.api.enums.ProductStatusEnum;
 import com.example.common.exception.*;
 import com.example.product.convert.ProductInfoVoConvert;
 import com.example.product.domain.dto.*;
@@ -409,7 +410,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 .stock((Integer) source.get("stock"))
                 .merchantName((String) source.get("merchantName"))
                 .categories(categories)
-                .status((Integer) source.get("status"))
+                .status(ProductStatusEnum.fromCode((Integer) source.get("status")))
                 .createTime(LocalDateTime.parse((String)source.get("createTime")))
                 .updateTime(LocalDateTime.parse((String)source.get("createTime")))
                 .build();

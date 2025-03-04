@@ -1,4 +1,4 @@
-package com.example.product.enums;
+package com.example.api.enums;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
 import com.example.common.exception.BadRequestException;

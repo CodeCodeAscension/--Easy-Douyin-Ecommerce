@@ -1,7 +1,7 @@
 package com.example.product.domain.po;
 
 import com.baomidou.mybatisplus.annotation.*;
-import com.example.product.enums.ProductStatusEnum;
+import com.example.api.enums.ProductStatusEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;

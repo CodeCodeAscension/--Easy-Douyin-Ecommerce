@@ -5,7 +5,7 @@ import com.example.common.domain.ResponseResult;
 import com.example.user.domain.dto.BannedDto;
 import com.example.user.domain.dto.LogoffDto;
 import com.example.user.domain.dto.UpdatePowerDto;
-import com.example.user.enums.UserStatus;
+import com.example.user.enums.UserStatusEnum;
 import com.example.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,7 +33,7 @@ public class AdminController {
     @Operation(summary = "封禁某个用户")
     public ResponseResult<Object> deleteUser(@RequestBody @Validated BannedDto dto) {
         LogoffDto logoffDto = new LogoffDto();
-        logoffDto.setStatus(UserStatus.BANNED);
+        logoffDto.setStatus(UserStatusEnum.BANNED);
         logoffDto.setReason(dto.getReason());
         userService.disableUser(dto.getUserId(), logoffDto);
         // 使token失效

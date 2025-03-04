@@ -13,8 +13,7 @@ import com.example.api.domain.vo.order.OrderInfoVo;
 import com.example.api.domain.vo.payment.ChargeVo;
 import com.example.api.domain.vo.payment.TransactionInfoVo;
 import com.example.api.domain.vo.product.ProductInfoVo;
-import com.example.api.enums.OrderStatus;
-import com.example.common.config.rabbitmq.PayQueue;
+import com.example.api.enums.OrderStatusEnum;
 import com.example.common.config.rabbitmq.RabbitQueueNamesConfig;
 import com.example.common.config.rabbitmq.RetryableCorrelationData;
 import com.example.common.domain.ResponseResult;
@@ -94,7 +93,7 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
                 throw new SystemException("订单服务状态异常："+orderResult.getMsg());
             } else if (orderResult.getData() == null) {
                 throw new NotFoundException("未找到指定的订单");
-            } else if (!Objects.equals(orderResult.getData().getStatus(), OrderStatus.WAIT_FOR_PAY.getCode())) {
+            } else if (!Objects.equals(orderResult.getData().getStatus(), OrderStatusEnum.WAIT_FOR_PAY.getCode())) {
                 throw new BadRequestException("该订单不处于待支付的状态");
             }
 
@@ -443,7 +442,7 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
                 log.error("order-service: {}", resp.getMsg());
                 continue;
             }
-            if (resp.getData().getStatus() == OrderStatus.CANCELED) {
+            if (resp.getData().getStatus() == OrderStatusEnum.CANCELED) {
                 // 订单的状态已经变成了取消
                 sendPaymentCancelMessage(tran);
             }

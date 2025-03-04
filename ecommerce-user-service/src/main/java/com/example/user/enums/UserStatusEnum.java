@@ -9,7 +9,7 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum UserStatus {
+public enum UserStatusEnum {
     NORMAL(0,"正常"),
     BANNED(1,"封禁"),
     TERMINATED(2,"注销");
@@ -20,10 +20,10 @@ public enum UserStatus {
     private final String description;
 
     @JsonCreator
-    public static UserStatus fromCode(int code) {
-        for (UserStatus userStatus : UserStatus.values()) {
-            if (userStatus.code == code) {
-                return userStatus;
+    public static UserStatusEnum fromCode(int code) {
+        for (UserStatusEnum userStatusEnum : UserStatusEnum.values()) {
+            if (userStatusEnum.code == code) {
+                return userStatusEnum;
             }
         }
         throw new BadRequestException("用户状态枚举值不正确");

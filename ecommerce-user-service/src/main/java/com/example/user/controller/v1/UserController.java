@@ -1,6 +1,6 @@
 package com.example.user.controller.v1;
 
-import com.example.api.domain.vo.user.UserInfoVo;
+import com.example.user.domain.vo.UserInfoVo;
 import com.example.auth.util.TokenRedisUtil;
 import com.example.common.domain.ResponseResult;
 import com.example.common.domain.ResultCode;

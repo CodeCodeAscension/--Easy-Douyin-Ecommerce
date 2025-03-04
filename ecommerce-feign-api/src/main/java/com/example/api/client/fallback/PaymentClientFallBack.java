@@ -18,25 +18,19 @@ public class PaymentClientFallBack implements FallbackFactory<PaymentClient> {
         return new PaymentClient() {
             @Override
             public ResponseResult<ChargeVo> charge(ChargeDto chargeDto) {
-                log.error("payment-service-exception:charge, "+cause.getMessage());
-                return ResponseResult.errorFeign(cause);
-            }
-
-            @Override
-            public ResponseResult<Object> cancelCharge(Integer transactionId) {
-                log.error("payment-service-exception:cancelCharge, "+cause.getMessage());
+                log.error("payment-service-exception:charge, {}", cause.getMessage());
                 return ResponseResult.errorFeign(cause);
             }
 
             @Override
             public ResponseResult<Object> confirmCharge(String preTransactionId) {
-                log.error("payment-service-exception:confirmCharge, "+cause.getMessage());
+                log.error("payment-service-exception:confirmCharge, {}", cause.getMessage());
                 return ResponseResult.errorFeign(cause);
             }
 
             @Override
             public ResponseResult<TransactionInfoVo> getTransactionInfo(TransactionInfoDto transactionInfoDto) {
-                log.error("payment-service-exception:getTransactionInfo, "+cause.getMessage());
+                log.error("payment-service-exception:getTransactionInfo, {}", cause.getMessage());
                 return ResponseResult.errorFeign(cause);
             }
         };

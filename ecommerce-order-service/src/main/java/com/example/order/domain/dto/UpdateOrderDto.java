@@ -1,4 +1,4 @@
-package com.example.api.domain.dto.order;
+package com.example.order.domain.dto;
 
 import com.example.api.domain.po.CartItem;
 import io.swagger.v3.oas.annotations.media.Schema;

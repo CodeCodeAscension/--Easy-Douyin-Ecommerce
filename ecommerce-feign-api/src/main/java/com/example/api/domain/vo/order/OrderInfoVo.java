@@ -1,7 +1,7 @@
 package com.example.api.domain.vo.order;
 
 import com.example.api.domain.po.CartItem;
-import com.example.api.enums.OrderStatus;
+import com.example.api.enums.OrderStatusEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -14,7 +14,7 @@ public class OrderInfoVo {
     @Schema(description = "订单ID")
     private String orderId;
     @Schema(description = "支付状态（0待支付，1已支付，2已取消）")
-    private OrderStatus status;
+    private OrderStatusEnum status;
     @Schema(description = "使用的货币")
     private String userCurrency;
     @Schema(description = "地址")

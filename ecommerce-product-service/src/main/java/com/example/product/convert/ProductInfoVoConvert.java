@@ -31,7 +31,7 @@ public class ProductInfoVoConvert {
                 .stock(product.getStock())
                 .merchantName(product.getMerchantName())
                 .categories(iProCateRelService.getProductCategoryNames(product.getId()))
-                .status(product.getStatus().getCode())
+                .status(product.getStatus())
                 .createTime(product.getCreateTime())
                 .updateTime(product.getUpdateTime())
                 .build();

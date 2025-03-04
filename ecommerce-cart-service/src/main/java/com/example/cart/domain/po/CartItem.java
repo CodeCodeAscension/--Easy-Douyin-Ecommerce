@@ -1,15 +1,12 @@
 package com.example.cart.domain.po;
 
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.*;
 
 import java.io.Serial;
 import java.time.LocalDateTime;
-import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
 
-import com.example.cart.enums.OrderStatusEnum;
+import com.example.api.enums.OrderStatusEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -44,9 +41,9 @@ public class CartItem implements Serializable {
     @TableField("quantity")
     private Integer quantity;
 
-    @Schema(description = "状态（0待支付，1已支付，2已删除）")
-    @TableField("status")
-    private OrderStatusEnum status;
+    @Schema(description = "状态（0待下单，1已删除）")
+    @TableLogic
+    private Integer status;
 
     @Schema(description = "创建时间")
     @TableField("create_time")

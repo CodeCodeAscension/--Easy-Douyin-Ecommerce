@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.example.api.domain.dto.order.PlaceOrderDto;
 import com.example.api.domain.dto.order.SearchOrderDto;
-import com.example.api.domain.dto.order.UpdateOrderDto;
+import com.example.order.domain.dto.UpdateOrderDto;
 import com.example.api.domain.po.CartItem;
 import com.example.api.domain.po.OrderResult;
 import com.example.api.domain.vo.order.OrderInfoVo;

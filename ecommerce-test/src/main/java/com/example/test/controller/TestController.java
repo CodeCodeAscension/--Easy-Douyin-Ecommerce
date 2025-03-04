@@ -1,6 +1,6 @@
 package com.example.test.controller;
 
-import com.example.api.client.UserClient;
+//import com.example.api.client.UserClient;
 import com.example.common.domain.ResponseResult;
 import com.example.test.domain.TestPo;
 import com.example.test.mapper.TestMapper;
@@ -28,12 +28,12 @@ public class TestController {
         return testPoList;
     }
 
-    @Autowired
-    private UserClient userClient;
+//    @Autowired
+//    private UserClient userClient;
 
-    @GetMapping("/users")
-//    @ApiOperation("users")
-    public ResponseResult getUsers() {
-        return userClient.getUserInfo();
-    }
+//    @GetMapping("/users")
+////    @ApiOperation("users")
+//    public ResponseResult getUsers() {
+//        return userClient.getUserInfo();
+//    }
 }

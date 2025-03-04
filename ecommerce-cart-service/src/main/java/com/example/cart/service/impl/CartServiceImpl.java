@@ -2,12 +2,13 @@ package com.example.cart.service.impl;
 
 import com.example.api.client.ProductClient;
 import com.example.api.domain.vo.product.ProductInfoVo;
+import com.example.api.enums.ProductStatusEnum;
 import com.example.cart.domain.dto.AddItemDTO;
 import com.example.cart.domain.po.Cart;
 import com.example.cart.domain.po.CartItem;
 import com.example.cart.domain.vo.CartInfoVo;
 import com.example.cart.domain.vo.CartItemInfo;
-import com.example.cart.enums.OrderStatusEnum;
+import com.example.api.enums.OrderStatusEnum;
 import com.example.cart.mapper.CartMapper;
 import com.example.cart.service.ICartItemService;
 import com.example.cart.service.ICartService;
@@ -54,13 +55,12 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         Long userId = UserContextUtil.getUserId();
 
         //判断是否是第一次添加购物车,条件是用户id和购物车未结算的购物车
-        Cart cart = this.lambdaQuery().eq(Cart::getUserId, userId)
-                        .eq(Cart::getStatus, OrderStatusEnum.UNPAID).one();
+        Cart cart = this.lambdaQuery().eq(Cart::getUserId, userId).one();
         //如果是第一次添加购物车，创建购物车
         if(cart == null){
             cart = new Cart();
             cart.setUserId(userId);
-            cart.setStatus(OrderStatusEnum.UNPAID);
+            cart.setStatus(0);
             cart.setCreateTime(LocalDateTime.now());
             cart.setUpdateTime(LocalDateTime.now());
             this.save(cart);
@@ -71,7 +71,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         if(productInfoById.getCode() != ResultCode.SUCCESS || productInfoById.getData() == null) {
             throw new UserException(productInfoById.getCode(), productInfoById.getMsg());
         }
-        if(productInfoById.getData().getStatus() != 0) {
+        if(productInfoById.getData().getStatus() != ProductStatusEnum.PUT_ON) {
             throw new BadRequestException("商品未上架");
         }
         if(productInfoById.getData().getStock() < addItemDTO.getQuantity()) {
@@ -106,8 +106,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         Long userId= UserContextUtil.getUserId();
 
         //查询购物车表获取购物车id
-        Cart cart = this.lambdaQuery().eq(Cart::getUserId, userId)
-                     .eq(Cart::getStatus, OrderStatusEnum.UNPAID).one();
+        Cart cart = this.lambdaQuery().eq(Cart::getUserId, userId).one();
         if(cart == null) {
             return false;
         }
@@ -123,14 +122,13 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         //获取购物车信息
         Cart cart = this.lambdaQuery()
                 .eq(Cart::getUserId, userId)
-                .eq(Cart::getStatus, OrderStatusEnum.UNPAID)
                 .one();
         CartInfoVo cartInfoVo = new CartInfoVo();
 
         if(cart != null){
             cartInfoVo.setId(cart.getId());
             cartInfoVo.setUserId(cart.getUserId());
-            cartInfoVo.setStatus(cart.getStatus().getCode());
+            cartInfoVo.setStatus(cart.getStatus());
             cartInfoVo.setCreateTime(cart.getCreateTime());
             cartInfoVo.setUpdateTime(cart.getUpdateTime());
             List<CartItem> list = iCartItemService.lambdaQuery()

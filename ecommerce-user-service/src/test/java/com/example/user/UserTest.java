@@ -4,7 +4,7 @@ import com.example.auth.domain.UserClaims;
 import com.example.user.config.UserServiceConfig;
 import com.example.user.domain.po.User;
 import com.example.auth.enums.UserPower;
-import com.example.user.enums.UserStatus;
+import com.example.user.enums.UserStatusEnum;
 import com.example.user.mapper.UserMapper;
 import com.example.auth.util.BCryptUtil;
 import com.example.auth.util.JwtUtil;
@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import javax.sql.DataSource;
 import java.time.LocalDateTime;
 
 @SpringBootTest
@@ -45,7 +44,7 @@ public class UserTest {
         user.setCountry("test");
         user.setZipCode("123");
         user.setUserCurrency("test");
-        user.setStatus(UserStatus.BANNED);
+        user.setStatus(UserStatusEnum.BANNED);
         user.setDisableReason("test");
         user.setCreateTime(LocalDateTime.now());
         user.setUpdateTime(LocalDateTime.now());
