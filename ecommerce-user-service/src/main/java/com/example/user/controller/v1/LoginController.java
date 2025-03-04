@@ -114,6 +114,9 @@ public class LoginController {
         if(!Boolean.TRUE.equals(userClaims.getIsRefreshToken())) {
             throw new UnauthorizedException("请使用RefreshToken访问本接口");
         }
+        if(!refreshToken.equals(redisUtil.getRefreshToken(userClaims.getUserId()))) {
+            throw new UnauthorizedException("RefreshToken已过期");
+        }
         return generateTokens(userClaims);
     }
 }

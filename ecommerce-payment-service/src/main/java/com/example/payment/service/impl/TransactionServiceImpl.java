@@ -436,7 +436,7 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
                 log.error("order-service: {}", resp.getMsg());
                 continue;
             }
-            if (resp.getData().getStatus() == 4) {
+            if (resp.getData().getStatus() == OrderStatus.CANCELED) {
                 // 订单的状态已经变成了取消
                 sendPaymentCancelMessage(tran);
             }
