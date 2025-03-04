@@ -1,4 +1,4 @@
-package com.example.api.domain.dto.product;
+package com.example.product.domain.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;

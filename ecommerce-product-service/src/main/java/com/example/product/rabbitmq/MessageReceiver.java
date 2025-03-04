@@ -2,7 +2,7 @@ package com.example.product.rabbitmq;
 
 import com.example.common.domain.message.PayFailMessage;
 import com.example.common.domain.message.PaySuccessMessage;
-import com.example.api.domain.dto.product.AddProductDto;
+import com.example.product.domain.dto.AddProductDto;
 import com.example.product.domain.dto.AddProductSoldDto;
 import com.example.product.service.IProductService;
 import jakarta.annotation.Resource;

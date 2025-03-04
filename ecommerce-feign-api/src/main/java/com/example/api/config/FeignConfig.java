@@ -5,6 +5,7 @@ import com.example.common.util.UserContextUtil;
 import feign.Logger;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
+import feign.codec.ErrorDecoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
@@ -25,5 +26,10 @@ public class FeignConfig {
                 return;
             }
         };
+    }
+
+    @Bean
+    public ErrorDecoder errorDecoder() {
+        return new EcommerceErrorCode();
     }
 }

@@ -1,5 +1,7 @@
 package com.example.common.domain;
 
+import com.example.common.exception.UserException;
+
 /**
  * controller返回给前端的数据
  * @param <T> 返回的数据对象类型
@@ -57,7 +59,11 @@ public class ResponseResult<T> {
      * @param cause 异常
      */
     public static <T> ResponseResult<T> errorFeign(Throwable cause) {
-        return error(ResultCode.SERVICE_UNAVAILABLE, cause);
+        if(cause instanceof UserException) {
+            return error(((UserException) cause).getCode(), cause.getMessage());
+        } else {
+            return error(ResultCode.SERVICE_UNAVAILABLE, cause.getMessage());
+        }
     }
 
     public int getCode() {
