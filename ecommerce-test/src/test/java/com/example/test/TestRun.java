@@ -15,7 +15,7 @@ public class TestRun {
 
     @Test
     public void testRabbitMqSend() {
-        rabbitTemplate.convertAndSend("test.queue", "Hello World");
+        rabbitTemplate.convertAndSend("order.dlx.queue", "1896984825336827905");
     }
 
     @Autowired

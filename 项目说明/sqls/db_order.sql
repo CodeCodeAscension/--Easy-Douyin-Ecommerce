@@ -92,7 +92,7 @@ CREATE TABLE `order_item` (
   `product_id` bigint DEFAULT NULL COMMENT '商品ID',
   `quantity` int DEFAULT NULL COMMENT '数量',
   `cost` decimal(10,2) NOT NULL COMMENT '总消费',
-  `status` int NOT NULL DEFAULT '0' COMMENT '状态（0待支付，1已支付，2已删除）',
+  `status` int NOT NULL DEFAULT '0' COMMENT '状态（0待支付，1已确认待支付，2已支付，3支付失败，4已取消）',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `pay_time` datetime DEFAULT NULL COMMENT '支付时间',
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',

@@ -7,12 +7,13 @@ import com.example.api.client.CartClient;
 import com.example.api.client.ProductClient;
 import com.example.api.domain.po.CartItem;
 import com.example.api.domain.vo.product.ProductInfoVo;
+import com.example.api.enums.OrderStatusEnum;
 import com.example.common.domain.ResponseResult;
 import com.example.common.domain.ResultCode;
+import com.example.common.exception.BadRequestException;
 import com.example.common.exception.NotFoundException;
 import com.example.common.exception.SystemException;
 import com.example.order.domain.po.OrderItem;
-import com.example.order.enums.OrderItemStatusEnum;
 import com.example.order.mapper.OrderItemMapper;
 import com.example.order.service.IOrderItemService;
 import lombok.AllArgsConstructor;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @AllArgsConstructor
@@ -41,10 +43,13 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
             // 判断购物车物品是否存在
             ResponseResult<CartItem> exists = cartClient.getCartItem(cartItem.getCartItemId());
             if(exists.getCode() == ResultCode.NOT_FOUND) {
-                throw new NotFoundException("指定购物商品不存在");
+                throw new NotFoundException("指定购物车项目不存在");
             } else if(exists.getCode() != ResultCode.SUCCESS) {
                 log.error("cart-service异常：{}", exists.getMsg());
                 throw new SystemException("cart-service异常");
+            }
+            if(!Objects.equals(cartItem.getProductId(), exists.getData().getProductId()) || !Objects.equals(cartItem.getQuantity(), exists.getData().getQuantity())) {
+                throw new BadRequestException("下单数据与购物车数据不符合");
             }
             Float cost = 0f;
             // 从商品服务计算总价格
@@ -67,7 +72,7 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
                         .cost(0f)
                         .quantity(cartItem.getQuantity())
                         .productId(cartItem.getProductId())
-                        .status(OrderItemStatusEnum.PENDING)
+                        .status(OrderStatusEnum.WAIT_FOR_PAY)
                         .createTime(LocalDateTime.now())
                         .updateTime(LocalDateTime.now())
                         .build();
@@ -89,5 +94,19 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
                 .stream()
                 .map(item -> new CartItem(item.getCartItemId(), item.getProductId(), item.getQuantity()))
                 .toList();
+    }
+
+    @Transactional
+    @Override
+    public void setOrderItemsStatus(String orderId, OrderStatusEnum status) {
+        this.list(Wrappers.<OrderItem>lambdaQuery().eq(OrderItem::getOrderId, orderId))
+                .forEach(orderItem -> {
+                   orderItem.setStatus(status);
+                   orderItem.setUpdateTime(LocalDateTime.now());
+                   if(status == OrderStatusEnum.PAID) {
+                       orderItem.setPayTime(LocalDateTime.now());
+                   }
+                   this.updateById(orderItem);
+                });
     }
 }

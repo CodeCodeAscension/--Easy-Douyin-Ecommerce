@@ -1,6 +1,7 @@
 package com.example.order.domain.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
@@ -13,19 +14,19 @@ public class AddressDto implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Schema(description = "街道地址")
-    @NotEmpty
+    @NotBlank
     private String streetAddress;
 
     @Schema(description = "城市")
-    @NotEmpty
+    @NotBlank
     private String city;
 
     @Schema(description = "省份")
-    @NotEmpty
+    @NotBlank
     private String province;
 
     @Schema(description = "国家")
-    @NotEmpty
+    @NotBlank
     private String country;
 
     @Schema(description = "邮政编码")

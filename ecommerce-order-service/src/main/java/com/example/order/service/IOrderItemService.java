@@ -2,6 +2,7 @@ package com.example.order.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.api.domain.po.CartItem;
+import com.example.api.enums.OrderStatusEnum;
 import com.example.order.domain.po.OrderItem;
 
 import java.util.List;
@@ -21,4 +22,11 @@ public interface IOrderItemService extends IService<OrderItem> {
      * @return 结果
      */
     List<CartItem> getCartItemsByOrderId(String orderId);
+
+    /**
+     * 设置订单项目状态
+     * @param orderId 订单ID
+     * @param status 状态
+     */
+    void setOrderItemsStatus(String orderId, OrderStatusEnum status);
 }

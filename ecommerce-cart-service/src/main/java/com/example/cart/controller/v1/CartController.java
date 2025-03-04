@@ -12,6 +12,7 @@ import com.example.common.exception.NotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -33,7 +34,7 @@ public class CartController {
 
     @Operation(summary = "添加购物车")
     @PostMapping
-    public ResponseResult<AddItemDTO> addCart(@RequestBody AddItemDTO addItemDTO){
+    public ResponseResult<AddItemDTO> addCart(@RequestBody @Validated AddItemDTO addItemDTO){
         iCartService.addCart(addItemDTO);
         return ResponseResult.success();
    }

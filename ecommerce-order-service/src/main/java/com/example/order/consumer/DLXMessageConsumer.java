@@ -32,21 +32,14 @@ public class DLXMessageConsumer {
             String messageBody = new String(message.getBody()).replace("\"", "");
 
             // 获取订单信息
-            OrderInfoVo orderById = iOrderService.getOrderById(messageBody);
-            if (orderById == null ||
-                    orderById.getStatus().equals(OrderStatusEnum.PAID) ||
-                    orderById.getStatus().equals(OrderStatusEnum.CANCELED)) {
+            OrderStatusEnum status = iOrderService.getOrderStatus(messageBody);
+            if(status != OrderStatusEnum.WAIT_FOR_CONFIRM && status != OrderStatusEnum.WAIT_FOR_PAY) {
                 logger.info("Order {} is already paid or canceled.", messageBody);
                 return;
             }
 
             // 修改订单状态为已取消
-            boolean cancelResult = iOrderService.autoCancelOrder(messageBody, OrderStatusEnum.CANCELED.getCode());
-            if (cancelResult) {
-                logger.info("Order {} has been successfully canceled.", messageBody);
-            } else {
-                logger.error("Failed to cancel order {}.", messageBody);
-            }
+            iOrderService.changeOrderStatus(messageBody, OrderStatusEnum.CANCELED);
         } catch (Exception e) {
             logger.error("Error processing dead letter message", e);
         }

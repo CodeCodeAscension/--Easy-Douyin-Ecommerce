@@ -4,6 +4,7 @@ import com.example.api.domain.po.CartItem;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -22,7 +23,7 @@ public class PlaceOrderDto {
     private Long addressId;
     @Schema(description = "电子邮件")
     @Email
-    @NotNull
+    @NotBlank
     private String email;
     @Schema(description = "下单的商品")
     @NotEmpty

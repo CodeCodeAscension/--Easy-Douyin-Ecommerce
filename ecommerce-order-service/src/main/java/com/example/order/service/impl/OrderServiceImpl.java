@@ -50,12 +50,15 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private final RabbitTemplate rabbitTemplate;
     private final IAddressService iAddressService;
     private final IOrderItemService orderItemService;
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public OrderResult createOrder(Long userId, PlaceOrderDto placeOrderDto) {
         if(placeOrderDto.getCartItems() == null || placeOrderDto.getCartItems().isEmpty()) {
             throw new BadRequestException("至少要有订单商品");
+        }
+        if(!iAddressService.exists(Wrappers.<Address>lambdaQuery()
+                .eq(Address::getUserId, userId).eq(Address::getId, placeOrderDto.getAddressId()))) {
+            throw new BadRequestException("地址ID不存在");
         }
         //dto转po
         Order order = new Order();
@@ -64,7 +67,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         order.setUserCurrency(placeOrderDto.getUserCurrency());
         order.setAddressId(placeOrderDto.getAddressId());
         order.setEmail(placeOrderDto.getEmail());
-        order.setStatus(OrderStatusEnum.WAIT_FOR_PAY);
+        order.setStatus(OrderStatusEnum.WAIT_FOR_CONFIRM);
         order.setCreateTime(LocalDateTime.now());
         order.setUpdateTime(LocalDateTime.now());
         order.setDeleted(0);
@@ -79,9 +82,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             orderResult.setOrderId(order.getOrderId());
             //设置订单ttl半个小时
             RetryableCorrelationData data = new RetryableCorrelationData(
+                    orderResult.getOrderId(),
                     RabbitMQDLXConfig.ORDER_EXCHANGE,
                     RabbitMQDLXConfig.ORDER_ROUTING_KEY,
-                    orderResult.getOrderId(),
                     message -> {
                         message.getMessageProperties().setExpiration(String.valueOf(30 * 60 * 1000L));
                         return message;
@@ -97,13 +100,17 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateOrder(@NotNull UpdateOrderDto updateOrderDto) {
+    public void updateOrder(Long userId, @NotNull UpdateOrderDto updateOrderDto) {
         //封装po
         Order order = this.getById(updateOrderDto.getOrderId());
         if(order == null) {
             throw new NotFoundException("没有该订单");
-        } else if(order.getStatus() != OrderStatusEnum.WAIT_FOR_PAY) {
+        } else if(order.getStatus() != OrderStatusEnum.WAIT_FOR_CONFIRM) {
             throw new BadRequestException("此时订单不可以修改");
+        }
+        if(updateOrderDto.getAddressId()!=null&&!iAddressService.exists(Wrappers.<Address>lambdaQuery()
+                .eq(Address::getUserId, userId).eq(Address::getId, updateOrderDto.getAddressId()))) {
+            throw new BadRequestException("地址ID不存在");
         }
         order.setOrderId(updateOrderDto.getOrderId());
         order.setUserCurrency(updateOrderDto.getUserCurrency());
@@ -133,7 +140,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if(order == null) {
             throw new NotFoundException("该订单不存在");
         }
-        if(order.getStatus() != OrderStatusEnum.WAIT_FOR_PAY) {
+        if(order.getStatus() != OrderStatusEnum.WAIT_FOR_PAY && order.getStatus() != OrderStatusEnum.WAIT_FOR_CONFIRM) {
             throw new BadRequestException("该订单不可以取消");
         }
         order.setStatus(OrderStatusEnum.CANCELED);
@@ -141,20 +148,30 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         updateById(order);
     }
 
-    //自动取消订单
+    @Transactional
     @Override
-    public Boolean autoCancelOrder(String orderId, Integer status) {
+    public void changeOrderStatus(String orderId, OrderStatusEnum status) {
         Order order = getOne(Wrappers.<Order>lambdaQuery().eq(Order::getOrderId, orderId));
         if (order != null) {
-            order.setStatus(OrderStatusEnum.fromCode(status));
+            order.setStatus(status);
+            if(status == OrderStatusEnum.PAID) {
+                order.setPayTime(LocalDateTime.now());
+            }
             order.setUpdateTime(LocalDateTime.now());
-            return updateById(order);
+            orderItemService.setOrderItemsStatus(orderId, status);
+            this.updateById(order);
         }
-        return false;
     }
 
+    @Override
+    public OrderStatusEnum getOrderStatus(String orderId) {
+        Order order = this.getById(orderId);
+        if(order == null) {
+            return null;
+        }
+        return order.getStatus();
+    }
 
-    // 分页查询订单信息
     @Override
     public PageDTO<OrderInfoVo> getAllOrders(Long userId, Integer pageSize, Integer pageNum) {
         // 分页查询订单信息
@@ -196,8 +213,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 .eq(seatchOrderDto.getStatus() != null, Order::getStatus, seatchOrderDto.getStatus())
                 .ge(seatchOrderDto.getCreateDateLowerBound() != null, Order::getCreateTime, seatchOrderDto.getCreateDateLowerBound())
                 .le(seatchOrderDto.getCreateDateUpperBound() != null, Order::getCreateTime, seatchOrderDto.getCreateDateUpperBound())
-                .ge(seatchOrderDto.getPaymentDateLowerBound()!= null, Order::getPayTime, seatchOrderDto.getPaymentDateLowerBound())
-                .le(seatchOrderDto.getPaymentDateUpperBound() != null, Order::getPayTime, seatchOrderDto.getPaymentDateUpperBound())
+                .and(
+                        wp -> wp
+                                .ge(seatchOrderDto.getPaymentDateLowerBound() != null, Order::getPayTime, seatchOrderDto.getPaymentDateLowerBound())
+                                .le(seatchOrderDto.getPaymentDateUpperBound() != null, Order::getPayTime, seatchOrderDto.getPaymentDateUpperBound())
+                                // 追加 OR PayTime IS NULL 避免影响查询结果
+                                .or()
+                                .isNull(Order::getPayTime)
+                )
                 .page(new Page<>(pageNum, pageSize));
 
         // 获取分页记录

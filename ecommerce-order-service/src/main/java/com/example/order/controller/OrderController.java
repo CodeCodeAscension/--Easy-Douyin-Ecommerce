@@ -43,6 +43,14 @@ public class OrderController {
     @PostMapping
     public ResponseResult<OrderResult> createOrder(@RequestBody @Validated PlaceOrderDto placeOrderDto) {
         Long userId = UserContextUtil.getUserId();
+        List<CartItem> item = placeOrderDto.getCartItems();
+        if (item != null && !item.isEmpty()) {
+            item.forEach(cartItem -> {
+                if(cartItem.getProductId() == null || cartItem.getQuantity() == null || cartItem.getQuantity() <= 0) {
+                    throw new BadRequestException("购物车参数错误");
+                }
+            });
+        }
         OrderResult orderResult = iOrderService.createOrder(userId, placeOrderDto);
         log.info("订单创建成功，订单号：{}", orderResult.getOrderId());
         return ResponseResult.success(orderResult);
@@ -59,7 +67,8 @@ public class OrderController {
                 }
             });
         }
-        iOrderService.updateOrder(updateOrderDto);
+        Long userId = UserContextUtil.getUserId();
+        iOrderService.updateOrder(userId, updateOrderDto);
         return ResponseResult.success();
     }
 

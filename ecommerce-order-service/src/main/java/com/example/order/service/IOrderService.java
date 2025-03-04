@@ -3,6 +3,7 @@ package com.example.order.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.example.api.domain.dto.order.PlaceOrderDto;
 import com.example.api.domain.dto.order.SearchOrderDto;
+import com.example.api.enums.OrderStatusEnum;
 import com.example.order.domain.dto.UpdateOrderDto;
 import com.example.api.domain.po.OrderResult;
 import com.example.api.domain.vo.order.OrderInfoVo;
@@ -35,11 +36,12 @@ public interface IOrderService extends IService<Order> {
     /**
      * 更新订单信息
      * @param updateOrderDto dto
+     * @param userId 用户ID
      * @throws DatabaseException 数据库异常
      * @throws BadRequestException 参数异常
      * @throws NotFoundException 未找到异常
      */
-    void updateOrder(UpdateOrderDto updateOrderDto) throws DatabaseException, BadRequestException, NotFoundException;
+    void updateOrder(Long userId, UpdateOrderDto updateOrderDto) throws DatabaseException, BadRequestException, NotFoundException;
 
     /**
      * 查询订单信息
@@ -58,12 +60,18 @@ public interface IOrderService extends IService<Order> {
     void cancelOrder(Long userId, String orderId) throws BadRequestException, NotFoundException;
 
     /**
-     * 自动取消订单
+     * 修改订单状态
      * @param orderId 订单ID
      * @param status 状态值
-     * @return 是否成功
      */
-    Boolean autoCancelOrder(String orderId ,Integer status);
+    void changeOrderStatus(String orderId , OrderStatusEnum status);
+
+    /**
+     * 获取订单状态
+     * @param orderId 订单ID
+     * @return 订单状态
+     */
+    OrderStatusEnum getOrderStatus(String orderId);
 
     /**
      * 获得某个用户的所有订单

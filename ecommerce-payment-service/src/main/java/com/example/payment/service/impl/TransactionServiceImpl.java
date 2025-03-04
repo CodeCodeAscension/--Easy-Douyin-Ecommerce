@@ -411,9 +411,9 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
         scheduledHashOperations.put(SCHEDULED_KEY, transactionId, cancelTime);
         // 发送MQ消息到延迟队列中
         RetryableCorrelationData data = new RetryableCorrelationData(
+                transactionId,
                 RabbitMQTimeoutConfig.EXCHANGE_NAME,
                 RabbitMQTimeoutConfig.ROUTING_KEY,
-                transactionId,
                 message -> {
                     message.getMessageProperties().setExpiration(String.valueOf(minutes * 60 * 1000L));
                     return message;

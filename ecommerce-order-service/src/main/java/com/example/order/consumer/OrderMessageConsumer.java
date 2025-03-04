@@ -27,8 +27,12 @@ public class OrderMessageConsumer {
         try {
             logger.info("收到支付成功消息：{}", message);
             String messageBody = message.getOrderId();
+            if(iorderService.getOrderStatus(messageBody) != OrderStatusEnum.WAIT_FOR_PAY) {
+                logger.info("订单状态不正确，放弃本条信息");
+                return;
+            }
             //修改订单信息为以支付成功
-            iorderService.autoCancelOrder(messageBody, OrderStatusEnum.PAID.getCode());
+            iorderService.changeOrderStatus(messageBody, OrderStatusEnum.PAID);
             logger.info("订单处理成功：{}", messageBody);
         } catch (Exception e) {
             logger.error("处理支付成功消息异常：", e);
@@ -43,8 +47,12 @@ public class OrderMessageConsumer {
             logger.info("收到支付失败消息：{}", message);
             //获取信息
             String messageBody = message.getOrderId();
+            if(iorderService.getOrderStatus(messageBody) != OrderStatusEnum.WAIT_FOR_PAY) {
+                logger.info("订单状态不正确，放弃本条信息");
+                return;
+            }
             //修改订单状态为支付失败
-            iorderService.autoCancelOrder(messageBody, OrderStatusEnum.PAYMENT_FAIL.getCode());
+            iorderService.changeOrderStatus(messageBody, OrderStatusEnum.PAYMENT_FAIL);
 
             logger.info("修改订单状态完成：{}", messageBody);
         } catch (Exception e) {
@@ -60,8 +68,13 @@ public class OrderMessageConsumer {
             logger.info("收到取消支付消息：{}", message);
             //获取信息
             String messageBody = message.getOrderId();
+            OrderStatusEnum status = iorderService.getOrderStatus(messageBody);
+            if(status != OrderStatusEnum.WAIT_FOR_CONFIRM && status != OrderStatusEnum.WAIT_FOR_PAY) {
+                logger.info("订单状态不正确，放弃本条信息");
+                return;
+            }
             //修改订单状态为已取消
-            iorderService.autoCancelOrder(messageBody, OrderStatusEnum.CANCELED.getCode());
+            iorderService.changeOrderStatus(messageBody, OrderStatusEnum.CANCELED);
 
             logger.info("订单已取消：{}", messageBody);
         } catch (Exception e) {
@@ -77,8 +90,12 @@ public class OrderMessageConsumer {
             logger.info("收到待支付消息：{}", message);
             //获取信息
             String messageBody = message.getOrderId();
-            //修改订单状态为已取消
-            iorderService.autoCancelOrder(messageBody, OrderStatusEnum.WAIT_FOR_PAY.getCode());
+            if(iorderService.getOrderStatus(messageBody) != OrderStatusEnum.WAIT_FOR_CONFIRM) {
+                logger.info("订单状态不正确，放弃本条信息");
+                return;
+            }
+            //修改订单状态为待支付
+            iorderService.changeOrderStatus(messageBody, OrderStatusEnum.WAIT_FOR_PAY);
 
             logger.info("订单已标记待支付：{}", messageBody);
         } catch (Exception e) {

@@ -42,8 +42,8 @@ public class RabbitInitConfig {
                 } else {
                     // 进行消息重发
                     RetryableCorrelationData data = (RetryableCorrelationData) correlationData;
-                    int delay = (int) Math.pow(2, data.getRetryCount()) * 1000; // 指数退避
                     data.setRetryCount(data.getRetryCount() + 1);
+                    int delay = (int) Math.pow(2, data.getRetryCount()) * 1000; // 指数退避
                     new Thread(() -> {
                         try {
                             Thread.sleep(delay);
