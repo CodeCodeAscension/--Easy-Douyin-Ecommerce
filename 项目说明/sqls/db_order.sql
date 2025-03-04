@@ -30,8 +30,8 @@ CREATE TABLE `address` (
   `province` varchar(255) NOT NULL COMMENT '省份',
   `country` varchar(255) NOT NULL COMMENT '国家',
   `zip_code` varchar(255) NOT NULL COMMENT '邮政编码',
-  `create_time` datetime NOT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime NOT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='用户收货地址信息';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -61,7 +61,7 @@ CREATE TABLE `order` (
   `status` int NOT NULL DEFAULT '0' COMMENT '支付状态（0待支付，1已确认待支付，2已支付，3支付失败，4已取消）',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `pay_time` datetime DEFAULT NULL COMMENT '支付时间',
-  `update_time` datetime NOT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `update_time` datetime NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `deleted` int NOT NULL DEFAULT '0' COMMENT '逻辑删除',
   PRIMARY KEY (`order_id`),
   KEY `fk_address_id` (`address_id`),
@@ -93,9 +93,9 @@ CREATE TABLE `order_item` (
   `quantity` int DEFAULT NULL COMMENT '数量',
   `cost` decimal(10,2) NOT NULL COMMENT '总消费',
   `status` int NOT NULL DEFAULT '0' COMMENT '状态（0待支付，1已支付，2已删除）',
-  `create_time` datetime NOT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '创建时间',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `pay_time` datetime DEFAULT NULL COMMENT '支付时间',
-  `update_time` datetime NOT NULL COMMENT '修改时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
   PRIMARY KEY (`id`),
   KEY `order_item_order_order_id_fk` (`order_id`),
   CONSTRAINT `order_item_order_order_id_fk` FOREIGN KEY (`order_id`) REFERENCES `order` (`order_id`) ON UPDATE CASCADE
@@ -148,4 +148,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-04  1:05:09
+-- Dump completed on 2025-03-04 16:46:22
