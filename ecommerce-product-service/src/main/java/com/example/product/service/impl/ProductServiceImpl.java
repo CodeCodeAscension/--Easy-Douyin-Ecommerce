@@ -103,6 +103,12 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
     @Transactional
     @Override
+    public void createProducts(List<CreateProductDto> createProductDtos) throws SystemException {
+        createProductDtos.forEach(this::createProduct);
+    }
+
+    @Transactional
+    @Override
     public void updateProduct(UpdateProductDto updateProductDto) {
         // 1. 查询现有商品
         Product product = getById(updateProductDto.getId());
@@ -294,6 +300,11 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
         if (product == null) {
             throw new NotFoundException("商品不存在");
+        }
+
+        // 商品已下架，无法卖出
+        if (product.getStatus() != ProductStatusEnum.PUT_ON) {
+            throw new BadRequestException("商品已下架，无法卖出");
         }
 
         // 减少库存

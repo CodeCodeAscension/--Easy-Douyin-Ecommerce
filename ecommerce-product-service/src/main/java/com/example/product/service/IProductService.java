@@ -8,6 +8,9 @@ import com.example.api.domain.dto.product.*;
 import com.example.product.domain.dto.*;
 import com.example.product.domain.po.Product;
 import com.example.api.domain.vo.product.ProductInfoVo;
+
+import java.util.List;
+
 /**
  * 商品服务类
  * @since 2025-02-20
@@ -21,6 +24,13 @@ public interface IProductService extends IService<Product> {
      * @throws SystemException 系统异常
      */
     void createProduct(CreateProductDto createProductDto) throws SystemException;
+
+    /**
+     * 批量创建商品
+     * @param createProductDtos dtos
+     * @throws SystemException 系统异常
+     */
+    void createProducts(List<CreateProductDto> createProductDtos) throws SystemException;
 
     /**
      * 根据商品ID查询商品信息

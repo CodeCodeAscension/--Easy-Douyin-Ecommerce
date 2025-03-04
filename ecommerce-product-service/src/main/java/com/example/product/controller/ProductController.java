@@ -15,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -64,6 +66,14 @@ public class ProductController {
     public ResponseResult<Object> createProduct(@RequestBody @Validated CreateProductDto createProductDto) {
         UserContextUtil.getUserId();
         iProductService.createProduct(createProductDto);
+        return ResponseResult.success();
+    }
+
+    @PostMapping("/batch")
+    @Operation(summary = "批量创建商品")
+    public ResponseResult<Object> createProducts(@RequestBody @Validated List<CreateProductDto> dtos) {
+        UserContextUtil.getUserId();
+        iProductService.createProducts(dtos);
         return ResponseResult.success();
     }
 
