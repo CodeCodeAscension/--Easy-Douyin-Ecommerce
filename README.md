@@ -1,38 +1,94 @@
-# 简易版抖音电商
+# 字节跳动青训营抖音商城项目
 
-目前项目的技术栈为：SpringBoot+MySQL+MyBatisPlus+Redis+SpringCloud+Nacos+OpenFeign+Seata+RabbitMQ+Elasticsearch
+“简易版”抖音商城
 
-## 项目现在完成的情况
+本项目涉及到的技术框架为：SpringBoot、SpringAI、SpringCloudGateway、SpringCloud、SpringCloudAlibaba、MySQL、MyBatisPlus、Redis、Nacos、OpenFeign、Seata、RabbitMQ、Elasticsearch、Sentinel
 
-根据功能要求，我定义了7个微服务，对应功能需求的后七点，认证中心的功能就交由网关处理。每个微服务已经定义了应该实现的接口，查看[接口文档](项目说明/接口文档.md)即可。同时每个微服务都设计了[对应的数据库](项目说明/数据库表说明.md)。
+可以参考[docker-compose](project-description/docker-compose.yaml)文件的配置来快速搭建第三方技术框架。
 
-每个微服务项目都导入了MybatisPlus、Redis、Nacos、OpenFeign、Seata和RabbitMQ，可以根据微服务的具体需求对依赖进行删减。每个微服务都写完了向Nacos注册服务、从Nacos获取配置信息、Mybatis二级缓存使用Redis集群、SpringMVC全局控制通知类（拦截Controller异常）、OpenFeign远程服务调用的相关定义以及拦截器从请求头中获取用户ID（该请求头由网关或者FeignClient设置）。
+本项目的接口文档定义可以参考[接口文档.md](project-description/interface-documentation.md)
 
-根目录的`pom.xml`里定义了所有第三方技术的配置信息，并定义了dev1——dev5不同的profile，该处配置对全局所有项目都有效，每个人测试时可以使用自己的环境。
-
-## docker容器的搭建
-
-第三方依赖的搭建用的是docker-compose，可以根据`docker-compose.yaml`构建docker容器。所有容器应该在同一个`network`里。
-
-`docker-compose.yaml`里有一个环境变量`HOST_IP`，在运行`docker compose`前需要对这个环境变量进行赋值，或者直接换成当前主机IP：
-
-```bash
-export $HOST_IP=your_ip
-```
-
-注意nacos要提供环境配置文件，文件内容为：
+## 项目结构
 
 ```
-PREFER_HOST_MODE=hostname
-MODE=standalone
-SPRING_DATASOURCE_PLATFORM=mysql
-MYSQL_SERVICE_HOST=mysql
-MYSQL_SERVICE_DB_NAME=nacos
-MYSQL_SERVICE_PORT=3306
-MYSQL_SERVICE_USER=root
-MYSQL_SERVICE_PASSWORD=root
-MYSQL_SERVICE_DB_PARAM=characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+easy-douyin-ecommerce-project
+├── ecommerce-ai-service        # AI微服务
+├── ecommerce-auth-util         # 权限认证工具
+├── ecommerce-cart-service      # 购物车微服务
+├── ecommerce-checkout-service  # 结算微服务
+├── ecommerce-common            # 微服务共用模块（如异常拦截、公共配置等）
+├── ecommerce-feign-api         # 微服务远程调用接口定义
+├── ecommerce-gateway           # 网关
+├── ecommerce-order-service     # 订单微服务
+├── ecommerce-payment-service   # 支付微服务
+├── ecommerce-product-service   # 商品微服务
+├── ecommerce-user-service      # 用户微服务
+├── pom.xml                     # 整体项目Maven配置
+├── project-description         # 项目说明文件夹
+└── README.md
 ```
+
+本项目的RabbitMQ支付消息队列模型为：
+
+![img.png](project-description/images/img.png)
+
+定时取消订单和定时取消支付都是使用的RabbitMQ延迟队列机制，即为：`交换机->队列->死信交换机->死信队列`的结构
+
+本项目的elasticsearch索引结构的定义为：
+
+`PUT /products`
+```json
+{
+  "mappings": {
+    "properties": {
+      "id": { "type": "keyword" },
+      "name": { "type": "text", "analyzer": "ik_max_word" },
+      "description": { "type": "text", "analyzer": "ik_max_word" },
+      "price": { "type": "float" },
+      "sold": { "type": "integer" },
+      "stock": { "type": "integer" },
+      "merchantName": { "type": "keyword" },
+      "categories": { "type": "keyword" },
+      "status": { "type": "integer" },
+      "createTime": { 
+        "type": "date",
+        "format": "yyyy-MM-dd'T'HH:mm:ss"
+      },
+      "updateTime": { 
+        "type": "date",
+        "format": "yyyy-MM-dd'T'HH:mm:ss" 
+      }
+    }
+  }
+}
+```
+
+## 项目启动方式
+
+可以通过修改父项目的`pom.xml`文件的配置来定义所有第三方框架的相关信息，配置的格式示例：
+
+```xml
+<properties>
+    <env>dev1</env>
+    <database.host>vlsmb-kotori.local</database.host>
+    <database.port>3306</database.port>
+    <database.user>root</database.user>
+    <database.pwd>root</database.pwd>
+    <sentinel.dashboard>vlsmb-kotori.local:8090</sentinel.dashboard>
+    <nacos.dashboard>vlsmb-kotori.local:8848</nacos.dashboard>
+    <redis.cluster-addr>vlsmb-kotori.local:7001,vlsmb-kotori.local:7002,vlsmb-kotori.local:7003,vlsmb-kotori.local:7004,vlsmb-kotori.local:7005,vlsmb-kotori.local:7006</redis.cluster-addr>
+    <rabbitmq.host>vlsmb-kotori.local</rabbitmq.host>
+    <rabbitmq.port>5672</rabbitmq.port>
+    <rabbitmq.user>guest</rabbitmq.user>
+    <rabbitmq.pwd>guest</rabbitmq.pwd>
+    <elasticsearch.host>vlsmb-kotori.local</elasticsearch.host>
+    <elasticsearch.port>9200</elasticsearch.port>
+</properties>
+```
+
+所有的微服务都会继承父项目中的框架配置信息，不需要额外改动微服务的配置文件。
+
+项目所使用的第三方框架可以使用[docker-compose](project-description/docker-compose.yaml)搭建。`docker-compose`文件里有一个环境变量`HOST_IP`，在运行`docker compose`前需要对这个环境变量进行赋值，或者直接换成当前主机IP：`export $HOST_IP=your_ip`。
 
 sentinel构建的是它的发行版jar包，对应的DockerFile为：
 
@@ -70,14 +126,47 @@ docker exec -it redis-node-1 redis-cli --cluster create \
   --cluster-replicas 1 --cluster-yes
 ```
 
-## 任务要求
+启动之后需要将本项目使用的[nacos配置信息](project-description/nacos/configs)添加到nacos的`DEFAULT_GROUP`中，以及将[数据库表](project-description/sqls)导入到容器内的mysql中。
 
-每个人把本仓库fork一份，然后在自己的分支仓库里进行代码编写，写到一定程度来提交pr。每个人只能编写自己的微服务部分，如果遇到了必须修改公共模块（ecommerce-feign-api和ecommerce-common）的情况（比如这两部分模块有重大bug或者不符合业务逻辑的编码），请先在群里说明，避免因改动公共模块给别人造成困扰。
+## 项目完成的功能
 
-微服务项目的接口按照[接口文档](项目说明/接口文档.md)来写，每一个Controller类和POJO类都应该使用`knife4j`写接口文档，使用`@Slf4j`做必要的日志。每一个Controller的方法都应该返回`com.example.common.domain.ResponseResult`对象，且code字段值为`com.example.common.domain.ResultCode`中的定义。
+认证中心
+- 分发身份令牌
+- 续期身份令牌
+- 校验身份令牌
 
-如果要有修改接口文档和数据库表的定义，也请现在群里说明。
+用户服务
+- 创建用户
+- 登录
+- 用户登出
+- 删除用户
+- 更新用户
+- 获取用户身份信息
 
-优先完成基本任务，有时间再去完成可选、高级任务。每个人应于2月26日晚之前完成所有的基本任务。（留一天测试已经是很极限了，如果能再早点完成就更好了）
+商品服务
+- 创建商品
+- 修改商品信息
+- 删除商品
+- 查询商品信息（单个商品、批量商品）
 
-希望我们的项目能够顺利完成！
+购物车服务
+- 创建购物车
+- 清空购物车
+- 获取购物车信息
+
+订单服务
+- 创建订单
+- 修改订单信息
+- 订单定时取消
+
+结算
+- 订单结算
+
+支付
+- 取消支付
+- 定时取消支付
+- 支付
+
+AI大模型
+- 订单查询
+- 模拟自动下单

@@ -9,7 +9,6 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
-        <module>ecommerce-test</module>
         <module>ecommerce-gateway</module>
         <module>ecommerce-common</module>
         <module>ecommerce-user-service</module>

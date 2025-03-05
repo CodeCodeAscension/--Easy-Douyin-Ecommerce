@@ -13,6 +13,6 @@ import org.apache.ibatis.annotations.Select;
 @CacheNamespace(implementation = MybatisRedisCache.class)
 public interface CreditMapper extends BaseMapper<Credit> {
 
-    @Select("select * from db_payment.credit where user_id = #{userId}")
+    @Select("select * from db_payment.credit where user_id = #{userId} and deleted = 0")
     IPage<CreditVo> selectToVo(IPage<CreditVo> page, Long userId);
 }

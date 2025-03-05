@@ -127,7 +127,8 @@ public class CreditServiceImpl extends ServiceImpl<CreditMapper, Credit> impleme
         LambdaQueryWrapper<Credit> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Credit::getUserId, userId)
                     .eq(Credit::getCardNumber, cardNumber)
-                    .eq(Credit::getStatus, CreditStatusEnum.NORMAL);
+                    .eq(Credit::getStatus, CreditStatusEnum.NORMAL)
+                    .eq(Credit::getDeleted, 0);
         Credit credit;
         try {
             credit = creditMapper.selectOne(queryWrapper);

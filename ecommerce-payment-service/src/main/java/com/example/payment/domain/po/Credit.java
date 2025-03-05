@@ -57,8 +57,6 @@ public class Credit implements Serializable {
     @Schema(description = "更新时间")
     private LocalDateTime updateTime;
 
-    // 逻辑删除
-    @TableLogic
     private Integer deleted = 0;
 
 

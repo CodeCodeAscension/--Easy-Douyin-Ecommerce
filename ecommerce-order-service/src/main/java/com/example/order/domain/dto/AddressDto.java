@@ -30,5 +30,6 @@ public class AddressDto implements Serializable {
     private String country;
 
     @Schema(description = "邮政编码")
+    @NotBlank
     private String zipCode;
 }

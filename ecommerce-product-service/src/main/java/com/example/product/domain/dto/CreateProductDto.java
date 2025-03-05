@@ -3,8 +3,10 @@ package com.example.product.domain.dto;
 import com.example.api.enums.ProductStatusEnum;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.List;
@@ -23,8 +25,9 @@ public class CreateProductDto {
     @NotEmpty
     private String description;
 
-    @NonNull
+    @NotNull
     @Schema(description = "商品价格")
+    @DecimalMin(value = "0.0", inclusive = false)
     @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT)
     private Float price;
 

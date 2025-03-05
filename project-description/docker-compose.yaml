@@ -1,5 +1,3 @@
-# 此处定义了第三方技术的搭建
-
 version: "3.8"
 
 services:
@@ -10,7 +8,7 @@ services:
       - "3306:3306"
     environment:
       TZ: Asia/Shanghai
-      MYSQL_ROOT_PASSWORD: 2781307050.wl
+      MYSQL_ROOT_PASSWORD: root
     volumes:
       - "./mysql/conf:/etc/mysql/conf.d"
       - "./mysql/data:/var/lib/mysql"
@@ -25,7 +23,7 @@ services:
       retries: 5
       start_period: 10s
   nacos:
-    image: nacos/nacos-server:v2.2.3
+    image: nacos/nacos-server:v2.1.0-slim
     container_name: nacos
     env_file:
       - ./nacos/custom.env
@@ -42,9 +40,9 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-  setinel:
+  sentinel:
     build:
-      context: ./sentinel
+      context: sentinel
       dockerfile: Dockerfile
     container_name: sentinel
     ports:
@@ -53,7 +51,7 @@ services:
     networks:
       - new
   seata:
-    image: seataio/seata-server:1.5.2
+    image: seataio/seata-server:2.0.0
     container_name: seata
     ports:
       - "8099:8099"
@@ -94,6 +92,12 @@ services:
       - new
     ports:
       - "5601:5601"
+    restart: always
+  logstash:
+    image: logstash:7.12.1
+    container_name: logstash
+    networks:
+      - new
     restart: always
 
   redis-node-1:
@@ -273,7 +277,7 @@ services:
     networks:
       - new
     restart: always
-
+  
   rabbit-mq:
     image: rabbitmq:3.8-management
     container_name: rabbit-mq
