@@ -27,7 +27,8 @@ public class OrderMessageConsumer {
         try {
             logger.info("收到支付成功消息：{}", message);
             String messageBody = message.getOrderId();
-            if(iorderService.getOrderStatus(messageBody) != OrderStatusEnum.WAIT_FOR_PAY) {
+            OrderStatusEnum status = iorderService.getOrderStatus(messageBody);
+            if(status != OrderStatusEnum.WAIT_FOR_PAY || status == OrderStatusEnum.WAIT_FOR_CONFIRM) {
                 logger.info("订单状态不正确，放弃本条信息");
                 return;
             }
@@ -47,7 +48,8 @@ public class OrderMessageConsumer {
             logger.info("收到支付失败消息：{}", message);
             //获取信息
             String messageBody = message.getOrderId();
-            if(iorderService.getOrderStatus(messageBody) != OrderStatusEnum.WAIT_FOR_PAY) {
+            OrderStatusEnum status = iorderService.getOrderStatus(messageBody);
+            if(status != OrderStatusEnum.WAIT_FOR_PAY || status == OrderStatusEnum.WAIT_FOR_CONFIRM) {
                 logger.info("订单状态不正确，放弃本条信息");
                 return;
             }

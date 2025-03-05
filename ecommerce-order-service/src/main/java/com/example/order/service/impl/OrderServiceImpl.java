@@ -23,6 +23,7 @@ import com.example.order.service.IAddressService;
 import com.example.order.service.IOrderItemService;
 import com.example.order.service.IOrderService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import io.seata.core.context.RootContext;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

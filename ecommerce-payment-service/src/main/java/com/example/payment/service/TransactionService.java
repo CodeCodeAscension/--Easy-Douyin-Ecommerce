@@ -22,6 +22,15 @@ public interface TransactionService extends IService<Transaction> {
     ChargeVo charge(ChargeDto chargeDto) throws UserException, SystemException;
 
     /**
+     * 支付功能（快捷自动确认功能）
+     * @param chargeDto 订单支付dto
+     * @throws UserException 用户异常
+     * @throws SystemException 系统异常
+     * @return chargeVo 支付结果
+     */
+    ChargeVo quickCharge(ChargeDto chargeDto) throws UserException, SystemException;
+
+    /**
      * 取消支付
      * @param preTransactionId 预交易ID
      * @throws UserException 用户异常

@@ -29,6 +29,7 @@ import com.example.payment.mapper.TransactionMapper;
 import com.example.payment.service.CreditService;
 import com.example.payment.service.TransactionService;
 import com.example.payment.util.RedisHashUtil;
+import io.seata.core.context.RootContext;
 import io.seata.spring.annotation.GlobalTransactional;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
@@ -76,7 +77,24 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
     @Transactional
     @Override
     public ChargeVo charge(ChargeDto chargeDto) throws UserException, SystemException {
+        ChargeVo vo = chargeInner(chargeDto);
+        // 发送支付启动消息
+        sendPaymentStartMessage(this.getById(vo.getTransactionId()));
+        // 默认设置30分钟自动取消
+        scheduleAutoCancel(vo.getTransactionId(), 30);
+        return vo;
+    }
+
+    /**
+     * 支付（内部方法）
+     * @param chargeDto dto
+     * @return o
+     * @throws UserException 用户异常
+     * @throws SystemException 系统异常
+     */
+    private ChargeVo chargeInner(ChargeDto chargeDto) throws UserException, SystemException {
         try {
+            log.error(RootContext.getXID());
             // 检查这个orderId是否已经创建了交易信息
             LambdaQueryWrapper<Transaction> exist = new LambdaQueryWrapper<>();
             exist.eq(Transaction::getOrderId, chargeDto.getOrderId());
@@ -103,12 +121,6 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
             Transaction preTransaction = buildPreTransaction(credit, chargeDto, transId, amount);
             this.save(preTransaction);
 
-            // 发送支付启动消息
-            sendPaymentStartMessage(preTransaction);
-
-            // 默认设置30分钟自动取消
-            scheduleAutoCancel(transId, 30);
-
             ChargeVo chargeVo = new ChargeVo();
             chargeVo.setTransactionId(transId);
             chargeVo.setPreTransactionId(transId);
@@ -122,9 +134,15 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
         }
     }
 
-    @GlobalTransactional(name = "paymentConfirm", rollbackFor = Exception.class)
+    @Transactional
     @Override
-    public void confirmCharge(String preTransactionId) throws UserException, SystemException {
+    public ChargeVo quickCharge(ChargeDto chargeDto) throws UserException, SystemException {
+        ChargeVo vo = chargeInner(chargeDto);
+        confirmChargeInner(vo.getTransactionId());
+        return vo;
+    }
+
+    private void confirmChargeInner(String preTransactionId) {
         Transaction transaction = validateTransaction(preTransactionId, TransactionStatusEnum.WAIT_FOR_CONFIRM);
         String transactionId = transaction.getTransactionId();
         List<Long> addProductIds = new ArrayList<>();
@@ -172,6 +190,12 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
                 handlePaymentFailure(transactionId, e.getMessage(), addProductIds);
             });
         }
+    }
+
+    @GlobalTransactional(name = "paymentConfirm", rollbackFor = Exception.class)
+    @Override
+    public void confirmCharge(String preTransactionId) throws UserException, SystemException {
+        confirmChargeInner(preTransactionId);
     }
 
     @Override

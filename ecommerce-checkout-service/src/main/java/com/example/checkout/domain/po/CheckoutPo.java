@@ -2,6 +2,7 @@ package com.example.checkout.domain.po;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -12,19 +13,17 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@TableName("checkout")
 @Schema(description = "结算信息实体类")
 public class CheckoutPo {
 
-    @NonNull
     @Schema(description = "结算ID")
     @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;
 
-    @NonNull
     @Schema(description = "用户ID")
     private Long userId;
 
-    @NonNull
     @Schema(description = "购物车ID")
     private Long cartId;
 

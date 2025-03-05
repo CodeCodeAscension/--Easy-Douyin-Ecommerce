@@ -9,7 +9,6 @@ import com.example.product.mapper.ProCateRelMapper;
 import com.example.product.service.ICategoryService;
 import com.example.product.service.IProCateRelService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

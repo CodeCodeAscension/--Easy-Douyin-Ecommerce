@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.example.api.domain.dto.order.PlaceOrderDto;
 import com.example.api.domain.dto.order.SearchOrderDto;
+import com.example.api.domain.vo.order.PlaceOrderVo;
 import com.example.order.domain.dto.UpdateOrderDto;
 import com.example.api.domain.po.CartItem;
 import com.example.api.domain.po.OrderResult;
@@ -41,7 +42,7 @@ public class OrderController {
 
     @Operation(summary = "创建订单")
     @PostMapping
-    public ResponseResult<OrderResult> createOrder(@RequestBody @Validated PlaceOrderDto placeOrderDto) {
+    public ResponseResult<PlaceOrderVo> createOrder(@RequestBody @Validated PlaceOrderDto placeOrderDto) {
         Long userId = UserContextUtil.getUserId();
         List<CartItem> item = placeOrderDto.getCartItems();
         if (item != null && !item.isEmpty()) {
@@ -53,7 +54,9 @@ public class OrderController {
         }
         OrderResult orderResult = iOrderService.createOrder(userId, placeOrderDto);
         log.info("订单创建成功，订单号：{}", orderResult.getOrderId());
-        return ResponseResult.success(orderResult);
+        PlaceOrderVo placeOrderVo = new PlaceOrderVo();
+        placeOrderVo.setOrder(orderResult);
+        return ResponseResult.success(placeOrderVo);
     }
 
     @Operation(summary = "修改订单信息")

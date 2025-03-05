@@ -3,6 +3,7 @@ package com.example.cart.consumer;
 import com.example.api.client.OrderClient;
 import com.example.api.domain.po.CartItem;
 import com.example.api.domain.vo.order.OrderInfoVo;
+import com.example.api.enums.OrderStatusEnum;
 import com.example.cart.service.ICartItemService;
 import com.example.common.domain.ResponseResult;
 import com.example.common.domain.ResultCode;
