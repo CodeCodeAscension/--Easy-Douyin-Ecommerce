@@ -12,4 +12,5 @@ public class PayFailMessage implements Serializable {
     private static final long serialVersionUID = 1L;
     private String orderId;
     private List<ProductQuantity> products;
+    private List<Long> addProductIds;      // 需要恢复库存的ID
 }

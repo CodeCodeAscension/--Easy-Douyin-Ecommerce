@@ -325,12 +325,12 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         Product product = productMapper.selectById(productId);
 
         if (product == null) {
-            throw new NotFoundException("商品不存在");
+            return;
         }
 
         // 增加销量
-        Integer addStock = addProductSoldDto.getAddSold();
-        product.setSold(product.getStock() + addStock);
+        Integer addSold = addProductSoldDto.getAddSold();
+        product.setSold(product.getSold() + addSold);
 
         // 同步到ES
         syncProductToES(product);

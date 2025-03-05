@@ -53,14 +53,6 @@ public class ProductController {
         return ResponseResult.success();
     }
 
-    @PutMapping("/dec")
-    @Operation(summary = "减少库存")
-    public ResponseResult<Object> decProductStock(@RequestBody @Validated DecProductDto decProductDto) {
-        UserContextUtil.getUserId();
-        iProductService.decProductStock(decProductDto);
-        return ResponseResult.success();
-    }
-
     @PostMapping
     @Operation(summary = "创建商品")
     public ResponseResult<Object> createProduct(@RequestBody @Validated CreateProductDto createProductDto) {

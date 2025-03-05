@@ -9,12 +9,14 @@ import com.example.common.exception.*;
 import com.example.common.util.UserContextUtil;
 import com.example.payment.convert.CreditConvertToVo;
 import com.example.payment.convert.CreditDtoConvertToPo;
+import com.example.payment.domain.dto.CreditCreateDto;
 import com.example.payment.domain.dto.CreditDto;
 import com.example.payment.domain.dto.CreditUpdateDto;
 import com.example.payment.domain.po.Credit;
 import com.example.payment.domain.vo.CreditVo;
 import com.example.payment.enums.CreditStatusEnum;
 import com.example.payment.mapper.CreditMapper;
+import com.example.payment.service.BankService;
 import com.example.payment.service.CreditService;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
@@ -33,15 +35,29 @@ public class CreditServiceImpl extends ServiceImpl<CreditMapper, Credit> impleme
 
     @Resource
     private CreditMapper creditMapper;
+    private final BankService bankService;
 
     @Override
-    public CreditVo createCredit(Long userId, CreditDto creditDto) throws UserException, SystemException {
+    public CreditVo createCredit(Long userId, CreditCreateDto creditCreateDto) throws UserException, SystemException {
         // 判断信用卡信息是否已存在
-        Credit creditExist = creditMapper.selectById(creditDto.getCardNumber());
+        Credit creditExist = creditMapper.selectById(creditCreateDto.getCardNumber());
         if (creditExist != null) {
             log.error("信用卡信息已录入");
             throw new BadRequestException("信用卡信息已录入");
         }
+
+        // 使用银行服务判断银行卡信息是否正确
+        if(!bankService.checkCredit(creditCreateDto.getCardNumber(), creditCreateDto.getCvv())) {
+            throw new BadRequestException("信用卡信息不正确！");
+        }
+
+        // 转化为createDto
+        CreditDto creditDto = CreditDto.builder()
+                .cardNumber(creditCreateDto.getCardNumber())
+                .cvv(creditCreateDto.getCvv())
+                .balance(bankService.getBalance(creditCreateDto.getCardNumber()))
+                .expireDate(bankService.getExpiration(creditCreateDto.getCardNumber()))
+                .build();
 
         Credit credit = CreditDtoConvertToPo.convertToPo(userId, creditDto);
         int insert = creditMapper.insert(credit);
@@ -98,9 +114,7 @@ public class CreditServiceImpl extends ServiceImpl<CreditMapper, Credit> impleme
     }
 
     @Override
-    public CreditVo getCredit(String cardNumber) throws UserException, SystemException {
-
-        Long userId = UserContextUtil.getUserId();
+    public CreditVo getCredit(Long userId, String cardNumber) throws UserException, SystemException {
         Credit credit = checkCreditPermission(userId, cardNumber);
 
         return CreditConvertToVo.convertToVo(credit);

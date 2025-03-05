@@ -93,8 +93,8 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
                 throw new SystemException("订单服务状态异常："+orderResult.getMsg());
             } else if (orderResult.getData() == null) {
                 throw new NotFoundException("未找到指定的订单");
-            } else if (!Objects.equals(orderResult.getData().getStatus(), OrderStatusEnum.WAIT_FOR_PAY.getCode())) {
-                throw new BadRequestException("该订单不处于待支付的状态");
+            } else if (!Objects.equals(orderResult.getData().getStatus(), OrderStatusEnum.WAIT_FOR_CONFIRM)) {
+                throw new BadRequestException("该订单不处于待确认的状态");
             }
 
             // 生成预支付记录
@@ -127,6 +127,7 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
     public void confirmCharge(String preTransactionId) throws UserException, SystemException {
         Transaction transaction = validateTransaction(preTransactionId, TransactionStatusEnum.WAIT_FOR_CONFIRM);
         String transactionId = transaction.getTransactionId();
+        List<Long> addProductIds = new ArrayList<>();
         try {
             // 使用Redis分布式锁防止重复确认
             String lockKey = CANCEL_LOCK_KEY + transaction.getTransactionId();
@@ -152,6 +153,7 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
                     if (response.getCode() != ResultCode.SUCCESS) {
                         throw new SystemException(response.getMsg());
                     }
+                    addProductIds.add(cartItem.getProductId());
                 });
 
                 // 更新交易状态
@@ -167,7 +169,7 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
             log.error("支付确认失败: {}", e.getMessage());
             throw new SystemException(e.getMessage(), () -> {
                 // 处理失败的方法抛到全局事物外解决
-                handlePaymentFailure(transactionId, e.getMessage());
+                handlePaymentFailure(transactionId, e.getMessage(), addProductIds);
             });
         }
     }
@@ -191,7 +193,8 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
         Transaction transaction = transactionMapper.findByIdAndPreId(userId, null, preTransactionId);
         // 更新交易状态为已取消
         if(transaction.getStatus() != TransactionStatusEnum.WAIT_FOR_CONFIRM) {
-            throw new BadRequestException("订单无法取消");
+            // 该支付不能取消
+            return;
         }
         transaction.setStatus(TransactionStatusEnum.CANCELED);
         boolean update = this.updateById(transaction);
@@ -267,10 +270,11 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
      * @param transaction 交易对象
      * @param products 商品信息
      */
-    private void sendPaymentFailedMessage(Transaction transaction, List<ProductQuantity> products) {
+    private void sendPaymentFailedMessage(Transaction transaction, List<ProductQuantity> products, List<Long> addProductIds) {
         PayFailMessage message = new PayFailMessage();
         message.setOrderId(transaction.getOrderId());
         message.setProducts(products);
+        message.setAddProductIds(addProductIds);
         RetryableCorrelationData data = new RetryableCorrelationData(message, mqConfig.getExchangeName(), mqConfig.getQueues().getPay().getFail());
         rabbitTemplate.convertAndSend(
                 data.getExchange(),
@@ -375,7 +379,7 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
      * @param reason 失败原因
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    protected void handlePaymentFailure(String transactionId, String reason) {
+    protected void handlePaymentFailure(String transactionId, String reason, List<Long> addProductIds) {
         Transaction transaction = this.getById(transactionId);
         if (transaction != null) {
             if(reason.length() > 200) {
@@ -383,7 +387,7 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
             }
             updateTransactionStatus(transaction, TransactionStatusEnum.PAY_FAIL, reason);
             List<ProductQuantity> products = getProducts(transaction.getOrderId());
-            sendPaymentFailedMessage(transaction, products);
+            sendPaymentFailedMessage(transaction, products, addProductIds);
         }
     }
 

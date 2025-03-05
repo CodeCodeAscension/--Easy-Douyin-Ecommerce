@@ -29,14 +29,14 @@ public class CreditController {
 
     /**
      * 添加银行卡信息
-     * @param creditDto 银行卡dto
+     * @param dto 银行卡信息dto
      * @return ResponseResult对象
      */
     @PostMapping
     @Operation(summary = "添加银行卡信息")
-    public ResponseResult<CreditVo> createCredit(@RequestBody @Validated CreditDto creditDto) {
+    public ResponseResult<CreditVo> createCredit(@RequestBody @Validated CreditCreateDto dto) {
         Long userId = UserContextUtil.getUserId();
-        return ResponseResult.success(creditService.createCredit(userId, creditDto));
+        return ResponseResult.success(creditService.createCredit(userId, dto));
     }
 
     /**
@@ -51,16 +51,6 @@ public class CreditController {
         return ResponseResult.success();
     }
 
-//    /**
-//     * 更新银行卡信息（管理员接口）
-//     * @param creditUpdateDto dto
-//     * @return ResponseResult对象
-//     */
-//    @Operation(summary = "更新银行卡信息")
-//    @PutMapping
-//    public ResponseResult<CreditVo> updateCredit(@RequestBody @Validated CreditUpdateDto creditUpdateDto) {
-//        return ResponseResult.success(creditService.updateCredit(creditUpdateDto));
-//    }
 
     /**
      * 获取银行卡信息
@@ -70,7 +60,8 @@ public class CreditController {
     @GetMapping("/{cardNumber}")
     @Operation(summary = "获取银行卡信息")
     public ResponseResult<CreditVo> getCreditById(@PathVariable("cardNumber") String cardNumber) {
-        return ResponseResult.success(creditService.getCredit(cardNumber));
+        Long userId = UserContextUtil.getUserId();
+        return ResponseResult.success(creditService.getCredit(userId, cardNumber));
     }
 
     /**

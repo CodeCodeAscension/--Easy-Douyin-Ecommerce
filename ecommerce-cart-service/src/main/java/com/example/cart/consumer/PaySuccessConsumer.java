@@ -30,6 +30,8 @@ public class PaySuccessConsumer {
     @RabbitListener(queues = "pay.success.cart")
     public void paySuccess(PaySuccessMessage message) {
         String orderId = message.getOrderId();
+        log.info("收到支付成功消息：{}", orderId);
+        log.error(message.toString());
         ResponseResult<OrderInfoVo> orderInfos = orderClient.getOrderById(orderId);
         if(orderInfos.getCode() != ResultCode.SUCCESS || orderInfos.getData() == null) {
             log.error("订单服务异常，无法进行清空购物车信息：{}", orderInfos.getMsg());

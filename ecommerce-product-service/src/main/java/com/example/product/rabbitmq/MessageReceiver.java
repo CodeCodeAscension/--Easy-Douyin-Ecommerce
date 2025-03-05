@@ -29,9 +29,14 @@ public class MessageReceiver {
     @RabbitListener(queues = "pay.fail.product")
     public void handleMessage(PayFailMessage message) {
         log.info("收到支付失败的消息，订单号：{}", message.getOrderId());
+        if(message.getAddProductIds() == null || message.getAddProductIds().isEmpty()) {
+            return;
+        }
         // 恢复库存
-        message.getProducts().forEach(product ->
-            productService.addProductStock(new AddProductDto(product.getProductId(), product.getQuantity()))
-        );
+        message.getProducts().forEach(productQuantity -> {
+            if(message.getAddProductIds().contains(productQuantity.getProductId())) {
+                productService.addProductStock(new AddProductDto(productQuantity.getProductId(), productQuantity.getQuantity()));
+            }
+        });
     }
 }

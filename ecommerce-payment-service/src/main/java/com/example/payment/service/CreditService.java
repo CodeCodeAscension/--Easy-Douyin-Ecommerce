@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.common.exception.SystemException;
 import com.example.common.exception.UserException;
+import com.example.payment.domain.dto.CreditCreateDto;
 import com.example.payment.domain.dto.CreditDto;
 import com.example.payment.domain.dto.CreditUpdateDto;
 import com.example.payment.domain.po.Credit;
@@ -13,12 +14,12 @@ public interface CreditService extends IService<Credit> {
 
     /**
      * 创建信用卡信息
-     * @param creditDto dto
+     * @param creditCreateDto dto
      * @throws UserException 用户异常
      * @throws SystemException 系统异常
      * @return CreditVo对象
      */
-    CreditVo createCredit(Long userId, CreditDto creditDto) throws UserException, SystemException;
+    CreditVo createCredit(Long userId, CreditCreateDto creditCreateDto) throws UserException, SystemException;
 
     /**
      * 删除信用卡信息
@@ -40,11 +41,12 @@ public interface CreditService extends IService<Credit> {
     /**
      * 查询信用卡信息
      * @param cardNumber 信用卡ID
+     * @param userId 用户ID
      * @throws UserException 用户异常
      * @throws SystemException 系统异常
      * @return CreditVo对象
      */
-    CreditVo getCredit(String cardNumber) throws UserException, SystemException;
+    CreditVo getCredit(Long userId, String cardNumber) throws UserException, SystemException;
 
     /**
      * 检查银行卡是否可用
