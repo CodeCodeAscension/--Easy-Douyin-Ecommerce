@@ -4,7 +4,7 @@
 
 本项目涉及到的技术框架为：SpringBoot、SpringAI、SpringCloudGateway、SpringCloud、SpringCloudAlibaba、MySQL、MyBatisPlus、Redis、Nacos、OpenFeign、Seata、RabbitMQ、Elasticsearch、Sentinel。
 
-可以参考[docker-compose](project-description/docker-compose.yaml)文件的配置来快速搭建第三方技术框架。
+可以参考[docker-compose](project-description/docker-compose.yaml)文件的配置来快速搭建第三方技术框架
 
 本项目的接口文档定义可以参考[接口文档.md](project-description/interface-documentation.md)
 
