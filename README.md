@@ -8,7 +8,7 @@
 
 本项目的接口文档定义可以参考[接口文档.md](project-description/interface-documentation.md)
 
-## 项目结构
+## 项目结构如下
 
 ```
 easy-douyin-ecommerce-project
